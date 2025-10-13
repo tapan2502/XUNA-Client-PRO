@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosHeaders } from "axios";
 import { auth } from "@/lib/firebase";
 
 export const http = axios.create({
@@ -8,13 +8,22 @@ export const http = axios.create({
 
 http.interceptors.request.use(async (config) => {
   const user = auth.currentUser;
+  const headers =
+    config.headers instanceof AxiosHeaders
+      ? config.headers
+      : new AxiosHeaders(config.headers ?? {});
+
   if (user) {
     const token = await user.getIdToken();
-    config.headers = config.headers ?? {};
-    (config.headers as any).Authorization = `Bearer ${token}`;
+    headers.set("Authorization", `Bearer ${token}`);
   }
-  const imp = (window as any).__IMPERSONATE_USER_ID__ as string | undefined;
-  if (imp) (config.headers as any)["X-Impersonate-User"] = imp;
+  const imp =
+    typeof window !== "undefined"
+      ? ((window as any).__IMPERSONATE_USER_ID__ as string | undefined)
+      : undefined;
+  if (imp) headers.set("X-Impersonate-User", imp);
+
+  config.headers = headers;
   return config;
 });
 

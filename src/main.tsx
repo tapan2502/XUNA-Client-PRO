@@ -1,14 +1,16 @@
-import React from "react"
-import ReactDOM from "react-dom/client"
-import { Provider } from "react-redux"
-import { HeroUIProvider } from "@heroui/react"
-import "@/index.css"
-import { store } from "@/store"
-import AppRoutes from "@/app/routes"
-import { applyTheme } from "@/app/theme"
+// src/main.tsx
+import "@/index.css";               // ⬅️ FIRST
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { Provider } from "react-redux";
+import { HeroUIProvider } from "@heroui/react";
+import { store } from "@/store";
+import AppRoutes from "@/app/routes";
+import { applyTheme } from "@/app/theme";
 
-const savedTheme = (localStorage.getItem("theme") as "light" | "dark" | "system") || "system"
-applyTheme(savedTheme)
+const savedTheme =
+  (localStorage.getItem("theme") as "light" | "dark" | "system") ?? "system";
+applyTheme(savedTheme);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -17,5 +19,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <AppRoutes />
       </HeroUIProvider>
     </Provider>
-  </React.StrictMode>,
-)
+  </React.StrictMode>
+);

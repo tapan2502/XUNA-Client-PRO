@@ -1,25 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Input,
-  Button,
-  Chip,
-  User,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  Pagination,
-  Progress,
-} from "@heroui/react"
-import { Search, Filter, SortAsc, Columns, MoreVertical, Plus } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Search, Filter, SortAsc, Columns, MoreVertical, Plus, Copy } from "lucide-react"
+import { CreateAgentModal } from "@/features/agents/components/CreateAgentModal"
+import { useAppDispatch, useAppSelector } from "@/app/hooks"
+import { fetchAgents } from "@/store/agentsSlice"
 
 interface Client {
   id: string
@@ -31,272 +16,303 @@ interface Client {
   phoneNumber: string
   services: string[]
   language: string
+  languageFlag: string
   usage: number
+  usageMax: number
   avatar: string
   assistant: string
+  statusDot: "green" | "red" | "yellow"
 }
-
-const mockClients: Client[] = [
-  {
-    id: "1",
-    name: "Xuna AI",
-    assistantId: "unf48h4f2...",
-    model: "ChatGPT 4o",
-    status: "Active",
-    billing: "stripe",
-    phoneNumber: "+1 (813) 123-4567",
-    services: ["Voice", "SMS", "Outbound", "Inbound"],
-    language: "English",
-    usage: 482,
-    avatar: "/placeholder-user.jpg",
-    assistant: "Tony Reichert",
-  },
-  {
-    id: "2",
-    name: "Mokai Agency",
-    assistantId: "unf48h4f2...",
-    model: "ChatGPT 4o",
-    status: "Paused",
-    billing: "stripe",
-    phoneNumber: "+1 (813) 123-4567",
-    services: ["Voice", "Outbound", "Inbound"],
-    language: "German",
-    usage: 518,
-    avatar: "/placeholder-user.jpg",
-    assistant: "Zoe Lang",
-  },
-  {
-    id: "3",
-    name: "Best Buy",
-    assistantId: "unf48h4f2...",
-    model: "ChatGPT 4o",
-    status: "Needs Work",
-    billing: "stripe",
-    phoneNumber: "+1 (813) 123-4567",
-    services: ["Voice", "Inbound"],
-    language: "English",
-    usage: 5,
-    avatar: "/placeholder-user.jpg",
-    assistant: "Jane Fisher",
-  },
-  {
-    id: "4",
-    name: "Target",
-    assistantId: "unf48h4f2...",
-    model: "ChatGPT 4o",
-    status: "Active",
-    billing: "stripe",
-    phoneNumber: "+1 (813) 123-4567",
-    services: ["SMS", "Outbound", "Inbound"],
-    language: "English",
-    usage: 482,
-    avatar: "/placeholder-user.jpg",
-    assistant: "William Howard",
-  },
-  {
-    id: "5",
-    name: "Walmart",
-    assistantId: "unf48h4f2...",
-    model: "ChatGPT 4o",
-    status: "Paused",
-    billing: "stripe",
-    phoneNumber: "+1 (813) 123-4567",
-    services: ["Voice", "Outbound"],
-    language: "Spanish",
-    usage: 482,
-    avatar: "/placeholder-user.jpg",
-    assistant: "Kristen Cooper",
-  },
-]
 
 export default function ClientsTable() {
   const [page, setPage] = useState(1)
   const [searchValue, setSearchValue] = useState("")
-  const rowsPerPage = 10
+  const [isCreateAgentOpen, setIsCreateAgentOpen] = useState(false)
+
+  const dispatch = useAppDispatch()
+  const { agents, loading, error } = useAppSelector((s) => s.agents)
+
+  useEffect(() => {
+    dispatch(fetchAgents())
+  }, [dispatch])
+
+  const filteredAgents = (agents || []).filter((a: any) => a?.name?.toLowerCase?.().includes(searchValue.toLowerCase()))
+
+  const formatUnix = (secs?: number | null) => {
+    if (!secs) return "—"
+    try {
+      return new Date(secs * 1000).toLocaleString()
+    } catch {
+      return "—"
+    }
+  }
+
+  const getDotColorByLastCall = (secs?: number | null) => {
+    if (secs) return "bg-green-500"
+    return "bg-gray-500"
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Active":
-        return "success"
+        return "bg-green-500/10 text-green-600 dark:text-green-400"
       case "Paused":
-        return "warning"
+        return "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400"
       case "Inactive":
-        return "default"
+        return "bg-gray-500/10 text-gray-600 dark:text-gray-400"
       case "Needs Work":
-        return "warning"
+        return "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400"
       default:
-        return "default"
+        return "bg-gray-500/10 text-gray-600 dark:text-gray-400"
     }
   }
 
-  const getUsageColor = (usage: number) => {
-    if (usage >= 400) return "success"
-    if (usage >= 200) return "warning"
-    return "danger"
+  const getDotColor = (color: string) => {
+    switch (color) {
+      case "green":
+        return "bg-green-500"
+      case "red":
+        return "bg-red-500"
+      case "yellow":
+        return "bg-yellow-500"
+      default:
+        return "bg-gray-500"
+    }
+  }
+
+  const getUsageColor = (usage: number, max: number) => {
+    const percentage = (usage / max) * 100
+    if (percentage >= 80) return "bg-green-500"
+    if (percentage >= 40) return "bg-yellow-500"
+    return "bg-red-500"
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 h-full">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold">Clients</h2>
-          <Chip size="sm" variant="flat">
-            100
-          </Chip>
+          <h2 className="text-xl font-semibold text-foreground">Agents</h2>
+          <span className="text-sm text-muted-foreground">{filteredAgents.length}</span>
         </div>
-        <Button color="primary" startContent={<Plus className="size-4" />}>
-          Add Client
-        </Button>
+        <button
+          onClick={() => setIsCreateAgentOpen(true)}
+          className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm py-2 px-4 rounded-lg flex items-center gap-2 transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Create Agent
+        </button>
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <Input
-          className="max-w-xs"
-          placeholder="Search"
-          startContent={<Search className="size-4 text-foreground-400" />}
-          value={searchValue}
-          onValueChange={setSearchValue}
-        />
-        <Button variant="flat" startContent={<Filter className="size-4" />}>
+      <div className="flex items-center gap-3 flex-wrap shrink-0">
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 bg-[hsl(var(--card))] border border-[hsl(var(--divider))] rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <button className="flex items-center gap-2 px-3 py-2 bg-[hsl(var(--card))] border border-[hsl(var(--divider))] rounded-lg text-sm font-medium text-foreground hover:bg-[hsl(var(--sidebar-hover))] transition-colors">
+          <Filter className="w-4 h-4" />
           Filter
-        </Button>
-        <Button variant="flat" startContent={<SortAsc className="size-4" />}>
+        </button>
+        <button className="flex items-center gap-2 px-3 py-2 bg-[hsl(var(--card))] border border-[hsl(var(--divider))] rounded-lg text-sm font-medium text-foreground hover:bg-[hsl(var(--sidebar-hover))] transition-colors">
+          <SortAsc className="w-4 h-4" />
           Sort
-        </Button>
-        <Button variant="flat" startContent={<Columns className="size-4" />}>
+        </button>
+        <button className="flex items-center gap-2 px-3 py-2 bg-[hsl(var(--card))] border border-[hsl(var(--divider))] rounded-lg text-sm font-medium text-foreground hover:bg-[hsl(var(--sidebar-hover))] transition-colors">
+          <Columns className="w-4 h-4" />
           Columns
-        </Button>
-        <div className="ml-auto flex items-center gap-2">
-          <span className="text-sm text-foreground-500">2 Selected</span>
-          <Dropdown>
-            <DropdownTrigger>
-              <Button variant="flat">Selected Actions</Button>
-            </DropdownTrigger>
-            <DropdownMenu>
-              <DropdownItem>Export</DropdownItem>
-              <DropdownItem>Delete</DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+        </button>
+        <div className="ml-auto flex items-center gap-3">
+          <span className="text-sm text-muted-foreground">2 Selected</span>
+          <button className="px-3 py-2 bg-[hsl(var(--card))] border border-[hsl(var(--divider))] rounded-lg text-sm font-medium text-foreground hover:bg-[hsl(var(--sidebar-hover))] transition-colors">
+            Selected Actions
+          </button>
         </div>
       </div>
+
+      {/* Feedback states */}
+      {error ? (
+        <div className="px-4 py-2 rounded-md border border-[hsl(var(--divider))] bg-[hsl(var(--card))] text-sm text-red-500">
+          {error}
+        </div>
+      ) : null}
 
       {/* Table */}
-      <Table
-        aria-label="Clients table"
-        classNames={{
-          wrapper: "bg-content1",
-        }}
-      >
-        <TableHeader>
-          <TableColumn>CLIENT</TableColumn>
-          <TableColumn>ASSISTANT ID</TableColumn>
-          <TableColumn>MODEL</TableColumn>
-          <TableColumn>STATUS</TableColumn>
-          <TableColumn>BILLING</TableColumn>
-          <TableColumn>PHONE NUMBER</TableColumn>
-          <TableColumn>SERVICES</TableColumn>
-          <TableColumn>LANGUAGE</TableColumn>
-          <TableColumn>USAGE</TableColumn>
-          <TableColumn> </TableColumn>
-        </TableHeader>
-        <TableBody>
-          {mockClients.map((client) => (
-            <TableRow key={client.id}>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-success" />
-                  <span className="font-medium">{client.name}</span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <span className="text-foreground-500">{client.assistantId}</span>
-                  <Button isIconOnly size="sm" variant="light">
-                    <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                      />
-                    </svg>
-                  </Button>
-                </div>
-              </TableCell>
-              <TableCell>
-                <User
-                  name={client.assistant}
-                  description={client.model}
-                  avatarProps={{ src: client.avatar, size: "sm" }}
-                />
-              </TableCell>
-              <TableCell>
-                <Chip size="sm" variant="dot" color={getStatusColor(client.status)}>
-                  {client.status}
-                </Chip>
-              </TableCell>
-              <TableCell>
-                <span className="text-primary font-medium">{client.billing}</span>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">🇺🇸</span>
-                  <span>{client.phoneNumber}</span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex gap-1 flex-wrap">
-                  {client.services.map((service) => (
-                    <Chip key={service} size="sm" variant="flat">
-                      {service}
-                    </Chip>
-                  ))}
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">🇺🇸</span>
-                  <span>{client.language}</span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex flex-col gap-1 min-w-[120px]">
-                  <Progress
-                    size="sm"
-                    value={(client.usage / 5000) * 100}
-                    color={getUsageColor(client.usage)}
-                    classNames={{
-                      track: "h-1",
-                    }}
-                  />
-                  <span className="text-xs text-foreground-500">{client.usage} of 5,000 minutes</span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <Button isIconOnly size="sm" variant="light">
-                  <MoreVertical className="size-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <div className="flex-1 min-h-0 flex flex-col bg-[hsl(var(--card))] border border-[hsl(var(--divider))] rounded-xl overflow-hidden">
+        <div className="flex-1 overflow-auto">
+          <table className="w-full">
+            <thead className="bg-[hsl(var(--sidebar-hover))] border-b border-[hsl(var(--divider))] sticky top-0 z-10">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  AGENT
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  AGENT ID
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  MODEL
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  CREATED
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  LAST CALL
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  ROLE
+                </th>
+                <th className="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[hsl(var(--divider))]">
+              {loading
+                ? Array.from({ length: 6 }).map((_, i) => (
+                    <tr key={`s-${i}`}>
+                      <td className="px-4 py-4">
+                        <div className="h-4 w-40 bg-[hsl(var(--sidebar-hover))] rounded animate-pulse" />
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="h-4 w-32 bg-[hsl(var(--sidebar-hover))] rounded animate-pulse" />
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="h-4 w-24 bg-[hsl(var(--sidebar-hover))] rounded animate-pulse" />
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="h-4 w-36 bg-[hsl(var(--sidebar-hover))] rounded animate-pulse" />
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="h-4 w-28 bg-[hsl(var(--sidebar-hover))] rounded animate-pulse" />
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="h-4 w-20 bg-[hsl(var(--sidebar-hover))] rounded animate-pulse" />
+                      </td>
+                      <td className="px-4 py-4"></td>
+                    </tr>
+                  ))
+                : filteredAgents.map((agent: any) => {
+                    const llm =
+                      agent?.conversation_config?.agent?.prompt?.llm ??
+                      agent?.conversation_config?.agent?.prompt?.model_id ??
+                      "—"
+                    const created = formatUnix(agent?.created_at_unix_secs as number | undefined)
+                    const lastCall = formatUnix(agent?.last_call_time_unix_secs as number | undefined)
+                    const role = agent?.access_info?.role ?? agent?.access_level ?? "—"
 
-      {/* Pagination */}
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-foreground-500">2 of 10 selected</span>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="flat">
-            Previous
-          </Button>
-          <Pagination total={10} page={page} onChange={setPage} size="sm" />
-          <Button size="sm" variant="flat">
-            Next
-          </Button>
+                    return (
+                      <tr key={agent.agent_id} className="hover:bg-[hsl(var(--sidebar-hover))] transition-colors">
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`w-2 h-2 rounded-full ${getDotColorByLastCall(agent?.last_call_time_unix_secs)}`}
+                            />
+                            <span className="font-medium text-foreground">{agent.name || "Untitled Agent"}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground truncate max-w-[160px]">
+                              {agent.agent_id}
+                            </span>
+                            <button
+                              className="p-1 hover:bg-[hsl(var(--sidebar-hover))] rounded transition-colors"
+                              onClick={() => navigator.clipboard?.writeText(agent.agent_id)}
+                              title="Copy Agent ID"
+                            >
+                              <Copy className="w-3 h-3 text-muted-foreground" />
+                            </button>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center shrink-0">
+                              <span className="text-white text-xs font-bold">
+                                {(agent?.name || "A")
+                                  .split(" ")
+                                  .map((n: string) => n[0])
+                                  .join("")
+                                  .slice(0, 2)
+                                  .toUpperCase()}
+                              </span>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-foreground">{llm}</p>
+                              <p className="text-xs text-muted-foreground">LLM</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="text-sm text-foreground">{created}</span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="text-sm text-foreground">{lastCall}</span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="text-sm font-medium text-primary">{role}</span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <button className="p-1 hover:bg-[hsl(var(--sidebar-hover))] rounded transition-colors">
+                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="flex items-center justify-between px-4 py-3 border-t border-[hsl(var(--divider))] bg-[hsl(var(--card))] shrink-0">
+          <span className="text-sm text-muted-foreground">2 of 10 selected</span>
+          <div className="flex items-center gap-2">
+            <button className="px-3 py-1.5 text-sm font-medium text-foreground hover:bg-[hsl(var(--sidebar-hover))] rounded transition-colors">
+              Previous
+            </button>
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                <button
+                  key={num}
+                  onClick={() => setPage(num)}
+                  className={`w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-colors ${
+                    num === page
+                      ? "bg-primary text-primary-foreground"
+                      : "text-foreground hover:bg-[hsl(var(--sidebar-hover))]"
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
+              <span className="px-2 text-muted-foreground">...</span>
+              <button
+                onClick={() => setPage(10)}
+                className={`w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-colors ${
+                  page === 10
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-[hsl(var(--sidebar-hover))]"
+                }`}
+              >
+                10
+              </button>
+            </div>
+            <button className="px-3 py-1.5 text-sm font-medium text-foreground hover:bg-[hsl(var(--sidebar-hover))] rounded transition-colors">
+              Next
+            </button>
+          </div>
         </div>
       </div>
+      <CreateAgentModal
+        isOpen={isCreateAgentOpen}
+        onClose={() => setIsCreateAgentOpen(false)}
+        onSuccess={() => {
+          setIsCreateAgentOpen(false)
+          dispatch(fetchAgents())
+        }}
+      />
     </div>
   )
 }

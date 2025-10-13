@@ -1,135 +1,154 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardBody, Input, Button, Divider } from "@heroui/react"
-import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { signIn, signInWithGoogle } from "@/store/authSlice"
-import { Link } from "react-router-dom"
-import { Mail, Lock, LogIn, ArrowRight } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { signIn, signInWithGoogle } from "@/store/authSlice";
+import { Link } from "react-router-dom";
+import { Mail, Lock, LogIn, ArrowRight, Loader2 } from "lucide-react";
 
 export default function Login() {
-  const d = useAppDispatch()
-  const loading = useAppSelector((s) => s.auth.loading)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const dispatch = useAppDispatch();
+  const loading = useAppSelector((s) => s.auth.loading);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
-    const root = document.documentElement
-    const hadDarkClass = root.classList.contains("dark")
-    root.classList.remove("dark")
-
+    const root = document.documentElement;
+    const hadDark = root.classList.contains("dark");
+    root.classList.remove("dark");
     return () => {
-      if (hadDarkClass) {
-        root.classList.add("dark")
-      }
-    }
-  }, [])
+      if (hadDark) root.classList.add("dark");
+    };
+  }, []);
+
+  const onSubmit = () => dispatch(signIn({ email, password }));
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <div className="min-h-screen bg-gradient-to-b from-white via-neutral-50 to-neutral-100 dark:from-neutral-950 dark:via-neutral-900 dark:to-black text-foreground flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
+        {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">
-            <span className="text-gray-900">X</span>
-            <span className="text-purple-600">UNA</span>
+          <h1 className="text-4xl font-extrabold tracking-tight text-neutral-900 dark:text-white">
+            <span className="text-primary">X</span>UNA
           </h1>
-          <h2 className="text-2xl font-semibold text-purple-600 mb-2">Welcome back</h2>
-          <p className="text-gray-600 text-sm">Sign in to your Xuna account to continue</p>
+          <h2 className="mt-2 text-lg font-semibold text-neutral-800 dark:text-neutral-200">
+            Welcome back
+          </h2>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            Sign in to your Xuna account to continue
+          </p>
         </div>
 
-        <Card className="shadow-xl border-0 bg-white">
-          <CardBody className="gap-6 p-8">
+        {/* Card */}
+        <div className="rounded-3xl bg-white dark:bg-neutral-900/60 shadow-xl border border-neutral-200/70 dark:border-white/10 backdrop-blur-md p-8">
+          <form
+            className="space-y-6"
+            onSubmit={(e) => {
+              e.preventDefault();
+              onSubmit();
+            }}
+          >
+            {/* Email */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Email address</label>
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onValueChange={setEmail}
-                startContent={<Mail className="w-4 h-4 text-gray-400" />}
-                classNames={{
-                  input: "text-sm",
-                  inputWrapper: "bg-gray-50 border-gray-200 hover:bg-gray-100",
-                }}
-                size="lg"
-              />
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              >
+                Email address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="username"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-10 py-2.5 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:border-primary focus:ring-2 focus:ring-primary/30 outline-none transition"
+                />
+              </div>
             </div>
 
+            {/* Password */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Password</label>
-              <Input
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onValueChange={setPassword}
-                startContent={<Lock className="w-4 h-4 text-gray-400" />}
-                classNames={{
-                  input: "text-sm",
-                  inputWrapper: "bg-gray-50 border-gray-200 hover:bg-gray-100",
-                }}
-                size="lg"
-              />
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                <input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-10 py-2.5 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:border-primary focus:ring-2 focus:ring-primary/30 outline-none transition"
+                />
+              </div>
             </div>
 
-            <Button
-              size="lg"
-              isLoading={loading}
-              onPress={() => d(signIn({ email, password }))}
-              className="w-full bg-gradient-to-r from-purple-600 to-purple-500 text-white font-medium shadow-lg hover:shadow-xl transition-all"
-              endContent={!loading && <LogIn className="w-4 h-4" />}
+            {/* Sign In */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="group w-full flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-95 active:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition"
             >
-              Sign in
-            </Button>
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Signing in…
+                </>
+              ) : (
+                <>
+                  Sign in
+                  <LogIn className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </>
+              )}
+            </button>
 
-            <div className="relative my-2">
-              <Divider className="bg-gray-200" />
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-sm text-gray-500">
-                Or continue with
+            {/* Divider */}
+            <div className="relative flex items-center justify-center my-4">
+              <div className="h-px w-full bg-neutral-200 dark:bg-neutral-700" />
+              <span className="absolute bg-white dark:bg-neutral-900 px-3 text-xs text-neutral-500 uppercase tracking-wide">
+                or continue with
               </span>
             </div>
 
-            <Button
-              variant="bordered"
-              size="lg"
-              onPress={() => d(signInWithGoogle())}
-              className="w-full border-gray-300 hover:bg-gray-50 font-medium"
-              startContent={
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  />
-                </svg>
-              }
+            {/* Google */}
+            <button
+              type="button"
+              onClick={() => dispatch(signInWithGoogle())}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-800 dark:text-neutral-100 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition"
             >
-              <span className="text-gray-700">Sign in with Google</span>
-            </Button>
+              <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+              </svg>
+              Sign in with Google
+            </button>
 
-            <p className="text-sm text-center text-gray-600 mt-4">
-              Don't have an account?{" "}
+            {/* Footer */}
+            <p className="text-center text-sm text-neutral-600 dark:text-neutral-400 mt-6">
+              Don&apos;t have an account?{" "}
               <Link
                 to="/signup"
-                className="text-purple-600 font-semibold hover:text-purple-700 inline-flex items-center gap-1"
+                className="inline-flex items-center gap-1 font-semibold text-primary hover:opacity-80"
               >
-                Sign up
-                <ArrowRight className="w-3 h-3" />
+                Sign up <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </p>
-          </CardBody>
-        </Card>
+          </form>
+        </div>
       </div>
     </div>
-  )
+  );
 }

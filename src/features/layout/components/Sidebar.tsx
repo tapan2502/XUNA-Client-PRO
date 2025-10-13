@@ -1,4 +1,3 @@
-import { NavLink } from "react-router-dom"
 import {
   LayoutDashboard,
   Phone,
@@ -13,7 +12,13 @@ import {
   Key,
   Mic,
 } from "lucide-react"
-import { Button, Avatar, Divider } from "@heroui/react"
+import SidebarLogo from "./sidebar/SidebarLogo"
+import SidebarWorkspaceSelector from "./sidebar/SidebarWorkspaceSelector"
+import SidebarNavItem from "./sidebar/SidebarNavItem"
+import SidebarNavSection from "./sidebar/SidebarNavSection"
+import SidebarScheduleCall from "./sidebar/SidebarScheduleCall"
+import SidebarUserProfile from "./sidebar/SidebarUserProfile"
+import SidebarIconNav from "./sidebar/SidebarIconNav"
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -35,89 +40,40 @@ const configItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="w-64 shrink-0 border-r border-divider bg-content1 flex flex-col h-screen">
-      {/* Logo */}
-      <div className="p-4">
-        <div className="flex items-center gap-2 px-2">
-          <div className="text-2xl font-bold">XUNA</div>
-        </div>
-      </div>
+    <aside className="shrink-0 border-r border-[hsl(var(--divider))] bg-[hsl(var(--sidebar-bg))] flex h-screen">
+      {/* Icon Navigation */}
+      <SidebarIconNav />
 
-      {/* Workspace Selector */}
-      <div className="px-4 pb-4">
-        <Button
-          variant="flat"
-          className="w-full justify-start"
-          startContent={<Avatar size="sm" name="XA" className="size-6" />}
-        >
-          <div className="flex flex-col items-start flex-1">
-            <span className="text-sm font-medium">Xuna AI</span>
-            <span className="text-xs text-foreground-500">Core workspace</span>
-          </div>
-        </Button>
-      </div>
+      {/* Main Sidebar */}
+      <div className="w-[240px] flex flex-col h-full">
+        {/* Logo */}
+        <SidebarLogo />
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 overflow-y-auto">
-        <div className="space-y-1">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                  isActive ? "bg-primary text-primary-foreground" : "text-foreground-600 hover:bg-content2"
-                }`
-              }
-            >
-              <item.icon className="size-4" />
-              {item.label}
-            </NavLink>
-          ))}
-        </div>
+        {/* Workspace Selector */}
+        <SidebarWorkspaceSelector />
 
-        <Divider className="my-4" />
+        {/* Navigation */}
+        <nav className="flex-1 px-3 overflow-y-auto">
+          <SidebarNavSection>
+            {navItems.map((item) => (
+              <SidebarNavItem key={item.to} {...item} />
+            ))}
+          </SidebarNavSection>
 
-        {/* Configuration Section */}
-        <div className="space-y-1">
-          <div className="px-3 py-2 text-xs font-semibold text-foreground-500 uppercase">Configuration</div>
-          {configItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                  isActive ? "bg-primary text-primary-foreground" : "text-foreground-600 hover:bg-content2"
-                }`
-              }
-            >
-              <item.icon className="size-4" />
-              {item.label}
-            </NavLink>
-          ))}
-        </div>
-      </nav>
+          <div className="my-4 border-t border-[hsl(var(--divider))]" />
 
-      {/* Bottom Section - Schedule Call */}
-      <div className="p-4 border-t border-divider">
-        <div className="bg-content2 rounded-lg p-3 mb-3">
-          <p className="text-sm font-medium mb-2">Schedule a Call</p>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm">🇺🇸</span>
-            <span className="text-sm">+1</span>
-          </div>
-          <Button color="primary" size="sm" className="w-full">
-            Call Me
-          </Button>
-        </div>
+          {/* Configuration Section */}
+          <SidebarNavSection title="CONFIGURATION">
+            {configItems.map((item) => (
+              <SidebarNavItem key={item.to} {...item} />
+            ))}
+          </SidebarNavSection>
+        </nav>
 
-        {/* User Profile */}
-        <div className="flex items-center gap-2">
-          <Avatar size="sm" src="/placeholder-user.jpg" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">Kate Moore</p>
-            <p className="text-xs text-foreground-500 truncate">Customer Support</p>
-          </div>
+        {/* Bottom Section */}
+        <div className="p-3 border-t border-[hsl(var(--divider))] space-y-3">
+          <SidebarScheduleCall />
+          <SidebarUserProfile />
         </div>
       </div>
     </aside>

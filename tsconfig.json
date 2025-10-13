@@ -1,42 +1,23 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": [
-      "ES2020",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "skipLibCheck": true,
-    "jsx": "preserve",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] },
+
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
     "esModuleInterop": true,
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
-    "types": [
-      "vite/client"
-    ],
-    "allowJs": true,
-    "strict": false,
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "useDefineForClassFields": true,
+
+    "strict": false
   },
-  "include": [
-    "src",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
 }

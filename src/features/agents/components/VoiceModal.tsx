@@ -19,7 +19,7 @@ interface VoiceLabels {
 interface Voice {
   voice_id: string
   name: string
-  preview_url: string
+  preview_url?: string
   labels?: VoiceLabels
 }
 
@@ -161,8 +161,11 @@ export const VoiceModal = ({
   }, [sharedVoices])
 
   // Helper to play audio preview ensuring only one plays at a time
-  const handlePlay = (url: string, e: React.MouseEvent) => {
+  const handlePlay = (url: string | undefined, e: React.MouseEvent) => {
     e.stopPropagation()
+    if (!url) {
+      return
+    }
     // Pause and reset any currently playing audio
     if (currentAudioRef.current) {
       currentAudioRef.current.pause()

@@ -17,11 +17,14 @@ import { PrivacySettingsSection } from "../components/agent-details/PrivacySetti
 import { ASRKeywordsSection } from "../components/agent-details/ASRKeywordsSection"
 import { ToolsSection } from "../components/agent-details/ToolSection"
 import CallTesting from "../components/CallTesting"
+import { FullscreenLoader } from "@/components/ui/FullscreenLoader"
+import { useSnackbar } from "@/components/ui/SnackbarProvider"
 
 export default function AgentDetails() {
   const { agentId } = useParams<{ agentId: string }>()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
+  const { showSnackbar } = useSnackbar()
 
   const { agents, loading, error, voices, knowledgeBase } = useAppSelector((state) => state.agents)
   const agent = agents.find((a) => a.agent_id === agentId)
@@ -88,7 +91,13 @@ export default function AgentDetails() {
             },
           }
         } catch (urlError) {
-          setSaveError("Invalid webhook URL. Please enter a valid URL (e.g., https://example.com/webhook)")
+          const invalidMessage = "Invalid webhook URL. Please enter a valid URL (e.g., https://example.com/webhook)"
+          setSaveError(invalidMessage)
+          showSnackbar({
+            variant: "error",
+            title: "Validation Error",
+            message: invalidMessage,
+          })
           setSaving(false)
           return
         }
@@ -143,9 +152,20 @@ export default function AgentDetails() {
       await dispatch(updateAgent({ agentId, payload })).unwrap()
       setHasChanges(false)
       setSaveError("")
+      showSnackbar({
+        variant: "success",
+        title: "Agent Updated",
+        message: "Agent settings saved successfully.",
+      })
     } catch (err: any) {
       console.error("[v0] Failed to save agent:", err)
-      setSaveError(err.message || "Failed to update agent. Please try again.")
+      const message = err.message || "Failed to update agent. Please try again."
+      setSaveError(message)
+      showSnackbar({
+        variant: "error",
+        title: "Update Failed",
+        message,
+      })
     } finally {
       setSaving(false)
     }
@@ -160,19 +180,11 @@ export default function AgentDetails() {
   }
 
   const dynamicVariables = editedAgent?.platform_settings?.data_collection || {}
+  const isInitialLoading = loading && (!agent || !editedAgent)
+  const shouldShowLoader = isInitialLoading || saving
+  const loaderLabel = saving ? "Saving your changes" : "Fetching agent details"
 
-  if (loading && !agent) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-background">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading agent details...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!agent || !editedAgent) {
+  if ((!agent || !editedAgent) && !loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="text-center">
@@ -191,66 +203,62 @@ export default function AgentDetails() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto p-6 space-y-6">
-          <AgentDetailsHeader agent={editedAgent} onBack={() => navigate("/dashboard")} />
+    <>
+      <FullscreenLoader show={shouldShowLoader} label={loaderLabel} />
+      <div className="flex h-screen overflow-hidden bg-background">
+        {/* Main Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-5xl mx-auto p-6 space-y-6">
+            <AgentDetailsHeader agent={editedAgent} onBack={() => navigate("/dashboard")} />
 
-          {(error || saveError) && (
-            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
-              {saveError || error}
+            {(error || saveError) && (
+              <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
+                {saveError || error}
+              </div>
+            )}
+
+            <AgentConfigCards agent={editedAgent} voices={voices} onChange={handleChange} />
+            <VoiceSettingsSection agent={editedAgent} onChange={handleChange} />
+            <ConversationSettingsSection agent={editedAgent} onChange={handleChange} />
+            <ASRKeywordsSection agent={editedAgent} onChange={handleChange} />
+            <PrivacySettingsSection agent={editedAgent} onChange={handleChange} />
+            <PromptSection agent={editedAgent} onChange={handleChange} />
+            <DataCollectionSection agent={editedAgent} onChange={handleChange} />
+            <ToolsSection agent={editedAgent} onChange={handleChange} />
+            <WebhookSection agent={editedAgent} onChange={handleChange} />
+            <KnowledgeBaseSection agent={editedAgent} knowledgeBase={knowledgeBase} onChange={handleChange} />
+
+            <div className="h-20" />
+          </div>
+
+          {hasChanges && (
+            <div className="fixed bottom-6 right-[25rem] z-50">
+              <div className="flex items-center gap-3 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3 shadow-[0_18px_38px_hsl(var(--foreground)/0.16)] backdrop-blur-md">
+                <button
+                  onClick={handleCancel}
+                  className="inline-flex items-center gap-2 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--accent))] px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-[hsl(var(--accent)_/_0.7)]"
+                >
+                  <X className="w-4 h-4" />
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--primary))] px-4 py-2 text-sm font-semibold text-[hsl(var(--primary-foreground))] transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
             </div>
           )}
-
-          <AgentConfigCards agent={editedAgent} voices={voices} onChange={handleChange} />
-
-          <VoiceSettingsSection agent={editedAgent} onChange={handleChange} />
-
-          <ConversationSettingsSection agent={editedAgent} onChange={handleChange} />
-
-          <ASRKeywordsSection agent={editedAgent} onChange={handleChange} />
-
-          <PrivacySettingsSection agent={editedAgent} onChange={handleChange} />
-
-          <PromptSection agent={editedAgent} onChange={handleChange} />
-
-          <DataCollectionSection agent={editedAgent} onChange={handleChange} />
-
-          <ToolsSection agent={editedAgent} onChange={handleChange} />
-
-          <WebhookSection agent={editedAgent} onChange={handleChange} />
-
-          <KnowledgeBaseSection agent={editedAgent} knowledgeBase={knowledgeBase} onChange={handleChange} />
-
-          <div className="h-20" />
         </div>
 
-        {hasChanges && (
-          <div className="fixed bottom-6 right-[25rem] z-50 flex gap-3">
-            <button
-              onClick={handleCancel}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-card border border-border text-foreground rounded-lg hover:bg-muted transition-colors"
-            >
-              <X className="w-4 h-4" />
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--primary)] text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition-colors"
-            >
-              <Save className="w-4 h-4" />
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
-          </div>
-        )}
+        {/* Test Agent Panel */}
+        <div className="w-96 border-l border-border bg-background p-6">
+          <CallTesting agentId={agentId!} dynamicVariables={dynamicVariables} />
+        </div>
       </div>
-
-      {/* Test Agent Panel */}
-      <div className="w-96 border-l border-border bg-background p-6">
-        <CallTesting agentId={agentId!} dynamicVariables={dynamicVariables} />
-      </div>
-    </div>
+    </>
   )
 }

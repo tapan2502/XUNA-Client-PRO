@@ -7,6 +7,7 @@ import { X, MessageSquare, Clock, Activity, BarChart, Volume2, Play, Pause, Down
 import { useState, useEffect } from "react"
 import type { ConversationDetails } from "@/store/callHistorySlice"
 import DataCollectionSection from "./DataCollectionSection"
+import { FullscreenLoader } from "@/components/ui/FullscreenLoader"
 
 interface CallHistoryDetailsProps {
   details: ConversationDetails | null
@@ -84,28 +85,31 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
     link.click()
   }
 
-  if (!details) return null
+  if (!details && !loading) return null
 
   return (
-    <AnimatePresence>
-      <>
-        {/* Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-sm z-40"
-          onClick={onClose}
-        />
+    <>
+      <FullscreenLoader show={loading} label="Fetching call details" />
+      {details && (
+        <AnimatePresence>
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-sm z-40"
+              onClick={onClose}
+            />
 
-        {/* Sidebar */}
-        <motion.div
-          initial={{ opacity: 0, x: "100%" }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: "100%" }}
-          transition={{ type: "spring", damping: 25, stiffness: 200 }}
-          className="fixed top-0 right-0 w-full md:w-[600px] h-full bg-[radial-gradient(circle_at_top_left,_hsl(var(--primary)_/_0.35),_hsl(var(--card))_65%)] border-l border-border shadow-2xl flex flex-col z-50 backdrop-blur-md"
-        >
+            {/* Sidebar */}
+            <motion.div
+              initial={{ opacity: 0, x: "100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 w-full md:w-[600px] h-full bg-[radial-gradient(circle_at_top_left,_hsl(var(--primary)_/_0.35),_hsl(var(--card))_65%)] border-l border-border shadow-2xl flex flex-col z-50 backdrop-blur-md"
+            >
           {/* Header */}
           <div className="flex-shrink-0 border-b border-border bg-[hsl(var(--accent)_/_0.45)]">
             <div className="p-6 flex justify-between items-center">
@@ -331,8 +335,10 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
               </div>
             )}
           </div>
-        </motion.div>
-      </>
-    </AnimatePresence>
+            </motion.div>
+          </>
+        </AnimatePresence>
+      )}
+    </>
   )
 }

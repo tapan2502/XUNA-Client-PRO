@@ -48,6 +48,7 @@ const CallTesting: React.FC<CallTestingProps> = ({ agentId, dynamicVariables = {
 
         const conv = await Conversation.startSession({
           agentId,
+          connectionType: "webrtc",
           dynamicVariables: Object.keys(dynamicVariables).length > 0 ? dynamicVariables : undefined,
           onConnect: () => {
             setIsConnected(true)
@@ -57,11 +58,11 @@ const CallTesting: React.FC<CallTestingProps> = ({ agentId, dynamicVariables = {
             setIsConnected(false)
             setIsSpeaking(false)
           },
-          onError: (error) => {
-            console.error("Conversation error:", error)
+          onError: (message, context) => {
+            console.error("Conversation error:", message, context)
             setIsConnected(false)
             setIsLoading(false)
-            alert(`Conversation error: ${error.message || "Unknown error"}`)
+            alert(`Conversation error: ${message || "Unknown error"}`)
           },
           onModeChange: (mode) => {
             setIsSpeaking(mode.mode === "speaking")

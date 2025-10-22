@@ -5,6 +5,7 @@ import { Search, Filter, SortAsc, Columns, MoreVertical, Plus, Copy } from "luci
 import { CreateAgentModal } from "@/features/agents/components/CreateAgentModal"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchAgents } from "@/store/agentsSlice"
+import { useNavigate } from "react-router-dom"
 
 interface Client {
   id: string
@@ -30,6 +31,7 @@ export default function ClientsTable() {
   const [isCreateAgentOpen, setIsCreateAgentOpen] = useState(false)
 
   const dispatch = useAppDispatch()
+  const navigate = useNavigate()
   const { agents, loading, error } = useAppSelector((s) => s.agents)
 
   useEffect(() => {
@@ -205,7 +207,11 @@ export default function ClientsTable() {
                     const role = agent?.access_info?.role ?? agent?.access_level ?? "—"
 
                     return (
-                      <tr key={agent.agent_id} className="hover:bg-[hsl(var(--sidebar-hover))] transition-colors">
+                      <tr
+                        key={agent.agent_id}
+                        onClick={() => navigate(`/dashboard/agents/${agent.agent_id}`)}
+                        className="hover:bg-[hsl(var(--sidebar-hover))] transition-colors cursor-pointer"
+                      >
                         <td className="px-4 py-4">
                           <div className="flex items-center gap-2">
                             <div
@@ -221,7 +227,10 @@ export default function ClientsTable() {
                             </span>
                             <button
                               className="p-1 hover:bg-[hsl(var(--sidebar-hover))] rounded transition-colors"
-                              onClick={() => navigator.clipboard?.writeText(agent.agent_id)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                navigator.clipboard?.writeText(agent.agent_id)
+                              }}
                               title="Copy Agent ID"
                             >
                               <Copy className="w-3 h-3 text-muted-foreground" />
@@ -256,7 +265,10 @@ export default function ClientsTable() {
                           <span className="text-sm font-medium text-primary">{role}</span>
                         </td>
                         <td className="px-4 py-4">
-                          <button className="p-1 hover:bg-[hsl(var(--sidebar-hover))] rounded transition-colors">
+                          <button
+                            onClick={(e) => e.stopPropagation()}
+                            className="p-1 hover:bg-[hsl(var(--sidebar-hover))] rounded transition-colors"
+                          >
                             <MoreVertical className="w-4 h-4 text-muted-foreground" />
                           </button>
                         </td>

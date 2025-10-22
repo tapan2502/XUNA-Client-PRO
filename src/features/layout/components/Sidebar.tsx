@@ -11,6 +11,7 @@ import {
   SettingsIcon,
   Key,
   Mic,
+  Headphones,
 } from "lucide-react"
 import SidebarLogo from "./sidebar/SidebarLogo"
 import SidebarWorkspaceSelector from "./sidebar/SidebarWorkspaceSelector"
@@ -30,6 +31,7 @@ const navItems = [
   { to: "/dashboard/contacts", label: "Contacts", icon: Users },
   { to: "/dashboard/automation", label: "Automation", icon: Workflow },
   { to: "/dashboard/call-logs", label: "Call Logs", icon: PhoneCall },
+  { to: "/dashboard/call-history", label: "Call History", icon: Headphones },
 ]
 
 const configItems = [

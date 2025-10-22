@@ -32,15 +32,57 @@ export interface Agent {
   agent_id: string
   name: string
   created_at_unix_secs: number
+  last_call_time_unix_secs?: number
   access_level: string
   conversation_config?: {
     agent?: {
       prompt?: AgentPrompt
       language?: string
+      first_message?: string
+      dynamic_variables?: {
+        dynamic_variable_placeholders?: Record<string, string>
+      }
     }
     tts?: {
       voice_id: string
       model_id: string
+      optimize_streaming_latency?: number
+      stability?: number
+      speed?: number
+      similarity_boost?: number
+    }
+    turn?: {
+      turn_timeout?: number
+      silence_end_call_timeout?: number
+      mode?: "silence" | "turn"
+    }
+    asr?: {
+      keywords?: string[]
+    }
+  }
+  platform_settings?: {
+    data_collection?: Record<
+      string,
+      {
+        type: "boolean" | "string" | "number" | "integer"
+        description?: string
+        dynamic_variable?: string
+        constant_value?: string
+      }
+    >
+    workspace_overrides?: {
+      conversation_initiation_client_data_webhook?: {
+        url: string
+        request_headers: { "Content-Type": string }
+      }
+    }
+    privacy?: {
+      record_voice?: boolean
+      retention_days?: number
+      delete_transcript_and_pii?: boolean
+      delete_audio?: boolean
+      apply_to_existing_conversations?: boolean
+      zero_retention_mode?: boolean
     }
   }
 }
@@ -174,6 +216,30 @@ export const createKnowledgeBaseDocument = createAsyncThunk(
   },
 )
 
+export const fetchAgentById = createAsyncThunk(
+  "agents/fetchAgentById",
+  async (agentId: string, { rejectWithValue }) => {
+    try {
+      const response = await http.get(`/agents/${agentId}`)
+      return response.data
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch agent details")
+    }
+  },
+)
+
+export const updateAgent = createAsyncThunk(
+  "agents/updateAgent",
+  async ({ agentId, payload }: { agentId: string; payload: any }, { rejectWithValue }) => {
+    try {
+      const response = await http.patch(`/agents/${agentId}`, payload)
+      return response.data
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to update agent")
+    }
+  },
+)
+
 const agentsSlice = createSlice({
   name: "agents",
   initialState,
@@ -227,6 +293,41 @@ const agentsSlice = createSlice({
         if (action.payload.document) {
           state.knowledgeBase.push(action.payload.document)
         }
+      })
+      // Fetch agent by ID
+      .addCase(fetchAgentById.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchAgentById.fulfilled, (state, action) => {
+        state.loading = false
+        // Update or add the agent in the list
+        const index = state.agents.findIndex((a) => a.agent_id === action.payload.agent_id)
+        if (index !== -1) {
+          state.agents[index] = action.payload
+        } else {
+          state.agents.push(action.payload)
+        }
+      })
+      .addCase(fetchAgentById.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      // Update agent
+      .addCase(updateAgent.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(updateAgent.fulfilled, (state, action) => {
+        state.loading = false
+        const index = state.agents.findIndex((a) => a.agent_id === action.payload.agent_id)
+        if (index !== -1) {
+          state.agents[index] = action.payload
+        }
+      })
+      .addCase(updateAgent.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
       })
   },
 })

@@ -11,6 +11,8 @@ import DashboardHome from "@/features/dashboard/pages/DashboardHome"
 import { useAppDispatch, useAppSelector } from "./hooks"
 import { initAuthListener, selectAuthInitializing, selectEffectiveUser } from "@/store/authSlice"
 import Profile from "@/features/profile/pages/Profile"
+import AgentDetails from "@/features/agents/pages/AgentDetails"
+import CallHistory from "@/features/call-history/pages/CallHistory"
 
 const Protected: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const user = useAppSelector(selectEffectiveUser)
@@ -62,8 +64,16 @@ export default function AppRoutes() {
         >
           <Route index element={<DashboardHome />} />
           <Route path="profile" element={<Profile />} />
-          {/* Additional feature routes go here as stubs */}
+          <Route path="call-history" element={<CallHistory />} />
         </Route>
+        <Route
+          path="/dashboard/agents/:agentId"
+          element={
+            <Protected>
+              <AgentDetails />
+            </Protected>
+          }
+        />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

@@ -3,6 +3,7 @@ import authReducer from "./authSlice"
 import settingsReducer from "./settingsSlice"
 import layoutReducer from "./layoutSlice"
 import agentsReducer from "./agentsSlice"
+import callHistoryReducer from "./callHistorySlice"
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     settings: settingsReducer,
     layout: layoutReducer,
     agents: agentsReducer,
+    callHistory: callHistoryReducer,
   },
 })
 

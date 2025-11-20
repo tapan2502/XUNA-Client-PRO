@@ -28,15 +28,15 @@ const navItems = [
   { to: "/dashboard/knowledge-base", label: "Knowledge Base", icon: BookOpen },
   { to: "/dashboard/tools", label: "Tools & Functions", icon: Wrench },
   { to: "/dashboard/campaigns", label: "Campaigns", icon: Megaphone },
-  { to: "/dashboard/contacts", label: "Contacts", icon: Users },
-  { to: "/dashboard/automation", label: "Automation", icon: Workflow },
-  { to: "/dashboard/call-logs", label: "Call Logs", icon: PhoneCall },
+  // { to: "/dashboard/contacts", label: "Contacts", icon: Users },
+  // { to: "/dashboard/automation", label: "Automation", icon: Workflow },
+  // { to: "/dashboard/call-logs", label: "Call Logs", icon: PhoneCall },
   { to: "/dashboard/call-history", label: "Call History", icon: Headphones },
 ]
 
 const configItems = [
-  { to: "/dashboard/api-keys", label: "API Keys", icon: Key },
-  { to: "/dashboard/voice-providers", label: "Voice API Providers", icon: Mic },
+  // { to: "/dashboard/api-keys", label: "API Keys", icon: Key },
+  // { to: "/dashboard/voice-providers", label: "Voice API Providers", icon: Mic },
   { to: "/dashboard/settings", label: "Settings", icon: SettingsIcon },
 ]
 
@@ -44,7 +44,7 @@ export default function Sidebar() {
   return (
     <aside className="shrink-0 border-r border-[hsl(var(--divider))] bg-[hsl(var(--sidebar-bg))] flex h-screen">
       {/* Icon Navigation */}
-      <SidebarIconNav />
+      {/* <SidebarIconNav /> */}
 
       {/* Main Sidebar */}
       <div className="w-[240px] flex flex-col h-full">

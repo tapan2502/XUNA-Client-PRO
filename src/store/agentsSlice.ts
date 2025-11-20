@@ -240,6 +240,30 @@ export const updateAgent = createAsyncThunk(
   },
 )
 
+export const fetchKnowledgeBaseDocumentById = createAsyncThunk(
+  "agents/fetchKnowledgeBaseDocumentById",
+  async (documentId: string, { rejectWithValue }) => {
+    try {
+      const response = await http.get(`/knowledge-base/${documentId}`)
+      return response.data
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch document details")
+    }
+  },
+)
+
+export const deleteKnowledgeBaseDocument = createAsyncThunk(
+  "agents/deleteKnowledgeBaseDocument",
+  async (documentId: string, { rejectWithValue }) => {
+    try {
+      await http.delete(`/knowledge-base/${documentId}`)
+      return documentId
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to delete document")
+    }
+  },
+)
+
 const agentsSlice = createSlice({
   name: "agents",
   initialState,
@@ -293,6 +317,10 @@ const agentsSlice = createSlice({
         if (action.payload.document) {
           state.knowledgeBase.push(action.payload.document)
         }
+      })
+      // Delete KB document
+      .addCase(deleteKnowledgeBaseDocument.fulfilled, (state, action) => {
+        state.knowledgeBase = state.knowledgeBase.filter((doc) => doc.id !== action.payload)
       })
       // Fetch agent by ID
       .addCase(fetchAgentById.pending, (state) => {

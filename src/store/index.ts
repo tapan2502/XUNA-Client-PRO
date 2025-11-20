@@ -1,17 +1,21 @@
 import { configureStore } from "@reduxjs/toolkit"
 import authReducer from "./authSlice"
-import settingsReducer from "./settingsSlice"
 import layoutReducer from "./layoutSlice"
 import agentsReducer from "./agentsSlice"
+import phoneNumbersReducer from "./phoneNumbersSlice"
 import callHistoryReducer from "./callHistorySlice"
+import settingsReducer from "./settingsSlice"
+import campaignsReducer from "./campaignsSlice"
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    settings: settingsReducer,
     layout: layoutReducer,
     agents: agentsReducer,
+    phoneNumbers: phoneNumbersReducer,
     callHistory: callHistoryReducer,
+    settings: settingsReducer,
+    campaigns: campaignsReducer,
   },
 })
 

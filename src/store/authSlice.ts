@@ -36,6 +36,14 @@ export interface UserData {
     monthlyCredits: number;
   };
   plan_lookup_key: string;
+  batch_calls?: {
+    batch_call_id: string;
+    agent_id: string;
+    agent_name: string;
+    call_name: string;
+    created_at: string;
+    status: string;
+  }[];
 }
 
 interface AuthState {
@@ -99,6 +107,7 @@ const normalizeUserData = (data: Partial<UserData>): UserData => {
       monthlyCredits: entitlements.monthlyCredits ?? defaultEntitlements.monthlyCredits,
     },
     plan_lookup_key: data.plan_lookup_key ?? entitlements.planKey ?? "Price",
+    batch_calls: data.batch_calls ?? [],
   };
 };
 
@@ -136,10 +145,10 @@ const createMockUser = (userId: string, data: UserData): User => {
     },
     refreshToken: "",
     tenantId: null,
-    delete: async () => {},
+    delete: async () => { },
     getIdToken: async () => "",
     getIdTokenResult: async () => ({} as any),
-    reload: async () => {},
+    reload: async () => { },
     toJSON: () => ({}),
     phoneNumber: null,
     photoURL: null,

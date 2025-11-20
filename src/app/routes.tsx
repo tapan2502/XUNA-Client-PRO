@@ -13,6 +13,12 @@ import { initAuthListener, selectAuthInitializing, selectEffectiveUser } from "@
 import Profile from "@/features/profile/pages/Profile"
 import AgentDetails from "@/features/agents/pages/AgentDetails"
 import CallHistory from "@/features/call-history/pages/CallHistory"
+import PhoneNumbers from "@/features/dashboard/pages/PhoneNumbers"
+import Agents from "@/features/dashboard/pages/Agents"
+import KnowledgeBase from "@/features/dashboard/pages/KnowledgeBase"
+import KnowledgeBaseDetails from "@/features/dashboard/pages/KnowledgeBaseDetails"
+import Campaigns from "@/features/dashboard/pages/Campaigns"
+import Tools from "@/features/dashboard/pages/Tools"
 
 const Protected: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const user = useAppSelector(selectEffectiveUser)
@@ -65,7 +71,21 @@ export default function AppRoutes() {
           <Route index element={<DashboardHome />} />
           <Route path="profile" element={<Profile />} />
           <Route path="call-history" element={<CallHistory />} />
+
+          <Route path="phone-numbers" element={<PhoneNumbers />} />
+          <Route path="assistants" element={<Agents />} />
+          <Route path="knowledge-base" element={<KnowledgeBase />} />
+          <Route path="campaigns" element={<Campaigns />} />
+          <Route path="tools" element={<Tools />} />
         </Route>
+        <Route
+          path="/dashboard/knowledge-base/:documentId"
+          element={
+            <Protected>
+              <KnowledgeBaseDetails />
+            </Protected>
+          }
+        />
         <Route
           path="/dashboard/agents/:agentId"
           element={

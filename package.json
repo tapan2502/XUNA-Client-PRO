@@ -10,8 +10,10 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@11labs/client": "0.2.0",
     "@heroui/react": "2.8.5",
     "@heroui/theme": "2.4.23",
+    "@iconify/react": "^6.0.2",
     "@reduxjs/toolkit": "2.9.0",
     "axios": "1.12.2",
     "class-variance-authority": "0.7.1",
@@ -19,15 +21,15 @@
     "firebase": "12.4.0",
     "framer-motion": "^11.18.2",
     "lucide-react": "0.454.0",
+    "next": "16.0.0",
+    "path": "0.12.7",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-redux": "9.2.0",
     "react-router-dom": "7.9.4",
+    "recharts": "^3.4.1",
     "tailwind-merge": "3.3.1",
-    "tailwindcss-animate": "1.0.7",
-    "path": "0.12.7",
-    "next": "16.0.0",
-    "@11labs/client": "0.2.0"
+    "tailwindcss-animate": "1.0.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.14",

@@ -16,11 +16,9 @@ export default function ImportSIPModal({ isOpen, onClose }: ImportSIPModalProps)
   const [formData, setFormData] = useState({
     phone_number: "",
     label: "",
-    address: "",
-    credentials: {
-      username: "",
-      password: "",
-    },
+    sip_address: "",
+    username: "",
+    password: "",
   })
 
   const handleSubmit = async () => {
@@ -28,11 +26,8 @@ export default function ImportSIPModal({ isOpen, onClose }: ImportSIPModalProps)
       setLoading(true)
       await dispatch(
         createPhoneNumber({
-          phone_number: formData.phone_number,
-          label: formData.label,
-          provider: "sip_trunk",
-          address: formData.address,
-          credentials: formData.credentials,
+          ...formData,
+          provider: "sip",
         }),
       ).unwrap()
       onClose()
@@ -40,11 +35,9 @@ export default function ImportSIPModal({ isOpen, onClose }: ImportSIPModalProps)
       setFormData({
         phone_number: "",
         label: "",
-        address: "",
-        credentials: {
-          username: "",
-          password: "",
-        },
+        sip_address: "",
+        username: "",
+        password: "",
       })
     } catch (error) {
       console.error("Failed to import SIP number:", error)
@@ -57,10 +50,16 @@ export default function ImportSIPModal({ isOpen, onClose }: ImportSIPModalProps)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-gray-900/20 dark:bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white dark:bg-gray-900 rounded-xl w-full max-w-xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-h-[90vh]">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/20 dark:bg-black/50 backdrop-blur-sm" 
+        onClick={onClose} 
+      />
+      
+      {/* Modal Container - Using explicit white background */}
+      <div className="relative w-full max-w-xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
           <div className="flex items-center gap-2">
             <Phone className="w-4 h-4 text-gray-900 dark:text-gray-100" />
             <span className="text-base font-semibold text-gray-900 dark:text-gray-100">Import SIP Trunk</span>
@@ -74,7 +73,7 @@ export default function ImportSIPModal({ isOpen, onClose }: ImportSIPModalProps)
         </div>
 
         {/* Body */}
-        <div className="p-5 overflow-y-auto">
+        <div className="p-5 overflow-y-auto bg-white dark:bg-gray-900">
           <div className="flex flex-col gap-5">
             {/* Info Box */}
             <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-lg p-3 flex gap-3">
@@ -106,7 +105,7 @@ export default function ImportSIPModal({ isOpen, onClose }: ImportSIPModalProps)
                   placeholder="+1234567890"
                   value={formData.phone_number}
                   onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 />
                 <p className="text-[10px] text-gray-600 dark:text-gray-400">
                   Enter the phone number in E.164 format (e.g., +1234567890)
@@ -120,7 +119,7 @@ export default function ImportSIPModal({ isOpen, onClose }: ImportSIPModalProps)
                   placeholder="Main SIP Line"
                   value={formData.label}
                   onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 />
               </div>
 
@@ -129,36 +128,32 @@ export default function ImportSIPModal({ isOpen, onClose }: ImportSIPModalProps)
                 <input
                   type="text"
                   placeholder="sip.example.com"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  value={formData.sip_address}
+                  onChange={(e) => setFormData({ ...formData, sip_address: e.target.value })}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-gray-900 dark:text-gray-100">SIP Username</label>
+                  <label className="text-xs font-medium text-gray-900 dark:text-gray-100">Username</label>
                   <input
                     type="text"
                     placeholder="username"
-                    value={formData.credentials.username}
-                    onChange={(e) =>
-                      setFormData({ ...formData, credentials: { ...formData.credentials, username: e.target.value } })
-                    }
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-gray-900 dark:text-gray-100">SIP Password</label>
+                  <label className="text-xs font-medium text-gray-900 dark:text-gray-100">Password</label>
                   <input
                     type="password"
                     placeholder="password"
-                    value={formData.credentials.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, credentials: { ...formData.credentials, password: e.target.value } })
-                    }
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                   />
                 </div>
               </div>
@@ -167,7 +162,7 @@ export default function ImportSIPModal({ isOpen, onClose }: ImportSIPModalProps)
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex justify-end gap-2">
           <button
             onClick={onClose}
             className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 font-medium rounded-lg transition-colors text-xs"
@@ -177,10 +172,10 @@ export default function ImportSIPModal({ isOpen, onClose }: ImportSIPModalProps)
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="flex items-center gap-2 px-3 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-1.5 bg-brand-gradient text-white font-medium rounded-lg transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading && <Loader2 size={14} className="animate-spin" />}
-            Import Number
+            Import SIP Trunk
           </button>
         </div>
       </div>

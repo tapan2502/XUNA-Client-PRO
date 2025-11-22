@@ -18,21 +18,14 @@ export default function Signup() {
   const dispatch = useAppDispatch();
   const loading = useAppSelector((s) => s.auth.loading);
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // keep auth screens light
-  useEffect(() => {
-    const root = document.documentElement;
-    const hadDarkClass = root.classList.contains("dark");
-    root.classList.remove("dark");
-    return () => {
-      if (hadDarkClass) root.classList.add("dark");
-    };
-  }, []);
+
 
   const passwordsMismatch = useMemo(
     () => confirmPassword.length > 0 && password !== confirmPassword,
@@ -41,13 +34,14 @@ export default function Signup() {
 
   const disabled =
     loading ||
+    !name.trim() ||
     !email.trim() ||
     !password.trim() ||
     !confirmPassword.trim() ||
     passwordsMismatch;
 
   const onSubmit = () =>
-    dispatch(signUp({ email: email.trim(), password: password.trim() }));
+    dispatch(signUp({ email: email.trim(), password: password.trim(), name: name.trim() }));
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-neutral-50 to-neutral-100 dark:from-neutral-950 dark:via-neutral-900 dark:to-black text-foreground flex items-center justify-center px-4 py-8">
@@ -75,6 +69,29 @@ export default function Signup() {
               if (!disabled) onSubmit();
             }}
           >
+            {/* Name */}
+            <div className="space-y-2">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              >
+                Full Name
+              </label>
+              <div className="relative">
+                <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                <input
+                  id="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="John Doe"
+                  className="w-full rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-10 py-2.5 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:border-primary focus:ring-2 focus:ring-primary/30 outline-none transition"
+                />
+              </div>
+            </div>
+
             {/* Email */}
             <div className="space-y-2">
               <label
@@ -180,7 +197,7 @@ export default function Signup() {
             <button
               type="submit"
               disabled={disabled}
-              className="group w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-95 active:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition"
+              className="group w-full inline-flex items-center justify-center gap-2 rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-sm active:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition"
             >
               {loading ? (
                 <>

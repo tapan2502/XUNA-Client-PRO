@@ -109,8 +109,8 @@ export default function CreateCampaignModal({ isOpen, onClose }: CreateCampaignM
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-            <div className="p-1.5 bg-[#65a30d]/10 rounded-lg">
-              <div className="w-4 h-4 border-2 border-[#65a30d] rounded-full" />
+            <div className="p-1.5 bg-brand-gradient rounded-lg">
+              <div className="w-4 h-4 border-2 border-white rounded-full" />
             </div>
             <h2 className="font-semibold text-lg">Create Batch Campaign</h2>
           </div>
@@ -129,7 +129,7 @@ export default function CreateCampaignModal({ isOpen, onClose }: CreateCampaignM
               value={campaignName}
               onChange={(e) => setCampaignName(e.target.value)}
               placeholder="Enter campaign name"
-              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all text-gray-900 dark:text-gray-100"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] transition-all text-gray-900 dark:text-gray-100"
             />
           </div>
 
@@ -139,7 +139,7 @@ export default function CreateCampaignModal({ isOpen, onClose }: CreateCampaignM
             <select
               value={selectedAgentId}
               onChange={(e) => setSelectedAgentId(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all appearance-none text-gray-900 dark:text-gray-100"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] transition-all appearance-none text-gray-900 dark:text-gray-100"
             >
               <option value="">Select an agent</option>
               {agents.map(agent => (
@@ -154,7 +154,7 @@ export default function CreateCampaignModal({ isOpen, onClose }: CreateCampaignM
             <select
               value={selectedPhoneNumberId}
               onChange={(e) => setSelectedPhoneNumberId(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all appearance-none text-gray-900 dark:text-gray-100"
+              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] transition-all appearance-none text-gray-900 dark:text-gray-100"
             >
               <option value="">Select a phone number</option>
               {phoneNumbers.map(phone => (
@@ -172,7 +172,7 @@ export default function CreateCampaignModal({ isOpen, onClose }: CreateCampaignM
                   type="radio"
                   checked={recipientInputMethod === "paste"}
                   onChange={() => setRecipientInputMethod("paste")}
-                  className="w-4 h-4 text-[#65a30d] focus:ring-[#65a30d]"
+                  className="w-4 h-4 text-[#3b82f6] focus:ring-[#3b82f6]"
                 />
                 <span className="text-sm">Paste Numbers</span>
               </label>
@@ -181,7 +181,7 @@ export default function CreateCampaignModal({ isOpen, onClose }: CreateCampaignM
                   type="radio"
                   checked={recipientInputMethod === "csv"}
                   onChange={() => setRecipientInputMethod("csv")}
-                  className="w-4 h-4 text-[#65a30d] focus:ring-[#65a30d]"
+                  className="w-4 h-4 text-[#3b82f6] focus:ring-[#3b82f6]"
                 />
                 <span className="text-sm">Upload CSV File</span>
               </label>
@@ -192,7 +192,7 @@ export default function CreateCampaignModal({ isOpen, onClose }: CreateCampaignM
                 value={pastedNumbers}
                 onChange={(e) => setPastedNumbers(e.target.value)}
                 placeholder="Enter phone numbers (one per line or separated by commas)&#10;+1234567890&#10;+1987654321"
-                className="w-full h-32 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all resize-none font-mono text-sm text-gray-900 dark:text-gray-100"
+                className="w-full h-32 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] transition-all resize-none font-mono text-sm text-gray-900 dark:text-gray-100"
               />
             ) : (
               <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer relative">
@@ -222,7 +222,7 @@ export default function CreateCampaignModal({ isOpen, onClose }: CreateCampaignM
                 type="datetime-local"
                 value={scheduledTime}
                 onChange={(e) => setScheduledTime(e.target.value)}
-                className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all text-gray-900 dark:text-gray-100"
+                className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] transition-all text-gray-900 dark:text-gray-100"
               />
               <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400 pointer-events-none" />
             </div>
@@ -241,7 +241,7 @@ export default function CreateCampaignModal({ isOpen, onClose }: CreateCampaignM
           <button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="px-4 py-2 text-sm font-medium text-white bg-[#65a30d] hover:bg-[#4d7c0f] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 text-sm font-medium text-white bg-brand-gradient rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isLoading && <Loader2 size={16} className="animate-spin" />}
             Create Campaign

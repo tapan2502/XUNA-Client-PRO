@@ -7,6 +7,7 @@ import { Headphones, BarChart, Search } from "lucide-react"
 import CallHistoryFilters from "../components/CallHistoryFilters"
 import CallHistoryDetails from "../components/CallHistoryDetails"
 import CallHistoryTable from "../components/CallHistoryTabel"
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 
 export default function CallHistory() {
   const dispatch = useAppDispatch()
@@ -60,48 +61,36 @@ export default function CallHistory() {
   const activeFilters = [dateAfter, dateBefore, selectedAgent, selectedEvaluation].filter(Boolean).length
 
   if (loading && conversations.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(var(--primary))]" />
-      </div>
-    )
+    return <LoadingSpinner fullScreen />
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="flex flex-col gap-4 h-full p-4 max-w-7xl mx-auto w-full text-foreground">
       {/* Header Section */}
-      <div className="bg-card rounded-xl shadow-sm border border-border p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-[hsl(var(--primary))]/10 flex items-center justify-center">
-                <Headphones className="w-5 h-5 text-[hsl(var(--primary))]" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">Call History</h1>
-                <p className="text-sm text-muted-foreground mt-1">View and analyze your conversation history</p>
-              </div>
-            </div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-foreground">Call History</h1>
+          <p className="text-muted-foreground text-xs mt-1">View and analyze your conversation history</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2 bg-muted px-3 py-1.5 rounded-lg border border-border">
+            <BarChart className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs font-medium text-foreground">{conversations.length} Total Calls</span>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="hidden sm:flex items-center space-x-2 bg-accent px-4 py-2 rounded-lg">
-              <BarChart className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">{conversations.length} Total Calls</span>
-            </div>
 
-            {(searchQuery || activeFilters > 0) && (
-              <div className="hidden lg:flex items-center space-x-2 bg-[hsl(var(--primary))]/10 px-4 py-2 rounded-lg">
-                <Search className="w-4 h-4 text-[hsl(var(--primary))]" />
-                <span className="text-sm font-medium text-[hsl(var(--primary))]">
-                  {filteredConversations.length} Filtered Results
-                </span>
-              </div>
-            )}
-          </div>
+          {(searchQuery || activeFilters > 0) && (
+            <div className="hidden lg:flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-lg border border-primary/20">
+              <Search className="w-4 h-4 text-primary" />
+              <span className="text-xs font-medium text-primary">
+                {filteredConversations.length} Filtered Results
+              </span>
+            </div>
+          )}
+        </div>
         </div>
 
-        {/* Filters */}
-        <div className="mt-6">
+      {/* Filters */}
+      <div className="bg-card p-3 rounded-lg border border-border shadow-sm">
           <CallHistoryFilters
             conversations={conversations}
             searchQuery={searchQuery}
@@ -118,11 +107,13 @@ export default function CallHistory() {
             setSortOrder={setSortOrder}
           />
         </div>
-      </div>
+
 
       {/* Table */}
-      <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
-        <CallHistoryTable conversations={filteredConversations} onSelectConversation={setSelectedConversationId} />
+      <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden flex-1 min-h-0">
+        <div className="overflow-y-auto h-full">
+          <CallHistoryTable conversations={filteredConversations} onSelectConversation={setSelectedConversationId} />
+        </div>
       </div>
 
       {/* Details Sidebar */}

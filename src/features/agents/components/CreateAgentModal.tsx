@@ -231,7 +231,7 @@ export function CreateAgentModal({ isOpen, onClose, onSuccess }: CreateAgentModa
                 <button
                   onClick={() => setStep(STEPS[currIndex + 1])}
                   disabled={!canNext}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm font-medium text-white bg-brand-gradient rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>
@@ -239,7 +239,7 @@ export function CreateAgentModal({ isOpen, onClose, onSuccess }: CreateAgentModa
                 <button
                   onClick={handleCreateAgent}
                   disabled={createLoading}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 text-sm font-medium text-white bg-brand-gradient rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {createLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                   Create Agent

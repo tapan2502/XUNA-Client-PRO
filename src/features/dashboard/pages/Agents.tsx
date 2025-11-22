@@ -3,13 +3,12 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchAgents } from "@/store/agentsSlice"
 import { CreateAgentModal } from "@/features/agents/components/CreateAgentModal"
 import { useNavigate } from "react-router-dom"
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import { 
-  Headset, 
-  MoreVertical, 
-  ArrowRight, 
-  Plus, 
-  Download, 
-  Upload 
+  Headset,
+  MoreVertical,
+  ArrowRight,
+  Plus 
 } from "lucide-react"
 
 export default function Agents() {
@@ -45,17 +44,9 @@ export default function Agents() {
           <p className="text-muted-foreground text-sm mt-1">Create and manage your AI agents</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <button className="flex items-center gap-2 px-3 py-2 bg-background border border-border rounded-lg hover:bg-accent text-foreground text-sm font-medium transition-colors shadow-sm">
-            <Download size={16} />
-            <span>Export</span>
-          </button>
-          <button className="flex items-center gap-2 px-3 py-2 bg-background border border-border rounded-lg hover:bg-accent text-foreground text-sm font-medium transition-colors shadow-sm">
-            <Upload size={16} />
-            <span>Import</span>
-          </button>
           <button 
             onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#65a30d] hover:bg-[#4d7c0f] text-white text-sm font-medium rounded-lg transition-colors shadow-sm ml-auto sm:ml-0"
+            className="flex items-center gap-2 px-4 py-2 bg-brand-gradient text-white text-sm font-medium rounded-lg transition-colors shadow-sm ml-auto sm:ml-0"
           >
             <Plus size={18} />
             <span>Create Agent</span>
@@ -66,7 +57,7 @@ export default function Agents() {
       {/* Agents List */}
       <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden flex flex-col">
         {loading ? (
-          <div className="p-8 text-center text-muted-foreground">Loading agents...</div>
+          <LoadingSpinner fullScreen />
         ) : agents.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">No agents found. Create one to get started.</div>
         ) : (
@@ -78,7 +69,7 @@ export default function Agents() {
                 onClick={() => navigate(`/dashboard/agents/${agent.agent_id}`)}
               >
                 {/* Icon */}
-                <div className="w-12 h-12 rounded-xl bg-[#ecfccb] dark:bg-[#365314] flex items-center justify-center shrink-0 text-[#65a30d] dark:text-[#ecfccb]">
+                <div className="w-12 h-12 rounded-xl bg-brand-gradient flex items-center justify-center shrink-0 text-white">
                   <Headset size={24} />
                 </div>
 

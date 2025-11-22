@@ -89,7 +89,7 @@ export default function AssignAgentModal({ isOpen, onClose, phoneNumberId, curre
                         onClick={() => setSelectedAgentId(agent.agent_id)}
                         className={`flex items-center justify-between p-3.5 rounded-lg border-2 transition-all text-left font-medium ${
                           selectedAgentId === agent.agent_id
-                            ? "bg-primary border-primary text-primary-foreground shadow-md scale-[1.02]"
+                            ? "bg-brand-gradient border-transparent text-white shadow-md scale-[1.02]"
                             : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-primary/50 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 hover:shadow-sm"
                         }`}
                       >
@@ -119,7 +119,7 @@ export default function AssignAgentModal({ isOpen, onClose, phoneNumberId, curre
           <button
             onClick={handleSubmit}
             disabled={isSubmitting || !selectedAgentId}
-            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+            className="flex items-center gap-2 px-4 py-2 bg-brand-gradient text-white font-semibold rounded-lg transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
           >
             {isSubmitting && <Loader2 size={16} className="animate-spin" />}
             Save Assignment

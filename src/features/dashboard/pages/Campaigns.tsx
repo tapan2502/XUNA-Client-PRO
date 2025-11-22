@@ -1,6 +1,6 @@
-import { useState } from "react"
-import { useAppSelector } from "@/app/hooks"
-import { selectCurrentUserData } from "@/store/authSlice"
+import { useState, useEffect } from "react"
+import { useAppSelector, useAppDispatch } from "@/app/hooks"
+import { selectCurrentUserData, fetchUserDetails } from "@/store/authSlice"
 import { 
   Search, 
   Plus, 
@@ -13,18 +13,28 @@ import {
 } from "lucide-react"
 import CreateCampaignModal from "../components/CreateCampaignModal"
 import CampaignDetailsModal from "../components/CampaignDetailsModal"
+import { FilterDropdown } from "@/components/ui/FilterDropdown"
 
 export default function Campaigns() {
+  const dispatch = useAppDispatch()
   const userData = useAppSelector(selectCurrentUserData)
   const batchCalls = userData?.batch_calls || []
   
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null)
   const [searchValue, setSearchValue] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
 
-  const filteredCampaigns = batchCalls.filter(campaign => 
-    campaign.call_name.toLowerCase().includes(searchValue.toLowerCase())
-  )
+  // Refetch user data when component mounts to get latest campaigns
+  useEffect(() => {
+    dispatch(fetchUserDetails())
+  }, [dispatch])
+
+  const filteredCampaigns = batchCalls.filter((campaign) => {
+    const matchesSearch = campaign.call_name.toLowerCase().includes(searchValue.toLowerCase())
+    const matchesStatus = statusFilter === "all" || campaign.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
 
   return (
     <div className="flex flex-col gap-6 h-full p-6 max-w-7xl mx-auto w-full text-foreground">
@@ -36,7 +46,7 @@ export default function Campaigns() {
         </div>
         <button 
           onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#65a30d] hover:bg-[#4d7c0f] text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-brand-gradient text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
         >
           <Plus size={18} />
           <span>Create Batch Campaign</span>
@@ -56,11 +66,19 @@ export default function Campaigns() {
           />
         </div>
         <div className="h-8 w-[1px] bg-border mx-1" />
-        <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-lg transition-colors mr-1">
-          <Filter size={16} />
-          <span>All Status</span>
-          <ChevronDown size={14} className="text-muted-foreground" />
-        </button>
+        <FilterDropdown
+          value={statusFilter}
+          onChange={setStatusFilter}
+          options={[
+            { label: "All Status", value: "all" },
+            { label: "Completed", value: "completed" },
+            { label: "Processing", value: "processing" },
+            { label: "Failed", value: "failed" },
+          ]}
+          icon={<Filter size={16} />}
+          className="mr-1"
+          placeholder="All Status"
+        />
       </div>
 
       {/* Campaigns List */}
@@ -76,7 +94,7 @@ export default function Campaigns() {
               className="group bg-card border border-border rounded-xl p-4 flex items-center justify-between hover:shadow-md transition-all"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#ecfccb] text-[#65a30d] dark:bg-[#365314] dark:text-[#ecfccb] flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-brand-gradient text-white flex items-center justify-center shrink-0">
                   <Users size={24} />
                 </div>
                 <div>

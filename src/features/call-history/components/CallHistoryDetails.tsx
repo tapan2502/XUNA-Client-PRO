@@ -4,10 +4,10 @@ import type React from "react"
 
 import { motion, AnimatePresence } from "framer-motion"
 import { X, MessageSquare, Clock, Activity, BarChart, Volume2, Play, Pause, Download, Phone, User } from "lucide-react"
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import { useState, useEffect } from "react"
 import type { ConversationDetails } from "@/store/callHistorySlice"
 import DataCollectionSection from "./DataCollectionSection"
-import { FullscreenLoader } from "@/components/ui/FullscreenLoader"
 
 interface CallHistoryDetailsProps {
   details: ConversationDetails | null
@@ -89,7 +89,7 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
 
   return (
     <>
-      <FullscreenLoader show={loading} label="Fetching call details" />
+      {loading && <LoadingSpinner fullScreen />}
       {details && (
         <AnimatePresence>
           <>
@@ -98,7 +98,7 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
               onClick={onClose}
             />
 
@@ -108,17 +108,17 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 w-full md:w-[600px] h-full bg-[radial-gradient(circle_at_top_left,_hsl(var(--primary)_/_0.35),_hsl(var(--card))_65%)] border-l border-border shadow-2xl flex flex-col z-50 backdrop-blur-md"
+              className="fixed top-0 right-0 w-full md:w-[600px] h-full bg-white dark:bg-gray-900 border-l border-border shadow-2xl flex flex-col z-50"
             >
           {/* Header */}
-          <div className="flex-shrink-0 border-b border-border bg-[hsl(var(--accent)_/_0.45)]">
+          <div className="flex-shrink-0 border-b border-border bg-white dark:bg-gray-900">
             <div className="p-6 flex justify-between items-center">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[hsl(var(--primary)_/_0.2)] flex items-center justify-center">
-                  <MessageSquare className="w-5 h-5 text-[hsl(var(--primary))]" />
+                <div className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center">
+                  <MessageSquare className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-foreground">Conversation Details</h2>
+                  <h2 className="text-xl font-bold text-foreground">Call History Details</h2>
                   <p className="text-sm text-muted-foreground">View transcript and analytics</p>
                 </div>
               </div>
@@ -133,19 +133,14 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
 
           {/* Content - Scrollable Area */}
           <div className="flex-1 overflow-y-auto">
-            {loading ? (
-              <div className="p-8 flex justify-center items-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[hsl(var(--primary))]" />
-              </div>
-            ) : (
-              <div className="p-6 space-y-6">
+            <div className="p-6 space-y-6">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-3 gap-4">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="p-4 rounded-xl border border-transparent bg-[hsl(var(--primary)_/_0.12)] shadow-[0_12px_32px_hsl(var(--primary)/0.18)] backdrop-blur"
+                    className="p-4 rounded-xl border border-border bg-accent/50 shadow-sm"
                   >
                     <div className="flex items-center space-x-2 mb-2">
                       <Clock className="w-4 h-4 text-[hsl(var(--primary))]" />
@@ -160,7 +155,7 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="p-4 rounded-xl border border-transparent bg-[hsl(var(--primary)_/_0.12)] shadow-[0_12px_32px_hsl(var(--primary)/0.18)] backdrop-blur"
+                    className="p-4 rounded-xl border border-border bg-accent/50 shadow-sm"
                   >
                     <div className="flex items-center space-x-2 mb-2">
                       <Activity className="w-4 h-4 text-[hsl(var(--primary))]" />
@@ -175,7 +170,7 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="p-4 rounded-xl border border-transparent bg-[hsl(var(--primary)_/_0.12)] shadow-[0_12px_32px_hsl(var(--primary)/0.18)] backdrop-blur"
+                    className="p-4 rounded-xl border border-border bg-accent/50 shadow-sm"
                   >
                     <div className="flex items-center space-x-2 mb-2">
                       <BarChart className="w-4 h-4 text-[hsl(var(--primary))]" />
@@ -192,7 +187,7 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
                 {/* Audio Controls */}
                 {details.audio && (
                   <div className="surface-panel overflow-hidden">
-                    <div className="p-4 border-b border-border bg-[hsl(var(--accent)_/_0.55)]">
+                    <div className="p-4 border-b border-border bg-accent/40">
                       <div className="flex items-center space-x-2">
                         <Volume2 className="w-4 h-4 text-[hsl(var(--primary))]" />
                         <h3 className="text-sm font-medium text-foreground">Call Recording</h3>
@@ -204,7 +199,7 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={handlePlayAudio}
-                          className="w-12 h-12 rounded-full bg-[hsl(var(--primary)_/_0.12)] shadow-[0_12px_28px_hsl(var(--primary)/0.18)] flex items-center justify-center text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary)_/_0.18)] transition-colors"
+                          className="w-12 h-12 rounded-full bg-primary/10 shadow-sm flex items-center justify-center text-primary hover:bg-primary/20 transition-colors"
                         >
                           {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
                         </motion.button>
@@ -212,7 +207,7 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={handleDownloadAudio}
-                          className="w-12 h-12 rounded-full bg-[hsl(var(--accent))] shadow-[0_12px_28px_hsl(var(--foreground)/0.08)] flex items-center justify-center text-muted-foreground hover:text-[hsl(var(--primary))] transition-colors"
+                          className="w-12 h-12 rounded-full bg-accent shadow-sm flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
                         >
                           <Download className="w-6 h-6" />
                         </motion.button>
@@ -224,7 +219,7 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
                           max={duration}
                           value={currentTime}
                           onChange={handleSeek}
-                          className="w-full h-2 bg-[hsl(var(--accent)_/_0.6)] rounded-lg appearance-none cursor-pointer accent-[hsl(var(--primary))]"
+                          className="w-full h-2 bg-accent/60 rounded-lg appearance-none cursor-pointer accent-primary"
                         />
                         <div className="flex justify-between text-sm text-muted-foreground">
                           <span>{formatDuration(currentTime)}</span>
@@ -264,7 +259,7 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
                     <MessageSquare className="w-4 h-4 text-[hsl(var(--primary))]" />
                     <h3 className="text-sm font-medium text-foreground">Summary</h3>
                   </div>
-                  <div className="surface-subtle p-4 bg-[hsl(var(--accent)_/_0.7)]">
+                  <div className="surface-subtle p-4 bg-accent/50">
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       {details.conversation?.analysis?.transcript_summary}
                     </p>
@@ -281,7 +276,7 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
                   </div>
 
                   {/* Transcript Messages */}
-                  <div className="space-y-4 max-h-[400px] overflow-y-auto pr-4">
+                  <div className="space-y-4 max-h-[400px] overflow-y-auto pr-4 pb-8">
                     {details?.conversation?.transcript?.map((message, index) => (
                       <motion.div
                         key={index}
@@ -292,7 +287,7 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
                       >
                         <div className="flex items-end space-x-2 max-w-[80%]">
                           {message?.role !== "user" && (
-                            <div className="w-8 h-8 rounded-lg bg-[hsl(var(--primary)_/_0.16)] flex items-center justify-center flex-shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
                               <Phone className="w-4 h-4 text-[hsl(var(--primary))]" />
                             </div>
                           )}
@@ -301,8 +296,8 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
                             whileHover={{ scale: 1.02 }}
                             className={`relative group rounded-2xl p-4 ${
                               message?.role === "user"
-                                ? "bg-[hsl(var(--primary))] text-white"
-                                : "bg-[hsl(var(--accent))] text-foreground"
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-accent text-foreground"
                             }`}
                           >
                             {/* Message Header */}
@@ -319,11 +314,11 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
                             </div>
 
                             {/* Message Content */}
-                            <p className="text-sm leading-relaxed font-medium">{message?.message}</p>
+                            <p className="text-sm leading-relaxed font-medium break-words">{message?.message}</p>
                           </motion.div>
 
                           {message.role === "user" && (
-                            <div className="w-8 h-8 rounded-lg bg-[hsl(var(--primary)_/_0.16)] flex items-center justify-center flex-shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
                               <User className="w-4 h-4 text-[hsl(var(--primary))]" />
                             </div>
                           )}
@@ -333,7 +328,6 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
                   </div>
                 </div>
               </div>
-            )}
           </div>
             </motion.div>
           </>

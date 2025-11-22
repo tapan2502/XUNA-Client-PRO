@@ -7,7 +7,7 @@ interface SidebarNavItemProps {
   icon: LucideIcon
 }
 
-export default function SidebarNavItem({ to, label, icon: Icon }: SidebarNavItemProps) {
+export default function SidebarNavItem({ to, label, icon: Icon, isCollapsed }: SidebarNavItemProps & { isCollapsed?: boolean }) {
   return (
     <NavLink
       to={to}
@@ -17,11 +17,12 @@ export default function SidebarNavItem({ to, label, icon: Icon }: SidebarNavItem
           isActive
             ? "bg-[hsl(var(--sidebar-hover))] text-foreground"
             : "text-muted-foreground hover:bg-[hsl(var(--sidebar-hover))] hover:text-foreground"
-        }`
+        } ${isCollapsed ? "justify-center px-2" : ""}`
       }
+      title={isCollapsed ? label : undefined}
     >
       <Icon className="w-[18px] h-[18px] shrink-0" strokeWidth={2} />
-      <span className="truncate">{label}</span>
+      {!isCollapsed && <span className="truncate">{label}</span>}
     </NavLink>
   )
 }

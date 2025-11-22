@@ -19,6 +19,7 @@ import KnowledgeBase from "@/features/dashboard/pages/KnowledgeBase"
 import KnowledgeBaseDetails from "@/features/dashboard/pages/KnowledgeBaseDetails"
 import Campaigns from "@/features/dashboard/pages/Campaigns"
 import Tools from "@/features/dashboard/pages/Tools"
+import Settings from "@/features/settings/pages/Settings"
 
 const Protected: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const user = useAppSelector(selectEffectiveUser)
@@ -77,6 +78,7 @@ export default function AppRoutes() {
           <Route path="knowledge-base" element={<KnowledgeBase />} />
           <Route path="campaigns" element={<Campaigns />} />
           <Route path="tools" element={<Tools />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
         <Route
           path="/dashboard/knowledge-base/:documentId"

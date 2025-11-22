@@ -1,7 +1,8 @@
 import { useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchBatchCallDetails, clearSelectedCampaign } from "@/store/campaignsSlice"
-import { X, Loader2, CheckCircle2, Clock, Phone, Users } from "lucide-react"
+import { X, CheckCircle2, Clock, Phone, Users } from "lucide-react"
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 
 interface CampaignDetailsModalProps {
   isOpen: boolean
@@ -29,8 +30,8 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaignId }: Ca
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-            <div className="p-1.5 bg-[#65a30d]/10 rounded-lg">
-              <div className="w-4 h-4 border-2 border-[#65a30d] rounded-full" />
+            <div className="p-1.5 bg-[#3b82f6]/10 rounded-lg">
+              <div className="w-4 h-4 border-2 border-[#3b82f6] rounded-full" />
             </div>
             <h2 className="font-semibold text-lg">
               {selectedCampaign ? selectedCampaign.call_name : "Campaign Details"}
@@ -45,7 +46,7 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaignId }: Ca
         <div className="p-6 overflow-y-auto">
           {loading || !selectedCampaign ? (
             <div className="flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-[#65a30d]" />
+              <LoadingSpinner size="md" />
             </div>
           ) : (
             <div className="space-y-8">

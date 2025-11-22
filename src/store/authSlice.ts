@@ -13,6 +13,19 @@ import {
 import { doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
 import { auth, db } from "@/lib/firebase";
+import { http } from "@/lib/http";
+
+export const fetchUserDetails = createAsyncThunk<UserData, void, { rejectValue: string }>(
+  "auth/fetchUserDetails",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await http.get("/users/me");
+      return data;
+    } catch (error) {
+      return rejectWithValue(describeFirebaseError(error, "Failed to fetch user details"));
+    }
+  }
+);
 
 type RequestStatus = "pending" | "accepted" | "rejected";
 type RequestMap = Record<string, { status: RequestStatus; email: string }>;
@@ -283,12 +296,13 @@ export const signIn = createAsyncThunk<User, { email: string; password: string }
   }
 );
 
-export const signUp = createAsyncThunk<User, { email: string; password: string }, { rejectValue: string }>(
+export const signUp = createAsyncThunk<User, { email: string; password: string; name: string }, { rejectValue: string }>(
   "auth/signUp",
-  async ({ email, password }, { rejectWithValue }) => {
+  async ({ email, password, name }, { rejectWithValue }) => {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       const payload = createDefaultUserData(cred.user);
+      payload.name = name; // Set the name provided during signup
       await setDoc(doc(db, "users", cred.user.uid), payload);
       return cred.user;
     } catch (error) {
@@ -539,6 +553,19 @@ const authSlice = createSlice({
       .addCase(impersonateUser.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as string) ?? action.error.message ?? "Failed to impersonate user";
+      })
+      .addCase(fetchUserDetails.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserDetails.fulfilled, (state, action) => {
+        state.loading = false;
+        state.userData = normalizeUserData(action.payload);
+        state.error = null;
+      })
+      .addCase(fetchUserDetails.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as string) ?? action.error.message ?? "Failed to fetch user details";
       });
   },
 });

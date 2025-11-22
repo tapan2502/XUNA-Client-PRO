@@ -12,14 +12,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    const root = document.documentElement;
-    const hadDark = root.classList.contains("dark");
-    root.classList.remove("dark");
-    return () => {
-      if (hadDark) root.classList.add("dark");
-    };
-  }, []);
+
 
   const onSubmit = () => dispatch(signIn({ email, password }));
 
@@ -98,7 +91,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="group w-full flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-95 active:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition"
+              className="group w-full flex items-center justify-center gap-2 rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-sm active:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition"
             >
               {loading ? (
                 <>

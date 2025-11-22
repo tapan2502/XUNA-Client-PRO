@@ -1,23 +1,23 @@
-import { configureStore } from "@reduxjs/toolkit"
-import authReducer from "./authSlice"
-import layoutReducer from "./layoutSlice"
-import agentsReducer from "./agentsSlice"
-import phoneNumbersReducer from "./phoneNumbersSlice"
-import callHistoryReducer from "./callHistorySlice"
-import settingsReducer from "./settingsSlice"
-import campaignsReducer from "./campaignsSlice"
+import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "./authSlice";
+import layoutReducer from "./layoutSlice";
+import phoneNumbersReducer from "./phoneNumbersSlice";
+import agentsReducer from "./agentsSlice";
+import callHistoryReducer from "./callHistorySlice";
+import campaignsReducer from "./campaignsSlice";
+import settingsReducer from "./settingsSlice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     layout: layoutReducer,
-    agents: agentsReducer,
     phoneNumbers: phoneNumbersReducer,
+    agents: agentsReducer,
     callHistory: callHistoryReducer,
-    settings: settingsReducer,
     campaigns: campaignsReducer,
+    settings: settingsReducer,
   },
-})
+});
 
-export type RootState = ReturnType<typeof store.getState>
-export type AppDispatch = typeof store.dispatch
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

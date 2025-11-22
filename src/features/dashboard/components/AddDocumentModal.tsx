@@ -52,8 +52,8 @@ export default function AddDocumentModal({ isOpen, onClose }: AddDocumentModalPr
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-            <div className="p-1.5 bg-[#65a30d]/10 rounded-lg">
-              <div className="w-4 h-4 border-2 border-[#65a30d] rounded-full" />
+            <div className="p-1.5 bg-brand-gradient rounded-lg">
+              <div className="w-4 h-4 border-2 border-white rounded-full" />
             </div>
             <h2 className="font-semibold text-lg">Add to Knowledge Base</h2>
           </div>
@@ -123,7 +123,7 @@ export default function AddDocumentModal({ isOpen, onClose }: AddDocumentModalPr
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="https://example.com/document"
-                  className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] transition-all text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 />
               </div>
             )}
@@ -141,7 +141,7 @@ export default function AddDocumentModal({ isOpen, onClose }: AddDocumentModalPr
           <button
             onClick={handleSubmit}
             disabled={isLoading || (activeTab === "file" && !file) || (activeTab === "url" && !url)}
-            className="px-4 py-2 text-sm font-medium text-white bg-[#65a30d] hover:bg-[#4d7c0f] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 text-sm font-medium text-white bg-brand-gradient rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isLoading && <Loader2 size={16} className="animate-spin" />}
             Add Document

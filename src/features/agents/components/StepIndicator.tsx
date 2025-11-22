@@ -42,7 +42,7 @@ export function StepIndicator({ steps, currentStep, onStepClick }: StepIndicator
             <div
               className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
                 isActive
-                  ? "bg-blue-600 text-white"
+                  ? "bg-brand-gradient text-white"
                   : isDone
                     ? "bg-green-500 text-white"
                     : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"

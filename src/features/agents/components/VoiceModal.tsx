@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { X, Play, Search, Plus, Loader2 } from "lucide-react"
 import { http } from "@/lib/http"
 import { cn } from "@heroui/theme"
+import { ModernDropdown } from "@/components/ui/ModernDropdown"
 
 interface VoiceLabels {
   accent?: string
@@ -235,7 +236,7 @@ export const VoiceModal = ({
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 z-50 bg-black/20 dark:bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -250,14 +251,14 @@ export const VoiceModal = ({
           >
             {/* Modal box */}
             <motion.div
-              className="w-full max-w-2xl rounded-xl bg-card shadow-xl border border-border"
+              className="w-full max-w-2xl rounded-xl bg-white dark:bg-gray-900 shadow-xl border border-gray-200 dark:border-gray-800"
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="border-b border-border">
+              <div className="border-b border-gray-200 dark:border-gray-800">
                 <div className="flex items-center justify-between p-4">
                   <h2 className="text-lg font-semibold">
                     {activeTab === "my-voices" ? "Select Voice" : "Get Custom Voice"}
@@ -271,7 +272,7 @@ export const VoiceModal = ({
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-t border-border">
+                <div className="flex border-t border-gray-200 dark:border-gray-800">
                   <button
                     onClick={() => setActiveTab("my-voices")}
                     className={cn(
@@ -297,56 +298,54 @@ export const VoiceModal = ({
                 </div>
               </div>
               {/* Filters Row */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200 dark:border-gray-800">
                 {/* Gender Filter */}
-                <div className="relative">
-                  <select
+                <div className="w-32">
+                  <ModernDropdown
                     value={activeTab === "my-voices" ? genderFilter : customGenderFilter}
-                    onChange={(e) => {
+                    options={[
+                      { value: "", label: "All Genders" },
+                      ...(activeTab === "my-voices" 
+                        ? [
+                            { value: "male", label: "Male" },
+                            { value: "female", label: "Female" },
+                            { value: "non-binary", label: "Non-binary" }
+                          ]
+                        : customVoicesGenders.map(g => ({ value: g, label: g.charAt(0).toUpperCase() + g.slice(1) }))
+                      )
+                    ]}
+                    onChange={(value) => {
                       if (activeTab === "my-voices") {
-                        setGenderFilter(e.target.value)
+                        setGenderFilter(value)
                       } else {
-                        setCustomGenderFilter(e.target.value)
+                        setCustomGenderFilter(value)
                       }
                     }}
-                    className="text-sm border border-border rounded-md px-3 py-1.5 bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    <option value="">Gender</option>
-                    {activeTab === "my-voices" ? (
-                      <>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="non-binary">Non-binary</option>
-                      </>
-                    ) : (
-                      customVoicesGenders.map((gender) => (
-                        <option key={gender} value={gender}>
-                          {gender.charAt(0).toUpperCase() + gender.slice(1)}
-                        </option>
-                      ))
-                    )}
-                  </select>
+                    placeholder="Gender"
+                    className="w-full"
+                  />
                 </div>
                 {/* Dynamic Accent Filter */}
-                <div className="relative">
-                  <select
+                <div className="w-40">
+                  <ModernDropdown
                     value={activeTab === "my-voices" ? accentFilter : customAccentFilter}
-                    onChange={(e) => {
+                    options={[
+                      { value: "", label: "All Accents" },
+                      ...(activeTab === "my-voices" ? myVoicesAccents : customVoicesAccents).map(accent => ({
+                        value: accent,
+                        label: accent.charAt(0).toUpperCase() + accent.slice(1)
+                      }))
+                    ]}
+                    onChange={(value) => {
                       if (activeTab === "my-voices") {
-                        setAccentFilter(e.target.value)
+                        setAccentFilter(value)
                       } else {
-                        setCustomAccentFilter(e.target.value)
+                        setCustomAccentFilter(value)
                       }
                     }}
-                    className="text-sm border border-border rounded-md px-3 py-1.5 bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    <option value="">Accent</option>
-                    {(activeTab === "my-voices" ? myVoicesAccents : customVoicesAccents).map((accent) => (
-                      <option key={accent} value={accent}>
-                        {accent.charAt(0).toUpperCase() + accent.slice(1)}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="Accent"
+                    className="w-full"
+                  />
                 </div>
                 {/* Search */}
                 <div className="flex items-center ml-auto border border-border rounded-md px-2 py-1.5 bg-background">
@@ -447,7 +446,7 @@ export const VoiceModal = ({
                 </table>
               </div>
               {/* Footer */}
-              <div className="flex justify-end gap-2 p-4 border-t border-border">
+              <div className="flex justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-800">
                 <button
                   onClick={onClose}
                   className="px-4 py-2 text-sm font-semibold text-foreground bg-muted rounded hover:bg-muted/80"

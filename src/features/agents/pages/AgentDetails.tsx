@@ -1,10 +1,8 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchAgentById, updateAgent, fetchVoices, fetchKnowledgeBase } from "@/store/agentsSlice"
-import { ArrowLeft, Save, X } from "lucide-react"
+import { Save, X, ArrowLeft } from "lucide-react"
 import { AgentDetailsHeader } from "../components/agent-details/AgentDetailsHeader"
 import { AgentConfigCards } from "../components/agent-details/AgentConfigCards"
 import { VoiceSettingsSection } from "../components/agent-details/VoiceSettingsSection"
@@ -17,7 +15,7 @@ import { PrivacySettingsSection } from "../components/agent-details/PrivacySetti
 import { ASRKeywordsSection } from "../components/agent-details/ASRKeywordsSection"
 import { ToolsSection } from "../components/agent-details/ToolSection"
 import CallTesting from "../components/CallTesting"
-import { FullscreenLoader } from "@/components/ui/FullscreenLoader"
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import { useSnackbar } from "@/components/ui/SnackbarProvider"
 
 export default function AgentDetails() {
@@ -182,7 +180,6 @@ export default function AgentDetails() {
   const dynamicVariables = editedAgent?.platform_settings?.data_collection || {}
   const isInitialLoading = loading && (!agent || !editedAgent)
   const shouldShowLoader = isInitialLoading || saving
-  const loaderLabel = saving ? "Saving your changes" : "Fetching agent details"
 
   if ((!agent || !editedAgent) && !loading) {
     return (
@@ -192,7 +189,7 @@ export default function AgentDetails() {
           <p className="text-muted-foreground mb-4">The agent you're looking for doesn't exist.</p>
           <button
             onClick={() => navigate("/dashboard")}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-gradient text-white rounded-lg"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
@@ -204,11 +201,12 @@ export default function AgentDetails() {
 
   return (
     <>
-      <FullscreenLoader show={shouldShowLoader} label={loaderLabel} />
+      {shouldShowLoader && <LoadingSpinner fullScreen />}
+      
       <div className="flex h-screen overflow-hidden bg-background">
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-5xl mx-auto p-6 space-y-6">
+          <div className="max-w-5xl mx-auto p-6 space-y-8">
             <AgentDetailsHeader agent={editedAgent} onBack={() => navigate("/dashboard")} />
 
             {(error || saveError) && (
@@ -217,48 +215,86 @@ export default function AgentDetails() {
               </div>
             )}
 
-            <AgentConfigCards agent={editedAgent} voices={voices} onChange={handleChange} />
-            <VoiceSettingsSection agent={editedAgent} onChange={handleChange} />
-            <ConversationSettingsSection agent={editedAgent} onChange={handleChange} />
-            <ASRKeywordsSection agent={editedAgent} onChange={handleChange} />
-            <PrivacySettingsSection agent={editedAgent} onChange={handleChange} />
-            <PromptSection agent={editedAgent} onChange={handleChange} />
-            <DataCollectionSection agent={editedAgent} onChange={handleChange} />
-            <ToolsSection agent={editedAgent} onChange={handleChange} />
-            <WebhookSection agent={editedAgent} onChange={handleChange} />
-            <KnowledgeBaseSection agent={editedAgent} knowledgeBase={knowledgeBase} onChange={handleChange} />
+            <div className="space-y-8 pb-20">
+              <section className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 rounded-full bg-brand-gradient" />
+                  <h2 className="text-lg font-semibold text-foreground/90">General Configuration</h2>
+                </div>
+                <AgentConfigCards agent={editedAgent} voices={voices} onChange={handleChange} />
+              </section>
 
-            <div className="h-20" />
-          </div>
+              <section className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 rounded-full bg-brand-gradient" />
+                  <h2 className="text-lg font-semibold text-foreground/90">Voice Settings</h2>
+                </div>
+                <VoiceSettingsSection agent={editedAgent} voices={voices} onChange={handleChange} />
+              </section>
 
-          {hasChanges && (
-            <div className="fixed bottom-6 right-[25rem] z-50">
-              <div className="flex items-center gap-3 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3 shadow-[0_18px_38px_hsl(var(--foreground)/0.16)] backdrop-blur-md">
-                <button
-                  onClick={handleCancel}
-                  className="inline-flex items-center gap-2 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--accent))] px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-[hsl(var(--accent)_/_0.7)]"
-                >
-                  <X className="w-4 h-4" />
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--primary))] px-4 py-2 text-sm font-semibold text-[hsl(var(--primary-foreground))] transition-opacity hover:opacity-90 disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4" />
-                  {saving ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
+              <section className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 rounded-full bg-brand-gradient" />
+                  <h2 className="text-lg font-semibold text-foreground/90">Conversation Flow</h2>
+                </div>
+                <ConversationSettingsSection agent={editedAgent} onChange={handleChange} />
+              </section>
+
+              <section className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 rounded-full bg-brand-gradient" />
+                  <h2 className="text-lg font-semibold text-foreground/90">Behavior & Knowledge</h2>
+                </div>
+                <div className="grid gap-6">
+                  <PromptSection agent={editedAgent} onChange={handleChange} />
+                  <ToolsSection agent={editedAgent} onChange={handleChange} />
+                  <KnowledgeBaseSection agent={editedAgent} knowledgeBase={knowledgeBase} onChange={handleChange} />
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 rounded-full bg-brand-gradient" />
+                  <h2 className="text-lg font-semibold text-foreground/90">Advanced Settings</h2>
+                </div>
+                <div className="grid gap-6">
+                  <PrivacySettingsSection agent={editedAgent} onChange={handleChange} />
+                  <WebhookSection agent={editedAgent} onChange={handleChange} />
+                  <ASRKeywordsSection agent={editedAgent} onChange={handleChange} />
+                  <DataCollectionSection agent={editedAgent} onChange={handleChange} />
+                </div>
+              </section>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Test Agent Panel */}
-        <div className="w-96 border-l border-border bg-background p-6">
+        <div className="w-96 border-l border-border bg-background p-6 shrink-0">
           <CallTesting agentId={agentId!} dynamicVariables={dynamicVariables} />
         </div>
       </div>
+
+      {hasChanges && (
+        <div className="fixed bottom-6 right-[26rem] z-50">
+          <div className="flex items-center gap-3 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3 shadow-[0_18px_38px_hsl(var(--foreground)/0.16)] backdrop-blur-md">
+            <button
+              onClick={handleCancel}
+              className="inline-flex items-center gap-2 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--accent))] px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-[hsl(var(--accent)_/_0.7)]"
+            >
+              <X className="w-4 h-4" />
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-gradient px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              <Save className="w-4 h-4" />
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }

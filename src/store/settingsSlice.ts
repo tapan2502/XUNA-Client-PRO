@@ -10,7 +10,7 @@ interface SettingsState {
 }
 
 const initialState: SettingsState = {
-  theme: "system",
+  theme: (localStorage.getItem("theme") as ThemeMode) || "system",
   primaryColor: "#6366f1",
   companyName: "",
 };

@@ -129,33 +129,7 @@ export default function MetricCard({
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        <Dropdown
-          classNames={{
-            content: "min-w-[120px]",
-          }}
-          placement="bottom-end"
-        >
-          <DropdownTrigger>
-            <Button
-              isIconOnly
-              className="absolute top-2 right-2 w-auto rounded-full"
-              size="sm"
-              variant="light"
-            >
-              <Icon height={16} icon="solar:menu-dots-bold" width={16} />
-            </Button>
-          </DropdownTrigger>
-          <DropdownMenu
-            itemClasses={{
-              title: "text-tiny",
-            }}
-            variant="flat"
-          >
-            <DropdownItem key="view-details">View Details</DropdownItem>
-            <DropdownItem key="export-data">Export Data</DropdownItem>
-            <DropdownItem key="set-alert">Set Alert</DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
+
       </section>
     </Card>
   );

@@ -9,20 +9,19 @@ import {
   Filter,
   ChevronDown,
   Phone,
-  Bot,
-  Copy,
-  Settings,
   Trash2,
   UserPlus,
   PhoneOutgoing,
   AlertCircle,
-  Loader2,
+  CheckCircle2,
 } from "lucide-react"
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import ImportTwilioModal from "../components/ImportTwilioModal"
 import ImportSIPModal from "../components/ImportSIPModal"
 import AssignAgentModal from "../components/AssignAgentModal"
 import ConfirmationModal from "@/components/ConfirmationModal"
 import { useSnackbar } from "@/components/ui/SnackbarProvider"
+import { FilterDropdown } from "@/components/ui/FilterDropdown"
 
 type StatusFilter = "all" | "assigned" | "unassigned"
 
@@ -37,7 +36,6 @@ export default function PhoneNumbers() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState<string>("")
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>(undefined)
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -81,7 +79,7 @@ export default function PhoneNumbers() {
         variant: "success",
       })
       // No need to fetch again if slice updates state, but fetching ensures sync
-      // dispatch(fetchPhoneNumbers()) 
+      // dispatch(fetchPhoneNumbers())
       setIsDeleteModalOpen(false)
     } catch (error) {
       console.error("Failed to delete phone number:", error)
@@ -92,22 +90,6 @@ export default function PhoneNumbers() {
       })
     } finally {
       setIsDeleting(false)
-    }
-  }
-
-  const handleStatusFilterChange = (filter: StatusFilter) => {
-    setStatusFilter(filter)
-    setIsFilterOpen(false)
-  }
-
-  const getFilterLabel = () => {
-    switch (statusFilter) {
-      case "assigned":
-        return "Assigned"
-      case "unassigned":
-        return "Unassigned"
-      default:
-        return "All Status"
     }
   }
 
@@ -122,14 +104,14 @@ export default function PhoneNumbers() {
         <div className="flex gap-2">
           <button
             onClick={() => setIsTwilioModalOpen(true)}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-3 py-1.5 rounded-lg transition-colors text-sm shadow-sm"
+            className="flex items-center gap-2 bg-brand-gradient text-white font-medium px-3 py-1.5 rounded-lg transition-colors text-sm shadow-sm"
           >
             <Plus size={16} />
             Import from Twilio
           </button>
           <button
             onClick={() => setIsSIPModalOpen(true)}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-3 py-1.5 rounded-lg transition-colors text-sm shadow-sm"
+            className="flex items-center gap-2 bg-brand-gradient text-white font-medium px-3 py-1.5 rounded-lg transition-colors text-sm shadow-sm"
           >
             <Plus size={16} />
             Import from SIP
@@ -150,57 +132,24 @@ export default function PhoneNumbers() {
           />
         </div>
         <div className="relative">
-          <button
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="flex items-center gap-2 bg-background border border-border text-foreground px-3 py-1.5 rounded-md hover:bg-accent transition-colors min-w-[130px] justify-between text-sm"
-          >
-            <div className="flex items-center gap-2">
-              <Filter size={14} />
-              <span className="font-medium">{getFilterLabel()}</span>
-            </div>
-            <ChevronDown size={14} className="text-muted-foreground" />
-          </button>
-
-          {isFilterOpen && (
-            <>
-              <div className="fixed inset-0 z-10" onClick={() => setIsFilterOpen(false)} />
-              <div className="absolute right-0 mt-1 w-full bg-card border-2 border-border rounded-lg shadow-xl z-20 py-1">
-                <button
-                  onClick={() => handleStatusFilterChange("all")}
-                  className={`w-full text-left px-3 py-2 text-sm font-medium transition-colors ${
-                    statusFilter === "all" ? "bg-primary/10 text-primary" : "text-foreground hover:bg-accent"
-                  }`}
-                >
-                  All Status
-                </button>
-                <button
-                  onClick={() => handleStatusFilterChange("assigned")}
-                  className={`w-full text-left px-3 py-2 text-sm font-medium transition-colors ${
-                    statusFilter === "assigned" ? "bg-primary/10 text-primary" : "text-foreground hover:bg-accent"
-                  }`}
-                >
-                  Assigned
-                </button>
-                <button
-                  onClick={() => handleStatusFilterChange("unassigned")}
-                  className={`w-full text-left px-3 py-2 text-sm font-medium transition-colors ${
-                    statusFilter === "unassigned" ? "bg-primary/10 text-primary" : "text-foreground hover:bg-accent"
-                  }`}
-                >
-                  Unassigned
-                </button>
-              </div>
-            </>
-          )}
+          <FilterDropdown
+            value={statusFilter}
+            onChange={(val) => setStatusFilter(val as StatusFilter)}
+            options={[
+              { label: "All Status", value: "all" },
+              { label: "Assigned", value: "assigned" },
+              { label: "Unassigned", value: "unassigned" },
+            ]}
+            icon={<Filter size={14} />}
+            placeholder="All Status"
+          />
         </div>
       </div>
 
       {/* Phone Numbers List */}
       <div className="flex flex-col gap-3">
         {loading ? (
-          <div className="flex justify-center py-10">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
-          </div>
+          <LoadingSpinner fullScreen />
         ) : filteredPhoneNumbers.length === 0 ? (
           <div className="text-center py-10 text-muted-foreground text-sm">No phone numbers found.</div>
         ) : (
@@ -227,17 +176,6 @@ export default function PhoneNumbers() {
                         {pn.provider || "Twilio"}
                       </span>
                     </div>
-                    {pn.assigned_agent ? (
-                      <div className="flex items-center gap-1.5 mt-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/10 px-2 py-0.5 rounded-md w-fit border border-emerald-100 dark:border-emerald-900/20">
-                        <Bot size={12} />
-                        <span className="text-[10px] font-medium truncate max-w-[200px]">
-                          {pn.assigned_agent.agent_name}
-                        </span>
-                        <button className="p-0.5 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded transition-colors">
-                          <Copy size={10} />
-                        </button>
-                      </div>
-                    ) : null}
                   </div>
                 </div>
 
@@ -260,10 +198,6 @@ export default function PhoneNumbers() {
                   )}
 
                   <div className="flex items-center gap-2">
-                    <button className="p-1.5 text-muted-foreground hover:bg-accent rounded-md transition-colors">
-                      <Settings size={18} />
-                    </button>
-
                     {pn.assigned_agent ? (
                       <>
                         <button
@@ -273,13 +207,13 @@ export default function PhoneNumbers() {
                           <UserPlus size={14} />
                           Change Agent
                         </button>
-                        <button className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 font-medium px-3 py-1.5 rounded-lg transition-colors text-xs">
+                        <button className="flex items-center gap-1.5 bg-white border-emerald-200 hover:bg-gray-50 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-900/30 dark:hover:bg-emerald-900/30 dark:text-emerald-400 border font-medium px-3 py-1.5 rounded-lg transition-colors text-xs">
                           <PhoneOutgoing size={14} />
                           Outbound Call
                         </button>
-                        <button 
+                        <button
                           onClick={() => confirmDelete(pn.phone_number_id)}
-                          className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30 font-medium px-3 py-1.5 rounded-lg transition-colors text-xs"
+                          className="flex items-center gap-1.5 bg-white border-red-200 hover:bg-gray-50 text-red-700 dark:bg-red-900/20 dark:border-red-900/30 dark:hover:bg-red-900/30 dark:text-red-400 border font-medium px-3 py-1.5 rounded-lg transition-colors text-xs"
                         >
                           <Trash2 size={14} />
                           Delete
@@ -289,14 +223,14 @@ export default function PhoneNumbers() {
                       <>
                         <button
                           onClick={() => handleAssignAgent(pn.phone_number_id)}
-                          className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-3 py-1.5 rounded-lg transition-colors text-xs shadow-sm"
+                          className="flex items-center gap-1.5 bg-brand-gradient text-white font-medium px-3 py-1.5 rounded-lg transition-colors text-xs shadow-sm"
                         >
                           <UserPlus size={14} />
                           Assign Agent
                         </button>
-                        <button 
+                        <button
                           onClick={() => confirmDelete(pn.phone_number_id)}
-                          className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30 font-medium px-3 py-1.5 rounded-lg transition-colors text-xs"
+                          className="flex items-center gap-1.5 bg-white border-red-200 hover:bg-gray-50 text-red-700 dark:bg-red-900/20 dark:border-red-900/30 dark:hover:bg-red-900/30 dark:text-red-400 border font-medium px-3 py-1.5 rounded-lg transition-colors text-xs"
                         >
                           <Trash2 size={14} />
                           Delete

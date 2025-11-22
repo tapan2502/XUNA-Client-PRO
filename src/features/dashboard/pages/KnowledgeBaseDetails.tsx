@@ -2,7 +2,8 @@ import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useAppDispatch } from "@/app/hooks"
 import { fetchKnowledgeBaseDocumentById } from "@/store/agentsSlice"
-import { ArrowLeft, FileText, ExternalLink, Code, Bot, Loader2 } from "lucide-react"
+import { ArrowLeft, FileText, ExternalLink, Code, Bot } from "lucide-react"
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 
 export default function KnowledgeBaseDetails() {
   const { documentId } = useParams()
@@ -25,11 +26,7 @@ export default function KnowledgeBaseDetails() {
   }, [documentId, dispatch])
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="w-8 h-8 animate-spin text-[#65a30d]" />
-      </div>
-    )
+    return <LoadingSpinner fullScreen />
   }
 
   if (!document) {
@@ -54,8 +51,8 @@ export default function KnowledgeBaseDetails() {
           <div className="bg-card border border-border rounded-xl p-6 flex items-center gap-4 shadow-sm">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
               document.type === 'url' 
-                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' 
-                : 'bg-[#ecfccb] text-[#65a30d] dark:bg-[#365314] dark:text-[#ecfccb]'
+                ? 'bg-primary/10 text-primary' 
+                : 'bg-primary/10 text-primary'
             }`}>
               {document.type === 'url' ? <ExternalLink size={24} /> : <FileText size={24} />}
             </div>
@@ -104,7 +101,7 @@ export default function KnowledgeBaseDetails() {
           <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
             <div className="p-4 border-b border-border bg-muted/30 flex items-center justify-between">
               <h3 className="font-medium text-sm">Connected Agents</h3>
-              <span className="px-2 py-0.5 bg-[#65a30d]/10 text-[#65a30d] text-[10px] font-bold rounded uppercase">
+              <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded uppercase">
                 0 Total
               </span>
             </div>

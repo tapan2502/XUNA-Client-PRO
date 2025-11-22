@@ -1,11 +1,13 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Search, Filter, SortAsc, Columns, ChevronLeft, ChevronRight, MoreVertical, Copy } from "lucide-react"
+import { Search, Filter, ChevronLeft, ChevronRight, MoreVertical, Copy } from "lucide-react"
 import { CreateAgentModal } from "@/features/agents/components/CreateAgentModal"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchAgents } from "@/store/agentsSlice"
 import { useNavigate } from "react-router-dom"
+import { FilterDropdown } from "@/components/ui/FilterDropdown"
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 
 const getRandomPhone = () =>
   `+1 (${Math.floor(Math.random() * 900) + 100}) ${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`
@@ -40,6 +42,7 @@ const getRandomModelUser = () => {
 export default function ClientsTable() {
   const [page, setPage] = useState(1)
   const [searchValue, setSearchValue] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
   const [isCreateAgentOpen, setIsCreateAgentOpen] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const rowsPerPage = 10
@@ -76,15 +79,23 @@ export default function ClientsTable() {
   }, [agents])
 
   const filteredItems = useMemo(() => {
-    if (!searchValue) return enrichedAgents
+    let filtered = enrichedAgents
 
-    return enrichedAgents.filter(
-      (agent) =>
-        agent.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-        agent.assistantId.toLowerCase().includes(searchValue.toLowerCase()) ||
-        agent.modelUser.toLowerCase().includes(searchValue.toLowerCase()),
-    )
-  }, [enrichedAgents, searchValue])
+    if (searchValue) {
+      filtered = filtered.filter(
+        (agent) =>
+          agent.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+          agent.assistantId.toLowerCase().includes(searchValue.toLowerCase()) ||
+          agent.modelUser.toLowerCase().includes(searchValue.toLowerCase()),
+      )
+    }
+
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((agent) => agent.status === statusFilter)
+    }
+
+    return filtered
+  }, [enrichedAgents, searchValue, statusFilter])
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage) || 1
 
@@ -96,7 +107,7 @@ export default function ClientsTable() {
 
   useEffect(() => {
     setPage(1)
-  }, [searchValue])
+  }, [searchValue, statusFilter])
 
   const handleViewDetails = (agentId: string) => {
     navigate(`/dashboard/agents/${agentId}`)
@@ -129,7 +140,10 @@ export default function ClientsTable() {
   }
 
   return (
-    <div className="flex flex-col gap-4 h-full p-4 mx-auto w-full text-foreground">
+    <>
+      {loading && <LoadingSpinner fullScreen />}
+      
+      <div className="flex flex-col gap-4 h-full p-4 mx-auto w-full text-foreground">
       {/* Header Actions */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="relative w-full md:max-w-xs">
@@ -142,19 +156,19 @@ export default function ClientsTable() {
             className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all text-sm text-foreground placeholder:text-muted-foreground shadow-sm"
           />
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
-          <button className="flex items-center gap-2 px-3 py-2 bg-background border border-border rounded-lg hover:bg-accent text-foreground text-sm font-medium transition-colors shadow-sm">
-            <Filter size={14} />
-            <span>Filter</span>
-          </button>
-          <button className="flex items-center gap-2 px-3 py-2 bg-background border border-border rounded-lg hover:bg-accent text-foreground text-sm font-medium transition-colors shadow-sm">
-            <SortAsc size={14} />
-            <span>Sort</span>
-          </button>
-          <button className="flex items-center gap-2 px-3 py-2 bg-background border border-border rounded-lg hover:bg-accent text-foreground text-sm font-medium transition-colors shadow-sm">
-            <Columns size={14} />
-            <span>Columns</span>
-          </button>
+        <div className="flex gap-2 w-full md:w-auto items-center">
+          <FilterDropdown
+            value={statusFilter}
+            onChange={setStatusFilter}
+            options={[
+              { label: "All Status", value: "all" },
+              { label: "Active", value: "active" },
+              { label: "Paused", value: "paused" },
+              { label: "Inactive", value: "inactive" },
+            ]}
+            icon={<Filter size={14} />}
+            placeholder="Filter by Status"
+          />
         </div>
       </div>
 
@@ -198,15 +212,9 @@ export default function ClientsTable() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {loading ? (
+              {items.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="p-8 text-center text-muted-foreground text-sm">
-                    Loading agents...
-                  </td>
-                </tr>
-              ) : items.length === 0 ? (
-                <tr>
-                  <td colSpan={11} className="p-8 text-center text-muted-foreground text-sm">
+                  <td colSpan={10} className="p-8 text-center text-muted-foreground text-sm">
                     {searchValue ? "No results found" : "No agents found"}
                   </td>
                 </tr>
@@ -361,6 +369,7 @@ export default function ClientsTable() {
           dispatch(fetchAgents())
         }}
       />
-    </div>
+      </div>
+    </>
   )
 }

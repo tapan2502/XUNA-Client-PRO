@@ -48,8 +48,14 @@ export default function ImportTwilioModal({ isOpen, onClose }: ImportTwilioModal
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-gray-900/20 dark:bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white dark:bg-gray-900 rounded-xl w-full max-w-xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-h-[90vh]">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/20 dark:bg-black/50 backdrop-blur-sm" 
+        onClick={onClose} 
+      />
+      
+      {/* Modal Container - NOW USING TAILWIND CLASSES! */}
+      <div className="relative w-full max-w-xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2">
@@ -65,7 +71,7 @@ export default function ImportTwilioModal({ isOpen, onClose }: ImportTwilioModal
         </div>
 
         {/* Body */}
-        <div className="p-5 overflow-y-auto">
+        <div className="p-5 overflow-y-auto bg-white dark:bg-gray-900">
           <div className="flex flex-col gap-5">
             {/* Info Box */}
             <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-lg p-3 flex gap-3">
@@ -111,13 +117,13 @@ export default function ImportTwilioModal({ isOpen, onClose }: ImportTwilioModal
 
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-popover-foreground">Phone Number</label>
+                <label className="text-xs font-medium text-gray-900 dark:text-gray-100">Phone Number</label>
                 <input
                   type="text"
                   placeholder="+1234567890"
                   value={formData.phone_number}
                   onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 />
                 <p className="text-[10px] text-gray-600 dark:text-gray-400">
                   Enter the phone number in E.164 format (e.g., +1234567890)
@@ -125,35 +131,35 @@ export default function ImportTwilioModal({ isOpen, onClose }: ImportTwilioModal
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-popover-foreground">Label</label>
+                <label className="text-xs font-medium text-gray-900 dark:text-gray-100">Label</label>
                 <input
                   type="text"
                   placeholder="Support Line"
                   value={formData.label}
                   onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 />
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-popover-foreground">Twilio Account SID</label>
+                <label className="text-xs font-medium text-gray-900 dark:text-gray-100">Twilio Account SID</label>
                 <input
                   type="text"
                   placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
                   value={formData.sid}
                   onChange={(e) => setFormData({ ...formData, sid: e.target.value })}
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 />
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-popover-foreground">Twilio Auth Token</label>
+                <label className="text-xs font-medium text-gray-900 dark:text-gray-100">Twilio Auth Token</label>
                 <input
                   type="password"
                   placeholder="Enter your Twilio auth token"
                   value={formData.token}
                   onChange={(e) => setFormData({ ...formData, token: e.target.value })}
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#65a30d]/20 focus:border-[#65a30d] transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 />
               </div>
             </div>
@@ -161,7 +167,7 @@ export default function ImportTwilioModal({ isOpen, onClose }: ImportTwilioModal
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex justify-end gap-2">
           <button
             onClick={onClose}
             className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 font-medium rounded-lg transition-colors text-xs"
@@ -171,7 +177,7 @@ export default function ImportTwilioModal({ isOpen, onClose }: ImportTwilioModal
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="flex items-center gap-2 px-3 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-1.5 bg-brand-gradient text-white font-medium rounded-lg transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading && <Loader2 size={14} className="animate-spin" />}
             Import Number

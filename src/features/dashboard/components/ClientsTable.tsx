@@ -12,15 +12,6 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 const getRandomPhone = () =>
   `+1 (${Math.floor(Math.random() * 900) + 100}) ${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`
 
-const getRandomServices = () => {
-  const allServices = ["Voice", "SMS", "Outbound", "Inbound"]
-  const numServices = Math.floor(Math.random() * 3) + 1
-  const shuffled = [...allServices].sort(() => 0.5 - Math.random())
-  const selected = shuffled.slice(0, numServices)
-  const hasMore = allServices.length - selected.length
-  return { services: selected, hasMore: hasMore > 0 ? `+${hasMore}` : null }
-}
-
 const getRandomLanguage = () => {
   const langs = [
     { name: "English", code: "us" },
@@ -58,7 +49,6 @@ export default function ClientsTable() {
   const enrichedAgents = useMemo(() => {
     return (agents || []).map((agent: any) => {
       const modelUser = getRandomModelUser()
-      const serviceData = getRandomServices()
 
       return {
         id: agent.agent_id,
@@ -66,11 +56,9 @@ export default function ClientsTable() {
         assistantId: agent.agent_id,
         model: "ChatGPT 4o",
         modelUser: modelUser,
-        status: ["active", "paused", "inactive", "needs work"][Math.floor(Math.random() * 4)],
+        status: ["active", "paused", "inactive"][Math.floor(Math.random() * 3)],
         billing: "stripe",
         phoneNumber: getRandomPhone(),
-        services: serviceData.services,
-        moreServices: serviceData.hasMore,
         language: getRandomLanguage(),
         usage: getRandomUsage(),
         usageMax: 6000,

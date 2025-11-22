@@ -185,9 +185,6 @@ export default function ClientsTable() {
                 <th className="p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider min-w-[160px]">
                   Phone Number
                 </th>
-                <th className="p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider min-w-[200px]">
-                  Services
-                </th>
                 <th className="p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider min-w-[140px]">
                   Language
                 </th>
@@ -252,23 +249,6 @@ export default function ClientsTable() {
                           src="https://flagcdn.com/us.svg"
                         />
                         {item.phoneNumber}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex gap-1.5 flex-wrap max-w-[200px]">
-                        {item.services.map((service: string) => (
-                          <span
-                            key={service}
-                            className="px-1.5 py-0.5 bg-muted text-muted-foreground text-[10px] font-medium rounded border border-border"
-                          >
-                            {service}
-                          </span>
-                        ))}
-                        {item.moreServices && (
-                          <span className="px-1.5 py-0.5 bg-muted text-muted-foreground text-[10px] font-medium rounded border border-border">
-                            {item.moreServices}
-                          </span>
-                        )}
                       </div>
                     </td>
                     <td className="p-4">

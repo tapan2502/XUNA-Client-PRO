@@ -58,7 +58,7 @@ export interface DataTableProps<T> {
   topBarAction?: React.ReactNode;
   emptyContent?: string;
   filterContent?: React.ReactNode;
-  selectedActionsContent?: React.ReactNode;
+  selectedActionsContent?: React.ReactElement | React.ReactElement[];
   onItemFilter?: (item: T) => boolean;
   sortableColumnKey?: string;
   onMemberInfoClick?: () => void;

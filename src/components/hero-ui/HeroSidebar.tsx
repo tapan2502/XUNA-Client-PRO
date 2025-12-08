@@ -128,7 +128,7 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
                 )}
               </div>
             ) : null}
-            {!isCompact && isNestType ? <Sidebar {...item} {...props} /> : null}
+            {!isCompact && isNestType && item.items ? <Sidebar items={item.items} {...props} /> : null}
           </ListboxItem>
         );
       },

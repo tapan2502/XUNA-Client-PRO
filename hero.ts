@@ -1,8 +1,8 @@
-// hero.ts — Tailwind v4 CSS-first “config”
-import type { Config } from "tailwindcss";
+// hero.ts - HeroUI Plugin Configuration for Tailwind v4
+// This file exports the HeroUI plugin that Tailwind CSS will load
+
 import { heroui } from "@heroui/theme";
 
-export default {
-  // you can keep this empty because we'll declare @source in CSS
-  plugins: [heroui()],
-} satisfies Config;
+// Export the heroui plugin
+// This is loaded via @config directive in index.css
+export default heroui();

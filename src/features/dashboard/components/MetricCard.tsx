@@ -1,15 +1,6 @@
 
 import React from "react";
-import {
-  Button,
-  Card,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-  cn,
-  Chip,
-} from "@heroui/react";
+import { Card, Chip, cn } from "@heroui/react";
 import { Area, AreaChart, ResponsiveContainer, YAxis } from "recharts";
 import { Icon } from "@iconify/react";
 
@@ -17,7 +8,7 @@ interface MetricCardProps {
   title: string;
   value: string | number;
   change: number;
-  chartColor: string;
+  chartColor: "success" | "warning" | "danger"; // Restrict to specific themes
   data: number[];
 }
 
@@ -25,111 +16,88 @@ export default function MetricCard({
   title,
   value,
   change,
+  chartColor,
   data,
 }: MetricCardProps) {
   // Map simple number array to object array for Recharts
   const chartData = data.map((val) => ({ value: val }));
 
-  // Determine color based on change value
-  const color =
-    change > 0 ? "success" : change < 0 ? "danger" : "warning";
-
+  // Color mapping matching the screenshots
   const colorMap = {
-    success: "#17c964",
-    danger: "#f31260",
-    warning: "#f5a524",
+    success: {
+      hex: "#17c964", // Green
+      bg: "bg-success-50",
+      text: "text-success-600",
+    },
+    warning: {
+      hex: "#f5a524", // Orange
+      bg: "bg-warning-50",
+      text: "text-warning-600",
+    },
+    danger: {
+      hex: "#f31260", // Pink/Red
+      bg: "bg-danger-50",
+      text: "text-danger-600",
+    },
   };
 
-  // Sanitize title for ID usage
+  const currentTheme = colorMap[chartColor];
   const gradientId = `colorUv-${title.replace(/\s+/g, "")}`;
 
   return (
-    <Card className="dark:border-default-100 border border-transparent">
-      <section className="flex flex-col flex-nowrap">
-        <div className="flex flex-col justify-between gap-y-2 px-4 pt-4">
-          <div className="flex flex-col gap-y-2">
-            <div className="flex flex-col gap-y-0">
-              <dt className="text-default-600 text-sm font-medium">{title}</dt>
-            </div>
-            <div className="flex items-baseline gap-x-2">
-              <dd className="text-default-700 text-xl font-semibold">
-                {value}
-              </dd>
-              <Chip
-                classNames={{
-                  content: "font-medium",
-                }}
-                color={color}
-                radius="sm"
-                size="sm"
-                startContent={
-                  color === "success" ? (
-                    <Icon
-                      height={16}
-                      icon={"solar:arrow-right-up-linear"}
-                      width={16}
-                    />
-                  ) : color === "danger" ? (
-                    <Icon
-                      height={16}
-                      icon={"solar:arrow-right-down-linear"}
-                      width={16}
-                    />
-                  ) : (
-                    <Icon
-                      height={16}
-                      icon={"solar:arrow-right-linear"}
-                      width={16}
-                    />
-                  )
-                }
-                variant="flat"
-              >
-                <span>{Math.abs(change)}%</span>
-              </Chip>
-            </div>
+    <Card className="border border-transparent dark:border-default-100 shadow-sm">
+      <section className="flex flex-col flex-nowrap h-full justify-between">
+        {/* Header Section */}
+        <div className="flex justify-between items-start px-4 pt-4">
+          <div className="flex flex-col gap-y-1">
+            <dt className="text-default-500 text-sm font-medium">{title}</dt>
+            <dd className="text-3xl font-bold text-default-900">{value}</dd>
           </div>
+          
+          <Chip
+            classNames={{
+              base: cn("h-7 px-2", currentTheme.bg),
+              content: cn("font-medium text-xs", currentTheme.text),
+            }}
+            radius="sm"
+            variant="flat"
+            startContent={
+              <Icon
+                className={currentTheme.text}
+                icon={change >= 0 ? "solar:arrow-right-up-linear" : "solar:arrow-right-down-linear"}
+                width={16}
+              />
+            }
+          >
+            {Math.abs(change).toFixed(1)}%
+          </Chip>
         </div>
-        <div className="min-h-24 w-full">
-          <ResponsiveContainer className="[&_.recharts-surface]:outline-hidden">
+
+        {/* Chart Section */}
+        <div className="h-24 w-full mt-4">
+          <ResponsiveContainer width="100%" height="100%" className="[&_.recharts-surface]:outline-hidden">
             <AreaChart
-              accessibilityLayer
-              className="translate-y-1 scale-105"
               data={chartData}
+              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
             >
               <defs>
-                <linearGradient
-                  id={gradientId}
-                  x1="0"
-                  x2="0"
-                  y1="0"
-                  y2="1"
-                >
-                  <stop
-                    offset="10%"
-                    stopColor={colorMap[color]}
-                    stopOpacity={0.3}
-                  />
-                  <stop
-                    offset="100%"
-                    stopColor={colorMap[color]}
-                    stopOpacity={0.1}
-                  />
+                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={currentTheme.hex} stopOpacity={0.2} />
+                  <stop offset="95%" stopColor={currentTheme.hex} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <YAxis
-                domain={[Math.min(...chartData.map((d) => d.value)), "auto"]}
-                hide={true}
-              />
+              <YAxis domain={["dataMin", "dataMax"]} hide={true} />
               <Area
+                type="monotone"
                 dataKey="value"
+                stroke={currentTheme.hex}
+                strokeWidth={2}
+                fillOpacity={1}
                 fill={`url(#${gradientId})`}
-                stroke={colorMap[color]}
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
-
       </section>
     </Card>
   );

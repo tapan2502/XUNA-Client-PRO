@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchAgents } from "@/store/agentsSlice"
 import { fetchConversations } from "@/store/callHistorySlice"
-import MetricCard from "../components/MetricCard"
+import KpiStatsCard from "@/components/hero-ui/KpiStatsCard"
 import ClientsTable from "../components/ClientsTable"
 
 export default function DashboardHome() {
@@ -28,9 +28,27 @@ export default function DashboardHome() {
     <div className="flex flex-col gap-6 p-6 h-full">
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 shrink-0">
-        <MetricCard title="Agents" value={totalAgents.toString()} change={3.3} chartColor="#10b981" data={agentsData} />
-        <MetricCard title="Total Calls" value={totalCalls.toLocaleString()} change={0.0} chartColor="#f59e0b" data={callsData} />
-        <MetricCard title="Total SMS" value={totalSMS.toLocaleString()} change={-3.3} chartColor="#ef4444" data={smsData} />
+        <KpiStatsCard
+          title="Agents"
+          value={totalAgents.toString()}
+          change="3.3%"
+          color="success"
+          data={agentsData.map((v) => ({ value: v }))}
+        />
+        <KpiStatsCard
+          title="Total Calls"
+          value={totalCalls.toLocaleString()}
+          change="0.0%"
+          color="warning"
+          data={callsData.map((v) => ({ value: v }))}
+        />
+        <KpiStatsCard
+          title="Total SMS"
+          value={totalSMS.toLocaleString()}
+          change="-3.3%"
+          color="danger"
+          data={smsData.map((v) => ({ value: v }))}
+        />
       </div>
 
       <div className="flex-1 min-h-0">

@@ -1,6 +1,22 @@
+/* 
+ * Tailwind CSS v4 Import
+ * Official Hero UI configuration for Tailwind v4
+ * Reference: https://www.heroui.com/docs/guide/tailwind-v4
+ */
 @import "tailwindcss";
 
-/* TAILWIND V4 DARK MODE CONFIGURATION - THIS IS REQUIRED! */
+/* 
+ * Load Tailwind Configuration
+ * This loads tailwind.config.js which includes the heroui() plugin
+ * The @config directive is Tailwind v4's way to explicitly load config files
+ */
+@config "../tailwind.config.js";
+
+/* 
+ * Dark Mode Variant
+ * Tailwind v4 syntax for dark mode support
+ * Applies to elements with .dark class or descendants of .dark elements
+ */
 @variant dark (&:where(.dark, .dark *));
 
 /* …your variables and other CSS (what you pasted) … */
@@ -34,6 +50,15 @@
     --sidebar-bg: 0 0% 98%;
     --sidebar-icon-nav-bg: 0 0% 96%;
     --sidebar-hover: 214.3 31.8% 91.4%;
+
+    /* HeroUI Pro Variables */
+    --heroui-success: 146 79% 44%;
+    --heroui-warning: 37 91% 55%;
+    --heroui-danger: 339 90% 51%;
+    --heroui-primary: 212 100% 47%;
+    --heroui-secondary: 270 67% 47%;
+    --heroui-foreground: 210 40% 98%;
+    --heroui-default: 240 5% 26%;
   }
 
   .dark {

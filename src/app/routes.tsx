@@ -8,6 +8,7 @@ import Login from "@/features/auth/pages/Login"
 import Signup from "@/features/auth/pages/Signup"
 import DashboardShell from "@/features/layout/components/Dashboard"
 import DashboardHome from "@/features/dashboard/pages/DashboardHome"
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import { useAppDispatch, useAppSelector } from "./hooks"
 import { initAuthListener, selectAuthInitializing, selectEffectiveUser } from "@/store/authSlice"
 import Profile from "@/features/profile/pages/Profile"
@@ -39,7 +40,7 @@ export default function AppRoutes() {
   }, [dispatch])
 
   if (initializing) {
-    return null
+    return <LoadingSpinner fullScreen />
   }
 
   return (

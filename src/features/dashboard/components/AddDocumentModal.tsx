@@ -1,6 +1,6 @@
 import { useState, useRef } from "react"
 import { useAppDispatch } from "@/app/hooks"
-import { createKnowledgeBaseDocument } from "@/store/agentsSlice"
+import { createKnowledgeBaseDocument, fetchKnowledgeBase } from "@/store/agentsSlice"
 import { X, Upload, Link, FileText, Loader2 } from "lucide-react"
 
 interface AddDocumentModalProps {
@@ -35,6 +35,9 @@ export default function AddDocumentModal({ isOpen, onClose }: AddDocumentModalPr
         url: activeTab === "url" ? url : undefined,
         file: activeTab === "file" ? file! : undefined
       })).unwrap()
+      
+      // Refresh the list
+      dispatch(fetchKnowledgeBase())
       
       onClose()
       setFile(null)

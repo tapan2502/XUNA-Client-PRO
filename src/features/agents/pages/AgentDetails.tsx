@@ -5,7 +5,6 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchAgentById, updateAgent, fetchVoices, fetchKnowledgeBase } from "@/store/agentsSlice"
 import { Save, X, ArrowLeft } from "lucide-react"
-import { Button } from "@heroui/react"
 import { AgentDetailsHeader } from "../components/agent-details/AgentDetailsHeader"
 import { AgentConfigCards } from "../components/agent-details/AgentConfigCards"
 import { VoiceSettingsSection } from "../components/agent-details/VoiceSettingsSection"
@@ -36,8 +35,18 @@ export default function AgentDetails() {
   const [saveError, setSaveError] = useState("")
 
   useEffect(() => {
+    console.log("[v0] AgentDetails state:", {
+      agentId,
+      fetchingAgentDetails,
+      hasAgent: !!agent,
+      hasEditedAgent: !!editedAgent,
+      error,
+    })
+  }, [agentId, fetchingAgentDetails, agent, editedAgent, error])
+
+  useEffect(() => {
+    console.log("[v0] Fetching agent data for:", agentId)
     if (agentId) {
-      console.log("[v0] AgentDetails mounted, fetching data for agent:", agentId)
       dispatch(fetchAgentById(agentId))
       dispatch(fetchVoices())
       dispatch(fetchKnowledgeBase())
@@ -45,11 +54,12 @@ export default function AgentDetails() {
   }, [agentId, dispatch])
 
   useEffect(() => {
-    if (agent) {
-      console.log("[v0] Agent data loaded, setting editedAgent:", agent.agent_id)
+    console.log("[v0] Agent changed:", { hasAgent: !!agent, hasEditedAgent: !!editedAgent })
+    if (agent && !editedAgent) {
+      console.log("[v0] Initializing editedAgent from agent data")
       setEditedAgent(JSON.parse(JSON.stringify(agent)))
     }
-  }, [agent])
+  }, [agent, editedAgent])
 
   const handleChange = (path: string, value: any) => {
     setEditedAgent((prev: any) => {
@@ -183,7 +193,7 @@ export default function AgentDetails() {
   }
 
   if (fetchingAgentDetails && !agent) {
-    console.log("[v0] Loading agent details...")
+    console.log("[v0] Showing loading spinner - fetching agent")
     return (
       <div className="flex items-center justify-center h-full min-h-[400px]">
         <LoadingSpinner />
@@ -191,21 +201,24 @@ export default function AgentDetails() {
     )
   }
 
-  // Error state: API returned error and no agent data
   if (error && !agent) {
-    console.log("[v0] Error loading agent:", error)
+    console.log("[v0] Showing error state")
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 p-8 min-h-[400px]">
-        <p className="text-lg text-danger">{error}</p>
-        <Button onPress={() => navigate("/dashboard/assistants")} startContent={<ArrowLeft size={18} />}>
+        <p className="text-lg text-red-500">{error}</p>
+        <button
+          onClick={() => navigate("/dashboard/assistants")}
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <ArrowLeft size={18} />
           Back to Agents
-        </Button>
+        </button>
       </div>
     )
   }
 
   if (!editedAgent) {
-    console.log("[v0] Waiting for editedAgent to be initialized...")
+    console.log("[v0] Waiting for editedAgent initialization")
     return (
       <div className="flex items-center justify-center h-full min-h-[400px]">
         <LoadingSpinner />
@@ -213,53 +226,51 @@ export default function AgentDetails() {
     )
   }
 
-  console.log("[v0] Rendering AgentDetails for:", editedAgent.name)
+  console.log("[v0] Rendering agent details page")
 
   const dynamicVariables = editedAgent?.platform_settings?.data_collection || {}
 
   return (
     <>
-      <div className="flex overflow-hidden bg-background h-full">
+      <div className="flex bg-background">
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-5xl mx-auto p-6 space-y-8">
             <AgentDetailsHeader agent={editedAgent} onBack={() => navigate("/dashboard/assistants")} />
 
             {(error || saveError) && (
-              <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
-                {saveError || error}
-              </div>
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">{saveError || error}</div>
             )}
 
             <div className="space-y-8 pb-20">
               <section className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-6 w-1 rounded-full bg-primary" />
-                  <h2 className="text-lg font-semibold text-foreground/90">General Configuration</h2>
+                  <div className="h-6 w-1 rounded-full bg-blue-600" />
+                  <h2 className="text-lg font-semibold text-gray-900">General Configuration</h2>
                 </div>
                 <AgentConfigCards agent={editedAgent} voices={voices} onChange={handleChange} />
               </section>
 
               <section className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-6 w-1 rounded-full bg-primary" />
-                  <h2 className="text-lg font-semibold text-foreground/90">Voice Settings</h2>
+                  <div className="h-6 w-1 rounded-full bg-blue-600" />
+                  <h2 className="text-lg font-semibold text-gray-900">Voice Settings</h2>
                 </div>
                 <VoiceSettingsSection agent={editedAgent} voices={voices} onChange={handleChange} />
               </section>
 
               <section className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-6 w-1 rounded-full bg-primary" />
-                  <h2 className="text-lg font-semibold text-foreground/90">Conversation Flow</h2>
+                  <div className="h-6 w-1 rounded-full bg-blue-600" />
+                  <h2 className="text-lg font-semibold text-gray-900">Conversation Flow</h2>
                 </div>
                 <ConversationSettingsSection agent={editedAgent} onChange={handleChange} />
               </section>
 
               <section className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-6 w-1 rounded-full bg-primary" />
-                  <h2 className="text-lg font-semibold text-foreground/90">Behavior & Knowledge</h2>
+                  <div className="h-6 w-1 rounded-full bg-blue-600" />
+                  <h2 className="text-lg font-semibold text-gray-900">Behavior & Knowledge</h2>
                 </div>
                 <div className="grid gap-6">
                   <PromptSection agent={editedAgent} onChange={handleChange} />
@@ -270,8 +281,8 @@ export default function AgentDetails() {
 
               <section className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-6 w-1 rounded-full bg-primary" />
-                  <h2 className="text-lg font-semibold text-foreground/90">Advanced Settings</h2>
+                  <div className="h-6 w-1 rounded-full bg-blue-600" />
+                  <h2 className="text-lg font-semibold text-gray-900">Advanced Settings</h2>
                 </div>
                 <div className="grid gap-6">
                   <PrivacySettingsSection agent={editedAgent} onChange={handleChange} />
@@ -285,25 +296,29 @@ export default function AgentDetails() {
         </div>
 
         {/* Test Agent Panel */}
-        <div className="w-96 border-l border-border bg-background p-6 shrink-0 overflow-y-auto">
+        <div className="w-96 border-l border-gray-200 bg-white p-6 shrink-0 overflow-y-auto">
           <CallTesting agentId={agentId!} dynamicVariables={dynamicVariables} />
         </div>
       </div>
 
       {hasChanges && (
         <div className="fixed bottom-6 right-[26rem] z-50">
-          <div className="flex items-center gap-3 rounded-2xl border border-default-200 bg-content1 px-4 py-3 shadow-lg backdrop-blur-md">
-            <Button onClick={handleCancel} variant="bordered" startContent={<X className="w-4 h-4" />}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              isLoading={saving}
-              color="primary"
-              startContent={!saving && <Save className="w-4 h-4" />}
+          <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-lg backdrop-blur-md">
+            <button
+              onClick={handleCancel}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
+              <X className="w-4 h-4" />
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {!saving && <Save className="w-4 h-4" />}
               {saving ? "Saving..." : "Save Changes"}
-            </Button>
+            </button>
           </div>
         </div>
       )}

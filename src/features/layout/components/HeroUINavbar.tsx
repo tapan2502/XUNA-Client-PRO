@@ -111,6 +111,7 @@ export default function HeroUINavbar() {
             Dashboard
           </Link>
         </NavbarItem>
+        {/*
         <NavbarItem className="hidden sm:flex" isActive={isActive("/dashboard/deployments")}>
           <Link
             className={`text-sm font-medium transition-colors ${
@@ -159,6 +160,7 @@ export default function HeroUINavbar() {
             Team
           </Link>
         </NavbarItem>
+        */}
         <NavbarItem className="hidden sm:flex" isActive={isActive("/dashboard/settings")}>
           <Link
             className={`text-sm font-medium transition-colors ${
@@ -280,6 +282,7 @@ export default function HeroUINavbar() {
             Dashboard
           </Link>
         </NavbarMenuItem>
+        {/*
         <NavbarMenuItem isActive={isActive("/dashboard/deployments")}>
           <Link
             className="w-full"
@@ -319,6 +322,7 @@ export default function HeroUINavbar() {
             Team
           </Link>
         </NavbarMenuItem>
+        */}
         <NavbarMenuItem isActive={isActive("/dashboard/settings")}>
           <Link
             className="w-full"

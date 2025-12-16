@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { http } from "@/lib/http";
-import { Lock, Save } from "lucide-react";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { Lock, Save, Eye, EyeOff } from "lucide-react";
 import { useSnackbar } from "@/components/ui/SnackbarProvider";
+import { Button, Card, CardBody, CardHeader, Input, Spacer } from "@heroui/react";
 
 export default function Settings() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { showSnackbar } = useSnackbar();
 
@@ -57,68 +59,107 @@ export default function Settings() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-        <p className="text-muted-foreground text-sm mt-1">Manage your account security preferences</p>
+        <p className="text-default-500 text-sm mt-1">Manage your account security preferences</p>
       </div>
 
       {/* Content Area */}
-      <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-border bg-muted/30">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              <Lock size={20} />
-            </div>
-            <div>
-              <h2 className="font-semibold text-foreground">Change Password</h2>
-              <p className="text-sm text-muted-foreground">Ensure your account is using a long, random password to stay secure.</p>
-            </div>
+      <Card className="border border-default-200 dark:border-default-100 bg-background/60 dark:bg-default-50/50 backdrop-blur-md shadow-sm">
+        <CardHeader className="flex gap-3 px-6 py-4 border-b border-default-200 dark:border-default-100 bg-default-100/50 dark:bg-default-50/20">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+            <Lock size={20} />
           </div>
-        </div>
+          <div className="flex flex-col">
+            <p className="text-md font-semibold text-foreground">Change Password</p>
+            <p className="text-small text-default-500">Ensure your account is using a long, random password to stay secure.</p>
+          </div>
+        </CardHeader>
 
-        <div className="p-6">
-          <form onSubmit={handleSubmit} className="max-w-md space-y-4">
+        <CardBody className="px-6 py-8">
+          <form onSubmit={handleSubmit} className="max-w-md space-y-6">
             <div className="space-y-2">
-              <label htmlFor="new-password" className="block text-sm font-medium text-foreground">
-                New Password
+              <label className="block text-sm font-medium text-default-700 dark:text-default-300">
+                New Password <span className="text-danger">*</span>
               </label>
-              <input
-                id="new-password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              <Input
                 placeholder="Enter new password"
-                required
+                type={showPassword ? "text" : "password"}
+                variant="bordered"
+                color="primary"
+                value={password}
+                onValueChange={setPassword}
+                isRequired
+                startContent={
+                  <Lock className="text-default-400 pointer-events-none flex-shrink-0" size={16} />
+                }
+                endContent={
+                  <button
+                    className="focus:outline-none"
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="text-default-400 pointer-events-none" size={18} />
+                    ) : (
+                      <Eye className="text-default-400 pointer-events-none" size={18} />
+                    )}
+                  </button>
+                }
+                classNames={{
+                  inputWrapper: "bg-default-100/50 dark:bg-default-50/50 group-data-[focus=true]:bg-default-100/80 dark:group-data-[focus=true]:bg-default-50/80",
+                }}
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="confirm-password" className="block text-sm font-medium text-foreground">
-                Confirm New Password
+              <label className="block text-sm font-medium text-default-700 dark:text-default-300">
+                Confirm New Password <span className="text-danger">*</span>
               </label>
-              <input
-                id="confirm-password"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              <Input
                 placeholder="Confirm new password"
-                required
+                type={showConfirmPassword ? "text" : "password"}
+                variant="bordered"
+                color="primary"
+                value={confirmPassword}
+                onValueChange={setConfirmPassword}
+                isRequired
+                startContent={
+                  <Lock className="text-default-400 pointer-events-none flex-shrink-0" size={16} />
+                }
+                endContent={
+                  <button
+                    className="focus:outline-none"
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="text-default-400 pointer-events-none" size={18} />
+                    ) : (
+                      <Eye className="text-default-400 pointer-events-none" size={18} />
+                    )}
+                  </button>
+                }
+                classNames={{
+                  inputWrapper: "bg-default-100/50 dark:bg-default-50/50 group-data-[focus=true]:bg-default-100/80 dark:group-data-[focus=true]:bg-default-50/80",
+                }}
               />
             </div>
 
-            <div className="pt-2">
-              <button
+            <Spacer y={2} />
+
+            <div className="flex justify-start">
+              <Button
                 type="submit"
-                disabled={loading}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                color="primary"
+                isLoading={loading}
+                startContent={!loading && <Save size={18} />}
+                className="font-medium"
               >
-                {loading ? <LoadingSpinner size="sm" className="text-primary-foreground" /> : <Save size={16} />}
                 Update Password
-              </button>
+              </Button>
             </div>
           </form>
-        </div>
-      </div>
+        </CardBody>
+      </Card>
     </div>
   );
 }

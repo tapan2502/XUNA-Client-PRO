@@ -83,6 +83,7 @@ const sidebarItems: SidebarItem[] = [
     icon: "solar:megaphone-linear",
     title: "Campaigns",
   },
+  /*
   {
     key: "contacts",
     href: "/dashboard/contacts",
@@ -95,6 +96,7 @@ const sidebarItems: SidebarItem[] = [
     icon: "solar:widget-5-linear",
     title: "Automation",
   },
+  */
   {
     key: "call-logs",
     href: "/dashboard/call-history",
@@ -104,6 +106,7 @@ const sidebarItems: SidebarItem[] = [
 ];
 
 const configItems: SidebarItem[] = [
+  /*
   {
     key: "api-keys",
     href: "/dashboard/api-keys",
@@ -116,6 +119,7 @@ const configItems: SidebarItem[] = [
     icon: "solar:microphone-linear",
     title: "Voice API Providers",
   },
+  */
   {
     key: "settings",
     href: "/dashboard/settings",

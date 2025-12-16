@@ -77,10 +77,10 @@ export function DataCollectionSection({ agent, onChange }: DataCollectionSection
                       size="sm"
                       labelPlacement="outside"
                     >
-                      <SelectItem key="string" value="string">String</SelectItem>
-                      <SelectItem key="number" value="number">Number</SelectItem>
-                      <SelectItem key="boolean" value="boolean">Boolean</SelectItem>
-                      <SelectItem key="integer" value="integer">Integer</SelectItem>
+                      <SelectItem key="string">String</SelectItem>
+                      <SelectItem key="number">Number</SelectItem>
+                      <SelectItem key="boolean">Boolean</SelectItem>
+                      <SelectItem key="integer">Integer</SelectItem>
                     </Select>
 
                     <Input

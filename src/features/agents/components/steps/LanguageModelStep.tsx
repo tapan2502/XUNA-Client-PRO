@@ -38,9 +38,7 @@ export function LanguageModelStep({ formData, setFormData }: LanguageModelStepPr
     <div className="space-y-8">
       {/* Language Model Selection */}
       <div>
-        <label className="block text-sm font-semibold text-default-700 mb-3">
-          Language Model
-        </label>
+        <label className="block text-sm font-semibold text-default-700 mb-3">Language Model</label>
         <Select
           selectedKeys={[formData.llm]}
           onChange={(e) => setFormData((prev: any) => ({ ...prev, llm: e.target.value }))}
@@ -51,9 +49,7 @@ export function LanguageModelStep({ formData, setFormData }: LanguageModelStepPr
           }}
         >
           {llmOptions.map((option) => (
-            <SelectItem key={option} value={option}>
-              {option}
-            </SelectItem>
+            <SelectItem key={option}>{option}</SelectItem>
           ))}
         </Select>
       </div>
@@ -61,9 +57,7 @@ export function LanguageModelStep({ formData, setFormData }: LanguageModelStepPr
       {/* Temperature Slider - Premium Design */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <label className="text-sm font-semibold text-default-700">
-            Temperature
-          </label>
+          <label className="text-sm font-semibold text-default-700">Temperature</label>
           <div className="flex items-center gap-2">
             <currentLabel.icon className={`w-5 h-5 ${currentLabel.color}`} />
             <span className="text-lg font-bold bg-gradient-to-r bg-clip-text text-transparent ${getTemperatureColor(formData.temperature)}">
@@ -93,7 +87,9 @@ export function LanguageModelStep({ formData, setFormData }: LanguageModelStepPr
                   max="1"
                   step="0.1"
                   value={formData.temperature}
-                  onChange={(e) => setFormData((prev: any) => ({ ...prev, temperature: parseFloat(e.target.value) }))}
+                  onChange={(e) =>
+                    setFormData((prev: any) => ({ ...prev, temperature: Number.parseFloat(e.target.value) }))
+                  }
                   className="absolute inset-0 w-full h-3 opacity-0 cursor-pointer z-10"
                 />
 
@@ -102,7 +98,7 @@ export function LanguageModelStep({ formData, setFormData }: LanguageModelStepPr
                   className="absolute top-1/2 -translate-y-1/2 w-6 h-6 bg-white dark:bg-gray-900 border-4 rounded-full shadow-lg transition-all duration-300 pointer-events-none"
                   style={{
                     left: `calc(${formData.temperature * 100}% - 12px)`,
-                    borderColor: `hsl(var(--heroui-${currentLabel.color.split('-')[1]}-500))`,
+                    borderColor: `hsl(var(--heroui-${currentLabel.color.split("-")[1]}-500))`,
                   }}
                 />
               </div>
@@ -130,9 +126,13 @@ export function LanguageModelStep({ formData, setFormData }: LanguageModelStepPr
               <div className="bg-default-100 dark:bg-default-50/5 rounded-lg p-4">
                 <p className="text-sm text-default-600 leading-relaxed">
                   <span className="font-semibold text-default-700">{currentLabel.label} mode:</span>{" "}
-                  {formData.temperature <= 0.3 && "Produces consistent, deterministic responses. Best for factual tasks."}
-                  {formData.temperature > 0.3 && formData.temperature <= 0.7 && "Balances creativity and consistency. Ideal for most conversations."}
-                  {formData.temperature > 0.7 && "Maximizes creativity and variety. Great for brainstorming and creative tasks."}
+                  {formData.temperature <= 0.3 &&
+                    "Produces consistent, deterministic responses. Best for factual tasks."}
+                  {formData.temperature > 0.3 &&
+                    formData.temperature <= 0.7 &&
+                    "Balances creativity and consistency. Ideal for most conversations."}
+                  {formData.temperature > 0.7 &&
+                    "Maximizes creativity and variety. Great for brainstorming and creative tasks."}
                 </p>
               </div>
             </div>

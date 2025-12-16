@@ -1,19 +1,16 @@
+"use client"
+
+import type React from "react"
+
 import { useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchAgents } from "@/store/agentsSlice"
 import { CreateAgentModal } from "@/features/agents/components/CreateAgentModal"
 import { useNavigate } from "react-router-dom"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
-import { 
-  Headset,
-  MoreVertical,
-  ArrowRight,
-  Plus,
-  Trash2,
-  Copy
-} from "lucide-react"
+import { Headset, ArrowRight, Plus } from "lucide-react"
 import { Button, User, useDisclosure, Snippet } from "@heroui/react"
-import DataTable, { DataTableColumn } from "@/components/hero-ui/DataTable"
+import DataTable, { type DataTableColumn } from "@/components/hero-ui/DataTable"
 
 const columns: DataTableColumn[] = [
   { uid: "name", name: "Agent Name", sortable: true },
@@ -56,8 +53,8 @@ export default function Agents() {
               size: "sm",
               icon: <Headset className="w-4 h-4 text-white" />,
               classNames: {
-                base: "bg-primary"
-              }
+                base: "bg-primary",
+              },
             }}
             classNames={{
               name: "text-default-foreground font-medium",
@@ -67,13 +64,13 @@ export default function Agents() {
         )
       case "agent_id":
         return (
-          <Snippet 
-            symbol="" 
-            variant="flat" 
-            size="sm" 
+          <Snippet
+            symbol=""
+            variant="flat"
+            size="sm"
             classNames={{
               base: "bg-transparent p-0",
-              pre: "font-mono text-default-500 text-small"
+              pre: "font-mono text-default-500 text-small",
             }}
             codeString={item.agent_id}
           >
@@ -81,11 +78,7 @@ export default function Agents() {
           </Snippet>
         )
       case "created_at":
-        return (
-          <span className="text-small text-default-500">
-            {formatDate(item.created_at_unix_secs)}
-          </span>
-        )
+        return <span className="text-small text-default-500">{formatDate(item.created_at_unix_secs)}</span>
       case "actions":
         return (
           <div className="flex items-center justify-end gap-2">
@@ -118,17 +111,17 @@ export default function Agents() {
   )
 
   if (loading && agents.length === 0) {
-     return (
-       <div className="flex items-center justify-center h-full p-8">
-         <LoadingSpinner />
-       </div>
-     )
+    return (
+      <div className="flex items-center justify-center h-full p-8">
+        <LoadingSpinner />
+      </div>
+    )
   }
 
   // DataTable requires an 'id' property
-  const tableData = agents.map(agent => ({
+  const tableData = agents.map((agent) => ({
     ...agent,
-    id: agent.agent_id
+    id: agent.agent_id,
   }))
 
   return (
@@ -144,7 +137,6 @@ export default function Agents() {
         topBarCount={agents.length}
         topBarAction={topBarAction}
         emptyContent="No agents found. Create one to get started."
-        onRowAction={(key) => navigate(`/dashboard/agents/${key}`)}
       />
 
       <CreateAgentModal

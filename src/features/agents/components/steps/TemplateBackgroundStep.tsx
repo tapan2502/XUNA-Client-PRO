@@ -51,9 +51,7 @@ export function TemplateBackgroundStep({
           labelPlacement="outside"
         >
           {languages.map((lang) => (
-            <SelectItem key={lang.code} value={lang.code}>
-              {lang.name}
-            </SelectItem>
+            <SelectItem key={lang.code}>{lang.name}</SelectItem>
           ))}
         </Select>
       </div>

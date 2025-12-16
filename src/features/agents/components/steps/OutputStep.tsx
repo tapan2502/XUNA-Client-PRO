@@ -31,9 +31,7 @@ export function OutputStep({ formData, setFormData, voices }: OutputStepProps) {
     <div className="space-y-8">
       {/* Voice Model Selection */}
       <div>
-        <label className="block text-sm font-semibold text-default-700 mb-4">
-          Voice Model
-        </label>
+        <label className="block text-sm font-semibold text-default-700 mb-4">Voice Model</label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {availableModels.map((model) => {
             const Icon = getModelIcon(model.name)
@@ -85,9 +83,7 @@ export function OutputStep({ formData, setFormData, voices }: OutputStepProps) {
 
       {/* Voice Choice */}
       <div>
-        <label className="block text-sm font-semibold text-default-700 mb-3">
-          Voice Selection
-        </label>
+        <label className="block text-sm font-semibold text-default-700 mb-3">Voice Selection</label>
         <Select
           placeholder="Select a voice"
           selectedKeys={formData.voiceId ? [formData.voiceId] : []}
@@ -107,7 +103,7 @@ export function OutputStep({ formData, setFormData, voices }: OutputStepProps) {
             const labelText = labelParts.join(" · ")
 
             return (
-              <SelectItem key={voice.voice_id} value={voice.voice_id} textValue={`${voice.name} ${labelText ? `— ${labelText}` : ""}`}>
+              <SelectItem key={voice.voice_id} textValue={`${voice.name} ${labelText ? `— ${labelText}` : ""}`}>
                 <div className="flex flex-col gap-1">
                   <span className="font-medium">{voice.name}</span>
                   {labelText && <span className="text-tiny text-default-400">{labelText}</span>}

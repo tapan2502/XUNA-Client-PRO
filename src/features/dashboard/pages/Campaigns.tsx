@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { useAppSelector, useAppDispatch } from "@/app/hooks"
 import { selectCurrentUserData, fetchUserDetails } from "@/store/authSlice"
@@ -53,9 +55,7 @@ export default function Campaigns() {
           </div>
         )
       case "agent":
-        return (
-          <span className="text-small text-default-500">{item.agent_name || item.agent_id}</span>
-        )
+        return <span className="text-small text-default-500">{item.agent_name || item.agent_id}</span>
       case "created_at":
         return (
           <div className="flex items-center gap-1 text-small text-default-500">
@@ -92,11 +92,7 @@ export default function Campaigns() {
   }
 
   const topBarAction = (
-    <Button
-      color="primary"
-      onPress={() => setIsCreateModalOpen(true)}
-      startContent={<Plus size={18} />}
-    >
+    <Button color="primary" onPress={() => setIsCreateModalOpen(true)} startContent={<Plus size={18} />}>
       Create Campaign
     </Button>
   )
@@ -110,25 +106,16 @@ export default function Campaigns() {
       size="sm"
       className="w-48"
     >
-      <SelectItem key="all" value="all">
-        All Status
-      </SelectItem>
-      <SelectItem key="completed" value="completed">
-        Completed
-      </SelectItem>
-      <SelectItem key="processing" value="processing">
-        Processing
-      </SelectItem>
-      <SelectItem key="failed" value="failed">
-        Failed
-      </SelectItem>
+      <SelectItem key="all">All Status</SelectItem>
+      <SelectItem key="completed">Completed</SelectItem>
+      <SelectItem key="processing">Processing</SelectItem>
+      <SelectItem key="failed">Failed</SelectItem>
     </Select>
   )
 
   // Apply status filter
-  const filteredData = statusFilter === "all" 
-    ? tableData 
-    : tableData.filter(campaign => campaign.status === statusFilter)
+  const filteredData =
+    statusFilter === "all" ? tableData : tableData.filter((campaign) => campaign.status === statusFilter)
 
   return (
     <div className="h-full p-4 w-full max-w-[95rem] mx-auto flex flex-col gap-4">

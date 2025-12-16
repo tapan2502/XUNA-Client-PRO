@@ -2,26 +2,24 @@
 
 import { useState, useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { 
-  Modal, 
-  ModalContent, 
-  ModalHeader, 
-  ModalBody, 
-  ModalFooter, 
-  Button,
-  Chip,
-} from "@heroui/react"
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Chip } from "@heroui/react"
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react"
 
 import HorizontalSteps from "@/components/hero-ui/HorizontalSteps"
 import { TemplateBackgroundStep } from "./steps/TemplateBackgroundStep"
 import { KnowledgeSourcesStep } from "./steps/KnowledgeSourcesStep"
-import { BuiltInTool, clearCreateError, createAgent, CreateAgentPayload, fetchKnowledgeBase, fetchVoices } from "@/store/agentsSlice"
+import {
+  type BuiltInTool,
+  clearCreateError,
+  createAgent,
+  type CreateAgentPayload,
+  fetchKnowledgeBase,
+  fetchVoices,
+} from "@/store/agentsSlice"
 import { getAvailableModels, getModelId } from "@/lib/constants/languages"
 import { OutputStep } from "./steps/OutputStep"
 import { LanguageModelStep } from "./steps/LanguageModelStep"
 import { ToolsStep } from "./steps/ToolsStep"
-
 
 type StepKey = "TemplateBackground" | "Knowledge" | "Output" | "LanguageModel" | "Tools"
 
@@ -178,7 +176,7 @@ export function CreateAgentModal({ isOpen, onClose, onSuccess }: CreateAgentModa
   }
 
   const handleStepClick = (stepIndex: number) => {
-    if (stepIndex <= currentStepIndex || step === "TemplateBackground" && formData.name.trim().length > 0) {
+    if (stepIndex <= currentStepIndex || (step === "TemplateBackground" && formData.name.trim().length > 0)) {
       setStep(STEPS[stepIndex])
     }
   }
@@ -191,9 +189,9 @@ export function CreateAgentModal({ isOpen, onClose, onSuccess }: CreateAgentModa
   }
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={handleClose} 
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
       size="3xl"
       classNames={{
         base: "bg-background",
@@ -208,18 +206,12 @@ export function CreateAgentModal({ isOpen, onClose, onSuccess }: CreateAgentModa
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-bold">Create New Agent</h3>
-              <p className="text-sm text-default-500 font-normal">
-                {STEP_CONFIGS[currentStepIndex].title}
-              </p>
+              <p className="text-sm text-default-500 font-normal">{STEP_CONFIGS[currentStepIndex].title}</p>
             </div>
           </div>
-          
+
           {/* Horizontal Steps */}
-          <HorizontalSteps 
-            steps={STEP_CONFIGS} 
-            currentStep={currentStepIndex}
-            onStepClick={handleStepClick}
-          />
+          <HorizontalSteps steps={STEP_CONFIGS} currentStep={currentStepIndex} onStepClick={handleStepClick} />
         </ModalHeader>
 
         <ModalBody className="py-6">
@@ -238,25 +230,10 @@ export function CreateAgentModal({ isOpen, onClose, onSuccess }: CreateAgentModa
             />
           )}
           {step === "Knowledge" && (
-            <KnowledgeSourcesStep
-              knowledgeBase={knowledgeBase}
-              selectedDocuments={selectedDocuments}
-              setSelectedDocuments={setSelectedDocuments}
-            />
+            <KnowledgeSourcesStep selectedDocuments={selectedDocuments} setSelectedDocuments={setSelectedDocuments} />
           )}
-          {step === "Output" && (
-            <OutputStep
-              formData={formData}
-              setFormData={setFormData}
-              voices={voices}
-            />
-          )}
-          {step === "LanguageModel" && (
-            <LanguageModelStep
-              formData={formData}
-              setFormData={setFormData}
-            />
-          )}
+          {step === "Output" && <OutputStep formData={formData} setFormData={setFormData} voices={voices} />}
+          {step === "LanguageModel" && <LanguageModelStep formData={formData} setFormData={setFormData} />}
           {step === "Tools" && (
             <ToolsStep
               toolIds={toolIds}

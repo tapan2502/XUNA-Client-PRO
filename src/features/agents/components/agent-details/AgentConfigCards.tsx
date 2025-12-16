@@ -7,7 +7,7 @@ import { useState } from "react"
 import { VoiceModal } from "../VoiceModal"
 import { useAppDispatch } from "@/app/hooks"
 import { fetchVoices } from "@/store/agentsSlice"
-import { Card, CardBody, Button, Select, SelectItem } from "@heroui/react"
+import { Card, CardBody, Select, SelectItem } from "@heroui/react"
 
 interface AgentConfigCardsProps {
   agent: any
@@ -51,9 +51,7 @@ export function AgentConfigCards({ agent, voices, onChange }: AgentConfigCardsPr
               aria-label="Select Model"
             >
               {llmOptions.map((model) => (
-                <SelectItem key={model} value={model}>
-                  {model}
-                </SelectItem>
+                <SelectItem key={model}>{model}</SelectItem>
               ))}
             </Select>
           </CardBody>
@@ -113,9 +111,7 @@ export function AgentConfigCards({ agent, voices, onChange }: AgentConfigCardsPr
               aria-label="Select Language"
             >
               {languages.map((lang) => (
-                <SelectItem key={lang.code} value={lang.code}>
-                  {lang.name}
-                </SelectItem>
+                <SelectItem key={lang.code}>{lang.name}</SelectItem>
               ))}
             </Select>
           </CardBody>

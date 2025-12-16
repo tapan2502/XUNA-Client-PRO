@@ -75,14 +75,18 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
     const renderItem = React.useCallback(
       (item: SidebarItem) => {
         const isNestType = item.type === SidebarItemType.Nest;
+        // Destructure href out to prevent ListboxItem from rendering as an anchor tag
+        // active behavior is handled via key selection and onSelect prop
+        const { href, ...itemProps } = item;
 
         if (isNestType) {
-          delete item.endContent;
+          // @ts-ignore
+          delete itemProps.endContent;
         }
 
         return (
           <ListboxItem
-            {...item}
+            {...itemProps}
             key={item.key}
             classNames={{
               base: cn(

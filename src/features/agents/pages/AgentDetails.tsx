@@ -122,7 +122,7 @@ export default function AgentDetails() {
           agent: {
             prompt: {
               prompt: editedAgent.conversation_config?.agent?.prompt?.prompt || "",
-              llm: editedAgent.conversation_config?.agent?.prompt?.llm || "gpt-4.1",
+              llm: editedAgent.conversation_config?.agent?.prompt?.llm || "gpt-4-turbo",
               temperature: editedAgent.conversation_config?.agent?.prompt?.temperature || 0.7,
               knowledge_base: editedAgent.conversation_config?.agent?.prompt?.knowledge_base || [],
               tool_ids: editedAgent.conversation_config?.agent?.prompt?.tool_ids || [],
@@ -132,9 +132,9 @@ export default function AgentDetails() {
             language: editedAgent.conversation_config?.agent?.language || "en",
           },
           tts: {
-            voice_id: editedAgent.conversation_config?.tts?.voice_id || "",
+            voice_id: editedAgent.conversation_config?.tts?.voice_id || voices[0]?.voice_id || "21m00Tcm4TlvDq8ikWAM", // Fallback to Rachel
             model_id: editedAgent.conversation_config?.tts?.model_id || "eleven_turbo_v2_5",
-            optimize_streaming_latency: editedAgent.conversation_config?.tts?.optimize_streaming_latency || 0,
+            optimize_streaming_latency: editedAgent.conversation_config?.tts?.optimize_streaming_latency || 4,
             stability: editedAgent.conversation_config?.tts?.stability || 0.5,
             speed: editedAgent.conversation_config?.tts?.speed || 1.0,
             similarity_boost: editedAgent.conversation_config?.tts?.similarity_boost || 0.8,
@@ -195,8 +195,9 @@ export default function AgentDetails() {
   if (fetchingAgentDetails && !agent) {
     console.log("[v0] Showing loading spinner - fetching agent")
     return (
-      <div className="flex items-center justify-center h-full min-h-[400px]">
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
         <LoadingSpinner />
+        <p className="text-default-500">Fetching agent details...</p>
       </div>
     )
   }
@@ -220,8 +221,9 @@ export default function AgentDetails() {
   if (!editedAgent) {
     console.log("[v0] Waiting for editedAgent initialization")
     return (
-      <div className="flex items-center justify-center h-full min-h-[400px]">
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
         <LoadingSpinner />
+        <p className="text-default-500">Initializing editor...</p>
       </div>
     )
   }

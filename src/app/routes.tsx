@@ -39,10 +39,6 @@ export default function AppRoutes() {
     dispatch(initAuthListener())
   }, [dispatch])
 
-  if (initializing) {
-    return <LoadingSpinner fullScreen />
-  }
-
   return (
     <BrowserRouter>
       <Routes>
@@ -64,11 +60,7 @@ export default function AppRoutes() {
         />
         <Route
           path="/dashboard"
-          element={
-            <Protected>
-              <DashboardShell />
-            </Protected>
-          }
+          element={<DashboardShell />}
         >
           <Route index element={<DashboardHome />} />
           <Route path="profile" element={<Profile />} />

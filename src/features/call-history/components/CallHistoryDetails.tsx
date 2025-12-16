@@ -2,11 +2,11 @@
 
 import type React from "react"
 
-import { motion, AnimatePresence } from "framer-motion"
 import { X, MessageSquare, Clock, Activity, BarChart, Volume2, Play, Pause, Download, Phone, User } from "lucide-react"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import { useState, useEffect } from "react"
 import type { ConversationDetails } from "@/store/callHistorySlice"
+import { Card, CardBody, Button, Chip } from "@heroui/react"
 import DataCollectionSection from "./DataCollectionSection"
 
 interface CallHistoryDetailsProps {
@@ -89,128 +89,106 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
 
   return (
     <>
-      {loading && <LoadingSpinner fullScreen />}
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+          <LoadingSpinner />
+        </div>
+      )}
       {details && (
-        <AnimatePresence>
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-              onClick={onClose}
-            />
+        <>
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={onClose} />
 
-            {/* Sidebar */}
-            <motion.div
-              initial={{ opacity: 0, x: "100%" }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 w-full md:w-[600px] h-full bg-white dark:bg-gray-900 border-l border-border shadow-2xl flex flex-col z-50"
-            >
-          {/* Header */}
-          <div className="flex-shrink-0 border-b border-border bg-white dark:bg-gray-900">
-            <div className="p-6 flex justify-between items-center">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center">
-                  <MessageSquare className="w-5 h-5 text-white" />
+          {/* Sidebar */}
+          <div className="fixed top-0 right-0 w-full md:w-[600px] h-full bg-background border-l border-divider shadow-2xl flex flex-col z-50 animate-in slide-in-from-right duration-300">
+            {/* Header */}
+            <div className="flex-shrink-0 border-b border-divider p-6">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <MessageSquare className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Call Details</h2>
+                    <p className="text-sm text-default-400">View transcript and analytics</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold text-foreground">Call History Details</h2>
-                  <p className="text-sm text-muted-foreground">View transcript and analytics</p>
-                </div>
+                <Button isIconOnly variant="light" onPress={onClose}>
+                  <X className="w-5 h-5" />
+                </Button>
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-[hsl(var(--accent))] transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
-          </div>
 
-          {/* Content - Scrollable Area */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="p-6 space-y-6">
-                {/* Stats Grid */}
-                <div className="grid grid-cols-3 gap-4">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="p-4 rounded-xl border border-border bg-accent/50 shadow-sm"
-                  >
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Clock className="w-4 h-4 text-[hsl(var(--primary))]" />
-                      <span className="text-xs font-medium text-muted-foreground">Duration</span>
+            {/* Content - Scrollable Area */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Stats Grid */}
+              <div className="grid grid-cols-3 gap-4">
+                <Card shadow="sm" className="border border-default-200">
+                  <CardBody className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Clock className="w-4 h-4 text-primary" />
+                      <span className="text-tiny text-default-500">Duration</span>
                     </div>
-                    <p className="text-2xl font-bold text-[hsl(var(--primary))]">
+                    <p className="text-2xl font-bold text-primary">
                       {formatDuration(details.conversation.metadata.call_duration_secs)}
                     </p>
-                  </motion.div>
+                  </CardBody>
+                </Card>
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="p-4 rounded-xl border border-border bg-accent/50 shadow-sm"
-                  >
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Activity className="w-4 h-4 text-[hsl(var(--primary))]" />
-                      <span className="text-xs font-medium text-muted-foreground">Messages</span>
+                <Card shadow="sm" className="border border-default-200">
+                  <CardBody className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Activity className="w-4 h-4 text-primary" />
+                      <span className="text-tiny text-default-500">Messages</span>
                     </div>
-                    <p className="text-2xl font-bold text-[hsl(var(--primary))]">
-                      {details.conversation.transcript.length}
-                    </p>
-                  </motion.div>
+                    <p className="text-2xl font-bold text-primary">{details.conversation.transcript.length}</p>
+                  </CardBody>
+                </Card>
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="p-4 rounded-xl border border-border bg-accent/50 shadow-sm"
-                  >
-                    <div className="flex items-center space-x-2 mb-2">
-                      <BarChart className="w-4 h-4 text-[hsl(var(--primary))]" />
-                      <span className="text-xs font-medium text-muted-foreground">Cost</span>
+                <Card shadow="sm" className="border border-default-200">
+                  <CardBody className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <BarChart className="w-4 h-4 text-primary" />
+                      <span className="text-tiny text-default-500">Cost</span>
                     </div>
-                    <p className="text-2xl font-bold text-[hsl(var(--primary))]">
+                    <p className="text-2xl font-bold text-primary">
                       {details.conversation.metadata.cost !== undefined
                         ? `$${(details.conversation.metadata.cost / 100).toFixed(4)}`
                         : "N/A"}
                     </p>
-                  </motion.div>
-                </div>
+                  </CardBody>
+                </Card>
+              </div>
 
-                {/* Audio Controls */}
-                {details.audio && (
-                  <div className="surface-panel overflow-hidden">
-                    <div className="p-4 border-b border-border bg-accent/40">
-                      <div className="flex items-center space-x-2">
-                        <Volume2 className="w-4 h-4 text-[hsl(var(--primary))]" />
-                        <h3 className="text-sm font-medium text-foreground">Call Recording</h3>
+              {/* Audio Controls */}
+              {details.audio && (
+                <Card shadow="sm" className="border border-default-200">
+                  <CardBody className="p-0">
+                    <div className="p-4 border-b border-divider bg-default-50">
+                      <div className="flex items-center gap-2">
+                        <Volume2 className="w-4 h-4 text-primary" />
+                        <h3 className="text-sm font-semibold">Call Recording</h3>
                       </div>
                     </div>
-                    <div className="p-4 space-y-4 bg-[hsl(var(--card))]">
-                      <div className="flex items-center space-x-4">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={handlePlayAudio}
-                          className="w-12 h-12 rounded-full bg-primary/10 shadow-sm flex items-center justify-center text-primary hover:bg-primary/20 transition-colors"
+                    <div className="p-4 space-y-4">
+                      <div className="flex items-center gap-4">
+                        <Button
+                          isIconOnly
+                          color="primary"
+                          variant="flat"
+                          onPress={handlePlayAudio}
+                          className="w-12 h-12 rounded-full"
                         >
                           {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={handleDownloadAudio}
-                          className="w-12 h-12 rounded-full bg-accent shadow-sm flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
+                        </Button>
+                        <Button
+                          isIconOnly
+                          variant="flat"
+                          onPress={handleDownloadAudio}
+                          className="w-12 h-12 rounded-full"
                         >
                           <Download className="w-6 h-6" />
-                        </motion.button>
+                        </Button>
                       </div>
                       <div className="space-y-2">
                         <input
@@ -219,119 +197,105 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
                           max={duration}
                           value={currentTime}
                           onChange={handleSeek}
-                          className="w-full h-2 bg-accent/60 rounded-lg appearance-none cursor-pointer accent-primary"
+                          className="w-full h-2 bg-default-200 rounded-lg appearance-none cursor-pointer accent-primary"
                         />
-                        <div className="flex justify-between text-sm text-muted-foreground">
+                        <div className="flex justify-between text-sm text-default-500">
                           <span>{formatDuration(currentTime)}</span>
                           <span>{formatDuration(duration)}</span>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  </CardBody>
+                </Card>
+              )}
 
-                {/* Data Collection Results */}
-                {(() => {
-                  const dataCollection = details?.conversation?.analysis?.data_collection_results
-                  const hasDataCollection =
-                    dataCollection && typeof dataCollection === "object" && Object.keys(dataCollection).length > 0
+              {/* Data Collection Results */}
+              {(() => {
+                const dataCollection = details?.conversation?.analysis?.data_collection_results
+                const hasDataCollection =
+                  dataCollection && typeof dataCollection === "object" && Object.keys(dataCollection).length > 0
 
-                  return hasDataCollection ? (
-                    <DataCollectionSection dataCollection={dataCollection} />
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-2">
-                        <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                        <h3 className="text-sm font-medium text-muted-foreground">Data Collection Results</h3>
-                      </div>
-                      <div className="surface-subtle p-4">
-                        <p className="text-sm text-muted-foreground italic">
-                          No data collection results available for this conversation.
-                        </p>
-                      </div>
+                return hasDataCollection ? (
+                  <DataCollectionSection dataCollection={dataCollection} />
+                ) : (
+                  <Card shadow="sm" className="border border-default-200">
+                    <CardBody className="p-4">
+                      <p className="text-sm text-default-500 italic">
+                        No data collection results available for this conversation.
+                      </p>
+                    </CardBody>
+                  </Card>
+                )
+              })()}
+
+              {/* Summary */}
+              <Card shadow="sm" className="border border-default-200">
+                <CardBody className="p-0">
+                  <div className="p-4 border-b border-divider bg-default-50">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-primary" />
+                      <h3 className="text-sm font-semibold">Summary</h3>
                     </div>
-                  )
-                })()}
-
-                {/* Summary */}
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <MessageSquare className="w-4 h-4 text-[hsl(var(--primary))]" />
-                    <h3 className="text-sm font-medium text-foreground">Summary</h3>
                   </div>
-                  <div className="surface-subtle p-4 bg-accent/50">
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                  <div className="p-4">
+                    <p className="text-sm text-default-600 leading-relaxed">
                       {details.conversation?.analysis?.transcript_summary}
                     </p>
                   </div>
+                </CardBody>
+              </Card>
+
+              {/* Transcript */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-primary" />
+                  <h3 className="text-sm font-semibold">Transcript</h3>
                 </div>
 
-                {/* Transcript */}
+                {/* Transcript Messages */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <MessageSquare className="w-4 h-4 text-[hsl(var(--primary))]" />
-                      <h3 className="text-sm font-medium text-foreground">Transcript</h3>
-                    </div>
-                  </div>
+                  {details?.conversation?.transcript?.map((message, index) => (
+                    <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                      <div className="flex items-end gap-2 max-w-[80%]">
+                        {message?.role !== "user" && (
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <Phone className="w-4 h-4 text-primary" />
+                          </div>
+                        )}
 
-                  {/* Transcript Messages */}
-                  <div className="space-y-4 max-h-[400px] overflow-y-auto pr-4 pb-8">
-                    {details?.conversation?.transcript?.map((message, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 * index }}
-                        className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                      >
-                        <div className="flex items-end space-x-2 max-w-[80%]">
-                          {message?.role !== "user" && (
-                            <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
-                              <Phone className="w-4 h-4 text-[hsl(var(--primary))]" />
+                        <div
+                          className={`rounded-2xl p-4 ${
+                            message?.role === "user" ? "bg-primary text-primary-foreground" : "bg-default-100"
+                          }`}
+                        >
+                          {/* Message Header */}
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-bold opacity-80">
+                              {message?.role === "user" ? "You" : "Agent"}
+                            </span>
+                            <div className="flex items-center gap-1 text-xs opacity-60">
+                              <Clock className="w-3 h-3" />
+                              <span>{formatDuration(message?.time_in_call_secs)}</span>
                             </div>
-                          )}
+                          </div>
 
-                          <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            className={`relative group rounded-2xl p-4 ${
-                              message?.role === "user"
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-accent text-foreground"
-                            }`}
-                          >
-                            {/* Message Header */}
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center space-x-2">
-                                <span className="text-xs font-bold opacity-80">
-                                  {message?.role === "user" ? "You" : "Agent"}
-                                </span>
-                              </div>
-                              <div className="flex items-center space-x-1 text-xs opacity-60">
-                                <Clock className="w-3 h-3" />
-                                <span>{formatDuration(message?.time_in_call_secs)}</span>
-                              </div>
-                            </div>
-
-                            {/* Message Content */}
-                            <p className="text-sm leading-relaxed font-medium break-words">{message?.message}</p>
-                          </motion.div>
-
-                          {message.role === "user" && (
-                            <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
-                              <User className="w-4 h-4 text-[hsl(var(--primary))]" />
-                            </div>
-                          )}
+                          {/* Message Content */}
+                          <p className="text-sm leading-relaxed font-medium break-words">{message?.message}</p>
                         </div>
-                      </motion.div>
-                    ))}
-                  </div>
+
+                        {message.role === "user" && (
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <User className="w-4 h-4 text-primary" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
+            </div>
           </div>
-            </motion.div>
-          </>
-        </AnimatePresence>
+        </>
       )}
     </>
   )

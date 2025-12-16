@@ -1,10 +1,19 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, Loader2 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
+import { 
+  Modal, 
+  ModalContent, 
+  ModalHeader, 
+  ModalBody, 
+  ModalFooter, 
+  Button,
+  Chip,
+} from "@heroui/react"
+import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react"
 
-import { StepIndicator } from "./StepIndicator"
+import HorizontalSteps from "@/components/hero-ui/HorizontalSteps"
 import { TemplateBackgroundStep } from "./steps/TemplateBackgroundStep"
 import { KnowledgeSourcesStep } from "./steps/KnowledgeSourcesStep"
 import { BuiltInTool, clearCreateError, createAgent, CreateAgentPayload, fetchKnowledgeBase, fetchVoices } from "@/store/agentsSlice"
@@ -17,6 +26,14 @@ import { ToolsStep } from "./steps/ToolsStep"
 type StepKey = "TemplateBackground" | "Knowledge" | "Output" | "LanguageModel" | "Tools"
 
 const STEPS: StepKey[] = ["TemplateBackground", "Knowledge", "Output", "LanguageModel", "Tools"]
+
+const STEP_CONFIGS = [
+  { title: "Template & Background" },
+  { title: "Knowledge Sources" },
+  { title: "Output Settings" },
+  { title: "Language Model" },
+  { title: "Tools & Functions" },
+]
 
 interface FormData {
   name: string
@@ -144,111 +161,138 @@ export function CreateAgentModal({ isOpen, onClose, onSuccess }: CreateAgentModa
     }
   }
 
-  const currIndex = STEPS.indexOf(step)
-  const canNext = step === "TemplateBackground" ? formData.name.trim().length > 0 : true
+  const currentStepIndex = STEPS.indexOf(step)
 
-  if (!isOpen) return null
+  const handleNext = () => {
+    if (currentStepIndex < STEPS.length - 1) {
+      setStep(STEPS[currentStepIndex + 1])
+    } else {
+      handleCreateAgent()
+    }
+  }
+
+  const handlePrevious = () => {
+    if (currentStepIndex > 0) {
+      setStep(STEPS[currentStepIndex - 1])
+    }
+  }
+
+  const handleStepClick = (stepIndex: number) => {
+    if (stepIndex <= currentStepIndex || step === "TemplateBackground" && formData.name.trim().length > 0) {
+      setStep(STEPS[stepIndex])
+    }
+  }
+
+  const isNextEnabled = () => {
+    if (step === "TemplateBackground") {
+      return formData.name.trim().length > 0
+    }
+    return true
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-5xl max-h-[90vh] bg-white dark:bg-gray-900 rounded-xl shadow-2xl flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Create Agent</h2>
-          <button
-            onClick={handleClose}
-            className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-800"
+    <Modal 
+      isOpen={isOpen} 
+      onClose={handleClose} 
+      size="3xl"
+      classNames={{
+        base: "bg-background",
+        backdrop: "bg-black/50 backdrop-blur-sm",
+      }}
+    >
+      <ModalContent>
+        <ModalHeader className="flex flex-col gap-4 border-b border-divider pb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold">Create New Agent</h3>
+              <p className="text-sm text-default-500 font-normal">
+                {STEP_CONFIGS[currentStepIndex].title}
+              </p>
+            </div>
+          </div>
+          
+          {/* Horizontal Steps */}
+          <HorizontalSteps 
+            steps={STEP_CONFIGS} 
+            currentStep={currentStepIndex}
+            onStepClick={handleStepClick}
+          />
+        </ModalHeader>
+
+        <ModalBody className="py-6">
+          {createError && (
+            <Chip color="danger" variant="flat" className="mb-4">
+              {createError}
+            </Chip>
+          )}
+
+          {step === "TemplateBackground" && (
+            <TemplateBackgroundStep
+              formData={formData}
+              setFormData={setFormData}
+              nameError={nameError}
+              setNameError={setNameError}
+            />
+          )}
+          {step === "Knowledge" && (
+            <KnowledgeSourcesStep
+              knowledgeBase={knowledgeBase}
+              selectedDocuments={selectedDocuments}
+              setSelectedDocuments={setSelectedDocuments}
+            />
+          )}
+          {step === "Output" && (
+            <OutputStep
+              formData={formData}
+              setFormData={setFormData}
+              voices={voices}
+            />
+          )}
+          {step === "LanguageModel" && (
+            <LanguageModelStep
+              formData={formData}
+              setFormData={setFormData}
+            />
+          )}
+          {step === "Tools" && (
+            <ToolsStep
+              toolIds={toolIds}
+              setToolIds={setToolIds}
+              builtInTools={builtInTools}
+              setBuiltInTools={setBuiltInTools}
+            />
+          )}
+        </ModalBody>
+
+        <ModalFooter className="border-t border-divider flex justify-between">
+          <Button
+            variant="flat"
+            onPress={handlePrevious}
+            isDisabled={currentStepIndex === 0}
+            startContent={<ChevronLeft size={18} />}
           >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+            Previous
+          </Button>
 
-        {/* Body */}
-        <div className="flex flex-1 overflow-hidden">
-          {/* Steps sidebar */}
-          <aside className="w-64 shrink-0 border-r border-gray-200 dark:border-gray-800 p-4 overflow-y-auto">
-            <StepIndicator steps={STEPS} currentStep={step} onStepClick={setStep} />
-          </aside>
-
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto px-6 py-5">
-            {createError && (
-              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700/40 dark:bg-red-900/20 dark:text-red-300">
-                {createError}
-              </div>
-            )}
-
-            {step === "TemplateBackground" && (
-              <TemplateBackgroundStep
-                formData={formData}
-                setFormData={setFormData}
-                nameError={nameError}
-                setNameError={setNameError}
-              />
-            )}
-
-            {step === "Knowledge" && (
-              <KnowledgeSourcesStep selectedDocuments={selectedDocuments} setSelectedDocuments={setSelectedDocuments} />
-            )}
-
-            {step === "Output" && <OutputStep formData={formData} setFormData={setFormData} voices={voices} />}
-
-            {step === "LanguageModel" && <LanguageModelStep formData={formData} setFormData={setFormData} />}
-
-            {step === "Tools" && (
-              <ToolsStep
-                toolIds={toolIds}
-                setToolIds={setToolIds}
-                builtInTools={builtInTools}
-                setBuiltInTools={setBuiltInTools}
-              />
-            )}
+          <div className="flex gap-2">
+            <Button variant="light" onPress={handleClose}>
+              Cancel
+            </Button>
+            <Button
+              color="primary"
+              onPress={handleNext}
+              isLoading={createLoading}
+              isDisabled={!isNextEnabled()}
+              endContent={<ChevronRight size={18} />}
+            >
+              {currentStepIndex < STEPS.length - 1 ? "Next" : "Create Agent"}
+            </Button>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="border-t border-gray-200 dark:border-gray-800 px-6 py-4 bg-gray-50 dark:bg-gray-900/50">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Step {currIndex + 1} of {STEPS.length}
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"
-              >
-                Cancel
-              </button>
-              {currIndex > 0 && (
-                <button
-                  onClick={() => setStep(STEPS[currIndex - 1])}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"
-                >
-                  Back
-                </button>
-              )}
-              {currIndex < STEPS.length - 1 ? (
-                <button
-                  onClick={() => setStep(STEPS[currIndex + 1])}
-                  disabled={!canNext}
-                  className="px-4 py-2 text-sm font-medium text-white bg-brand-gradient rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
-              ) : (
-                <button
-                  onClick={handleCreateAgent}
-                  disabled={createLoading}
-                  className="px-4 py-2 text-sm font-medium text-white bg-brand-gradient rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  {createLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Create Agent
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   )
 }

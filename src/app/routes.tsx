@@ -76,27 +76,13 @@ export default function AppRoutes() {
 
           <Route path="phone-numbers" element={<PhoneNumbers />} />
           <Route path="assistants" element={<Agents />} />
+          <Route path="assistants/:agentId" element={<AgentDetails />} />
           <Route path="knowledge-base" element={<KnowledgeBase />} />
+          <Route path="knowledge-base/:documentId" element={<KnowledgeBaseDetails />} />
           <Route path="campaigns" element={<Campaigns />} />
           <Route path="tools" element={<Tools />} />
           <Route path="settings" element={<Settings />} />
         </Route>
-        <Route
-          path="/dashboard/knowledge-base/:documentId"
-          element={
-            <Protected>
-              <KnowledgeBaseDetails />
-            </Protected>
-          }
-        />
-        <Route
-          path="/dashboard/agents/:agentId"
-          element={
-            <Protected>
-              <AgentDetails />
-            </Protected>
-          }
-        />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

@@ -1,6 +1,6 @@
-import { Outlet } from "react-router-dom";
-import HeroUIProSidebar from "./HeroUIProSidebar";
-import HeroUINavbar from "./HeroUINavbar";
+import { Outlet } from "react-router-dom"
+import HeroUIProSidebar from "./HeroUIProSidebar"
+import HeroUINavbar from "./HeroUINavbar"
 
 export default function Dashboard() {
   return (
@@ -8,10 +8,10 @@ export default function Dashboard() {
       <HeroUINavbar />
       <div className="flex-1 flex overflow-hidden">
         <HeroUIProSidebar />
-        <main className="flex-1 overflow-y-auto bg-default-50/50 dark:bg-background">
+        <main className="flex-1 overflow-y-auto bg-default-50/50 dark:bg-background relative">
           <Outlet />
         </main>
       </div>
     </div>
-  );
+  )
 }

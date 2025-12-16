@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchAgents } from "@/store/agentsSlice"
 import { CreateAgentModal } from "@/features/agents/components/CreateAgentModal"
@@ -8,14 +8,25 @@ import {
   Headset,
   MoreVertical,
   ArrowRight,
-  Plus 
+  Plus,
+  Trash2,
+  Copy
 } from "lucide-react"
+import { Button, User, useDisclosure, Snippet } from "@heroui/react"
+import DataTable, { DataTableColumn } from "@/components/hero-ui/DataTable"
+
+const columns: DataTableColumn[] = [
+  { uid: "name", name: "Agent Name", sortable: true },
+  { uid: "agent_id", name: "Agent ID" },
+  { uid: "created_at", name: "Created At", sortable: true },
+  { uid: "actions", name: "Actions" },
+]
 
 export default function Agents() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { agents, loading } = useAppSelector((state) => state.agents)
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   useEffect(() => {
     dispatch(fetchAgents())
@@ -35,78 +46,112 @@ export default function Agents() {
     }).format(date)
   }
 
-  return (
-    <div className="flex flex-col gap-4 h-full p-4 max-w-7xl mx-auto w-full text-foreground">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">AI Agents</h1>
-          <p className="text-muted-foreground text-sm mt-1">Create and manage your AI agents</p>
-        </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <button 
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-brand-gradient text-white text-sm font-medium rounded-lg transition-colors shadow-sm ml-auto sm:ml-0"
+  const renderCell = (item: any, columnKey: React.Key) => {
+    switch (columnKey) {
+      case "name":
+        return (
+          <User
+            avatarProps={{
+              radius: "full",
+              size: "sm",
+              icon: <Headset className="w-4 h-4 text-white" />,
+              classNames: {
+                base: "bg-primary"
+              }
+            }}
+            classNames={{
+              name: "text-default-foreground font-medium",
+            }}
+            name={item.name}
+          />
+        )
+      case "agent_id":
+        return (
+          <Snippet 
+            symbol="" 
+            variant="flat" 
+            size="sm" 
+            classNames={{
+              base: "bg-transparent p-0",
+              pre: "font-mono text-default-500 text-small"
+            }}
+            codeString={item.agent_id}
           >
-            <Plus size={18} />
-            <span>Create Agent</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Agents List */}
-      <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden flex flex-col">
-        {loading ? (
-          <LoadingSpinner fullScreen />
-        ) : agents.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">No agents found. Create one to get started.</div>
-        ) : (
-          <div className="divide-y divide-border">
-            {agents.map((agent) => (
-              <div 
-                key={agent.agent_id} 
-                className="group p-4 flex items-center gap-4 hover:bg-accent/50 transition-colors cursor-pointer"
-                onClick={() => navigate(`/dashboard/agents/${agent.agent_id}`)}
-              >
-                {/* Icon */}
-                <div className="w-12 h-12 rounded-xl bg-brand-gradient flex items-center justify-center shrink-0 text-white">
-                  <Headset size={24} />
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-foreground truncate">{agent.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    Created {formatDate(agent.created_at_unix_secs)}
-                  </p>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-2 shrink-0">
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      // Handle menu
-                    }}
-                    className="p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-background transition-colors"
-                  >
-                    <MoreVertical size={18} />
-                  </button>
-                  <div className="p-2 text-muted-foreground group-hover:text-foreground transition-colors">
-                    <ArrowRight size={18} />
-                  </div>
-                </div>
-              </div>
-            ))}
+            {item.agent_id}
+          </Snippet>
+        )
+      case "created_at":
+        return (
+          <span className="text-small text-default-500">
+            {formatDate(item.created_at_unix_secs)}
+          </span>
+        )
+      case "actions":
+        return (
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              size="sm"
+              variant="light"
+              color="primary"
+              isIconOnly
+              onPress={() => navigate(`/dashboard/assistants/${item.agent_id}`)}
+              className="text-default-400 data-[hover=true]:text-primary"
+            >
+              <ArrowRight size={18} />
+            </Button>
           </div>
-        )}
-      </div>
+        )
+      default:
+        return item[columnKey as keyof typeof item]
+    }
+  }
+
+  const topBarAction = (
+    <Button
+      color="primary"
+      className="text-white shadow-sm font-medium"
+      startContent={<Plus size={18} />}
+      onPress={onOpen}
+    >
+      Create Agent
+    </Button>
+  )
+
+  if (loading && agents.length === 0) {
+     return (
+       <div className="flex items-center justify-center h-full p-8">
+         <LoadingSpinner />
+       </div>
+     )
+  }
+
+  // DataTable requires an 'id' property
+  const tableData = agents.map(agent => ({
+    ...agent,
+    id: agent.agent_id
+  }))
+
+  return (
+    <div className="h-full p-4 w-full max-w-[95rem] mx-auto flex flex-col gap-4">
+      <DataTable
+        columns={columns}
+        data={tableData}
+        renderCell={renderCell}
+        initialVisibleColumns={["name", "agent_id", "created_at", "actions"]}
+        searchKeys={["name", "agent_id"]}
+        searchPlaceholder="Search agents..."
+        topBarTitle="AI Agents"
+        topBarCount={agents.length}
+        topBarAction={topBarAction}
+        emptyContent="No agents found. Create one to get started."
+        onRowAction={(key) => navigate(`/dashboard/agents/${key}`)}
+      />
 
       <CreateAgentModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        isOpen={isOpen}
+        onClose={onClose}
         onSuccess={() => {
-          setIsCreateModalOpen(false)
+          onClose()
           dispatch(fetchAgents())
         }}
       />

@@ -2,21 +2,19 @@ import { useEffect, useState } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchKnowledgeBase, deleteKnowledgeBaseDocument } from "@/store/agentsSlice"
 import { useNavigate } from "react-router-dom"
-import { 
-  Search, 
-  Plus, 
-  Filter, 
-  ChevronDown, 
-  FileText, 
-  ExternalLink, 
-  Trash2,
-  Upload,
-  Eye
-} from "lucide-react"
+import { FileText, ExternalLink, Trash2, Eye, Plus } from "lucide-react"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
+import DataTable from "@/components/hero-ui/DataTable"
+import { Button, Chip } from "@heroui/react"
 import AddDocumentModal from "../components/AddDocumentModal"
 import ConfirmationModal from "@/components/ConfirmationModal"
 import { useSnackbar } from "@/components/ui/SnackbarProvider"
+
+interface Column {
+  uid: string
+  name: string
+  sortable?: boolean
+}
 
 export default function KnowledgeBase() {
   const dispatch = useAppDispatch()
@@ -27,18 +25,12 @@ export default function KnowledgeBase() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [searchValue, setSearchValue] = useState("")
 
   useEffect(() => {
     dispatch(fetchKnowledgeBase())
   }, [dispatch])
 
-  const filteredDocs = knowledgeBase.filter(doc => 
-    doc.name.toLowerCase().includes(searchValue.toLowerCase())
-  )
-
-  const handleDeleteClick = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation()
+  const handleDeleteClick = (id: string) => {
     setSelectedDocId(id)
     setIsDeleteModalOpen(true)
   }
@@ -67,107 +59,103 @@ export default function KnowledgeBase() {
     }
   }
 
+  const columns: Column[] = [
+    { uid: "name", name: "Name", sortable: true },
+    { uid: "type", name: "Type", sortable: true },
+    { uid: "actions", name: "Actions" },
+  ]
+
+  const renderCell = (item: any, columnKey: string) => {
+    switch (columnKey) {
+      case "name":
+        return (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              {item.type === "url" ? (
+                <ExternalLink className="w-5 h-5 text-primary" />
+              ) : (
+                <FileText className="w-5 h-5 text-primary" />
+              )}
+            </div>
+            <div>
+              <span className="font-medium text-default-foreground">{item.name}</span>
+              {item.dependent_agents && item.dependent_agents.length > 0 && (
+                <p className="text-tiny text-default-400">
+                  {item.dependent_agents.length} agent{item.dependent_agents.length > 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
+          </div>
+        )
+      case "type":
+        return (
+          <Chip variant="flat" size="sm" className="capitalize">
+            {item.type}
+          </Chip>
+        )
+      case "actions":
+        return (
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              onPress={() => navigate(`/dashboard/knowledge-base/${item.id}`)}
+            >
+              <Eye size={18} />
+            </Button>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              color="danger"
+              onPress={() => handleDeleteClick(item.id)}
+            >
+              <Trash2 size={18} />
+            </Button>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
+  const topBarAction = (
+    <Button color="primary" onPress={() => setIsAddModalOpen(true)} startContent={<Plus size={18} />}>
+      Add Document
+    </Button>
+  )
+
+  // Map data to ensure id property exists for DataTable
+  const tableData = knowledgeBase.map(doc => ({
+    ...doc,
+    id: doc.id // DataTable requires id property
+  }))
+
   return (
     <>
-      {loading && <LoadingSpinner fullScreen />}
-      
-      <div className="flex flex-col gap-6 h-full p-6 max-w-7xl mx-auto w-full text-foreground">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-xl font-bold text-foreground">Knowledge Base</h1>
-            <p className="text-muted-foreground text-sm mt-1">Manage your documents and URLs for AI training</p>
-          </div>
-          <button 
-            onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-brand-gradient text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
-          >
-            <Plus size={18} />
-            <span>Add Document</span>
-          </button>
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+          <LoadingSpinner />
         </div>
+      )}
 
-        {/* Search Bar */}
-        <div className="flex gap-3 items-center bg-card p-1 rounded-xl border border-border shadow-sm">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Search documents..."
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-transparent focus:bg-accent/50 rounded-lg outline-none transition-all text-sm text-foreground placeholder:text-muted-foreground"
-            />
-          </div>
-          <div className="h-8 w-[1px] bg-border mx-1" />
-          <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-lg transition-colors mr-1">
-            <Filter size={16} />
-            <span>All Types</span>
-            <ChevronDown size={14} className="text-muted-foreground" />
-          </button>
-        </div>
-
-        {/* Documents List */}
-        <div className="flex flex-col gap-3">
-          {filteredDocs.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground bg-card border border-border rounded-xl border-dashed">
-              <p>No documents found. Add one to get started.</p>
-            </div>
-          ) : (
-            filteredDocs.map((doc) => (
-              <div 
-                key={doc.id}
-                onClick={() => navigate(`/dashboard/knowledge-base/${doc.id}`)}
-                className="group bg-card border border-border rounded-xl p-4 flex items-center justify-between hover:shadow-md transition-all cursor-pointer"
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-                    doc.type === 'url' 
-                      ? 'bg-brand-gradient text-white' 
-                      : 'bg-brand-gradient text-white'
-                  }`}>
-                    {doc.type === 'url' ? <ExternalLink size={24} /> : <FileText size={24} />}
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-foreground">{doc.name}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Type:</span>
-                      <span className="px-1.5 py-0.5 rounded bg-muted text-xs font-medium capitalize text-foreground">
-                        {doc.type}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      navigate(`/dashboard/knowledge-base/${doc.id}`)
-                    }}
-                    className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
-                    title="View Details"
-                  >
-                    <Eye size={18} />
-                  </button>
-                  <button 
-                    onClick={(e) => handleDeleteClick(e, doc.id)}
-                    className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    title="Delete Document"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        <AddDocumentModal 
-          isOpen={isAddModalOpen} 
-          onClose={() => setIsAddModalOpen(false)} 
+      <div className="h-full p-4 w-full max-w-[95rem] mx-auto flex flex-col gap-4">
+        <DataTable
+          columns={columns}
+          data={tableData}
+          renderCell={renderCell}
+          initialVisibleColumns={["name", "type", "actions"]}
+          searchKeys={["name", "type"]}
+          searchPlaceholder="Search documents..."
+          topBarTitle="Knowledge Base"
+          topBarCount={knowledgeBase.length}
+          topBarAction={topBarAction}
+          emptyContent="No documents found. Add one to get started."
         />
-        
+
+        <AddDocumentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
+
         <ConfirmationModal
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}

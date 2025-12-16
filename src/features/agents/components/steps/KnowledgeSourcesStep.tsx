@@ -1,9 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, FileText, LinkIcon } from "lucide-react"
+import { Plus, FileText, LinkIcon, Upload } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { createKnowledgeBaseDocument, fetchKnowledgeBase } from "@/store/agentsSlice"
+import { 
+  Button, 
+  Input, 
+  Checkbox, 
+  Card, 
+  CardBody,
+  Tabs,
+  Tab
+} from "@heroui/react"
 
 interface KnowledgeSourcesStepProps {
   selectedDocuments: string[]
@@ -19,6 +28,7 @@ export function KnowledgeSourcesStep({ selectedDocuments, setSelectedDocuments }
   const [url, setUrl] = useState("")
   const [file, setFile] = useState<File | null>(null)
   const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleCreate = async () => {
     setError("")
@@ -31,19 +41,26 @@ export function KnowledgeSourcesStep({ selectedDocuments, setSelectedDocuments }
       return
     }
 
-    const result = await dispatch(
-      createKnowledgeBaseDocument({
-        type: createType,
-        url: createType === "url" ? url : undefined,
-        file: createType === "file" ? file : undefined,
-      }),
-    )
+    try {
+      setIsLoading(true)
+      const result = await dispatch(
+        createKnowledgeBaseDocument({
+          type: createType,
+          url: createType === "url" ? url : undefined,
+          file: createType === "file" ? file : undefined,
+        }),
+      )
 
-    if (createKnowledgeBaseDocument.fulfilled.match(result)) {
-      setIsCreating(false)
-      setUrl("")
-      setFile(null)
-      dispatch(fetchKnowledgeBase())
+      if (createKnowledgeBaseDocument.fulfilled.match(result)) {
+        setIsCreating(false)
+        setUrl("")
+        setFile(null)
+        dispatch(fetchKnowledgeBase())
+      }
+    } catch (err) {
+      setError("Failed to create document")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -58,112 +75,131 @@ export function KnowledgeSourcesStep({ selectedDocuments, setSelectedDocuments }
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Knowledge sources</label>
-        <button
-          onClick={() => setIsCreating(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-brand-gradient rounded-lg"
+        <label className="block text-small font-medium text-default-700">Knowledge sources</label>
+        <Button
+          size="sm"
+          color="primary"
+          onPress={() => setIsCreating(true)}
+          startContent={<Plus size={16} />}
         >
-          <Plus className="w-4 h-4" />
           Add Document
-        </button>
+        </Button>
       </div>
 
       {isCreating && (
-        <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50 space-y-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setCreateType("file")}
-              className={`px-4 py-2 text-sm font-medium rounded-lg ${
-                createType === "file"
-                  ? "bg-brand-gradient text-white"
-                  : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700"
-              }`}
+        <Card className="border border-default-200 shadow-none">
+          <CardBody className="gap-4">
+            <Tabs 
+              selectedKey={createType} 
+              onSelectionChange={(key) => setCreateType(key as "file" | "url")}
+              variant="underlined"
+              size="sm"
             >
-              Upload File
-            </button>
-            <button
-              onClick={() => setCreateType("url")}
-              className={`px-4 py-2 text-sm font-medium rounded-lg ${
-                createType === "url"
-                  ? "bg-brand-gradient text-white"
-                  : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700"
-              }`}
-            >
-              Add URL
-            </button>
-          </div>
+              <Tab key="file" title="Upload File" />
+              <Tab key="url" title="Add URL" />
+            </Tabs>
 
-          {createType === "url" ? (
-            <input
-              type="url"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              placeholder="https://example.com/document"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-            />
-          ) : (
-            <input
-              type="file"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-            />
-          )}
+            {createType === "url" ? (
+              <Input
+                label="Document URL"
+                placeholder="https://example.com/document"
+                value={url}
+                onValueChange={setUrl}
+                variant="bordered"
+                labelPlacement="outside"
+              />
+            ) : (
+              <div className="relative">
+                <input
+                  type="file"
+                  id="file-upload"
+                  className="hidden"
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                />
+                <label 
+                  htmlFor="file-upload"
+                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-default-300 rounded-lg cursor-pointer hover:bg-default-50 transition-colors"
+                >
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Upload className="w-8 h-8 mb-3 text-default-400" />
+                    <p className="mb-2 text-sm text-default-500">
+                      <span className="font-semibold">Click to upload</span> or drag and drop
+                    </p>
+                    <p className="text-xs text-default-400">
+                      {file ? file.name : "PDF, TXT, DOCX up to 10MB"}
+                    </p>
+                  </div>
+                </label>
+              </div>
+            )}
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && <p className="text-tiny text-danger">{error}</p>}
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleCreate}
-              className="px-4 py-2 text-sm font-medium text-white bg-brand-gradient rounded-lg"
-            >
-              Create
-            </button>
-            <button
-              onClick={() => {
-                setIsCreating(false)
-                setUrl("")
-                setFile(null)
-                setError("")
-              }}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+            <div className="flex items-center gap-2 justify-end">
+              <Button
+                variant="light"
+                onPress={() => {
+                  setIsCreating(false)
+                  setUrl("")
+                  setFile(null)
+                  setError("")
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                color="primary"
+                onPress={handleCreate}
+                isLoading={isLoading}
+              >
+                Create
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
       )}
 
       {knowledgeBase.length === 0 ? (
-        <div className="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 p-8 text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="rounded-lg border-2 border-dashed border-default-200 p-8 text-center">
+          <p className="text-small text-default-500">
             No knowledge base documents yet. Add from your Knowledge page.
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           {knowledgeBase.map((doc) => (
-            <label
+            <Card 
               key={doc.id}
-              className="flex items-center gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50"
+              isPressable
+              onPress={() => toggleDocument(doc.id)}
+              className={`border transition-colors ${
+                selectedDocuments.includes(doc.id) 
+                  ? "border-primary bg-primary-50 dark:bg-primary-900/20" 
+                  : "border-default-200 bg-transparent hover:bg-default-50"
+              }`}
+              shadow="sm"
             >
-              <input
-                type="checkbox"
-                checked={selectedDocuments.includes(doc.id)}
-                onChange={() => toggleDocument(doc.id)}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <div className="flex items-center gap-3 flex-1">
-                {doc.type === "file" ? (
-                  <FileText className="w-5 h-5 text-gray-400" />
-                ) : (
-                  <LinkIcon className="w-5 h-5 text-gray-400" />
-                )}
-                <div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">{doc.name}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">{doc.type}</div>
+              <CardBody className="p-3">
+                <div className="flex items-center gap-3">
+                  <Checkbox 
+                    isSelected={selectedDocuments.includes(doc.id)}
+                    radius="full"
+                    className="pointer-events-none" // Handled by Card onPress
+                  />
+                  <div className="p-2 rounded-lg bg-default-100">
+                    {doc.type === "file" ? (
+                      <FileText className="w-5 h-5 text-default-500" />
+                    ) : (
+                      <LinkIcon className="w-5 h-5 text-default-500" />
+                    )}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-small font-semibold">{doc.name}</span>
+                    <span className="text-tiny text-default-400 uppercase">{doc.type}</span>
+                  </div>
                 </div>
-              </div>
-            </label>
+              </CardBody>
+            </Card>
           ))}
         </div>
       )}

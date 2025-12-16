@@ -137,6 +137,9 @@ interface AgentsState {
   error: string | null
   createLoading: boolean
   createError: string | null
+  fetchingAgentDetails: boolean
+  fetchingVoices: boolean
+  fetchingKnowledgeBase: boolean
 }
 
 const initialState: AgentsState = {
@@ -147,6 +150,9 @@ const initialState: AgentsState = {
   error: null,
   createLoading: false,
   createError: null,
+  fetchingAgentDetails: false,
+  fetchingVoices: false,
+  fetchingKnowledgeBase: false,
 }
 
 export const fetchAgents = createAsyncThunk("agents/fetchAgents", async (_, { rejectWithValue }) => {
@@ -288,12 +294,26 @@ const agentsSlice = createSlice({
         state.error = action.payload as string
       })
       // Fetch voices
+      .addCase(fetchVoices.pending, (state) => {
+        state.fetchingVoices = true
+      })
       .addCase(fetchVoices.fulfilled, (state, action) => {
+        state.fetchingVoices = false
         state.voices = action.payload
       })
+      .addCase(fetchVoices.rejected, (state) => {
+        state.fetchingVoices = false
+      })
       // Fetch knowledge base
+      .addCase(fetchKnowledgeBase.pending, (state) => {
+        state.fetchingKnowledgeBase = true
+      })
       .addCase(fetchKnowledgeBase.fulfilled, (state, action) => {
+        state.fetchingKnowledgeBase = false
         state.knowledgeBase = action.payload
+      })
+      .addCase(fetchKnowledgeBase.rejected, (state) => {
+        state.fetchingKnowledgeBase = false
       })
       // Create agent
       .addCase(createAgent.pending, (state) => {
@@ -324,11 +344,11 @@ const agentsSlice = createSlice({
       })
       // Fetch agent by ID
       .addCase(fetchAgentById.pending, (state) => {
-        state.loading = true
+        state.fetchingAgentDetails = true
         state.error = null
       })
       .addCase(fetchAgentById.fulfilled, (state, action) => {
-        state.loading = false
+        state.fetchingAgentDetails = false
         // Update or add the agent in the list
         const index = state.agents.findIndex((a) => a.agent_id === action.payload.agent_id)
         if (index !== -1) {
@@ -338,7 +358,7 @@ const agentsSlice = createSlice({
         }
       })
       .addCase(fetchAgentById.rejected, (state, action) => {
-        state.loading = false
+        state.fetchingAgentDetails = false
         state.error = action.payload as string
       })
       // Update agent

@@ -1,19 +1,15 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo, useCallback } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchPhoneNumbers, deletePhoneNumber } from "@/store/phoneNumbersSlice"
 import {
-  Plus,
-  Search,
-  Filter,
-  ChevronDown,
   Phone,
   Trash2,
   UserPlus,
   PhoneOutgoing,
   AlertCircle,
-  CheckCircle2,
+  Plus,
 } from "lucide-react"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import ImportTwilioModal from "../components/ImportTwilioModal"
@@ -21,15 +17,40 @@ import ImportSIPModal from "../components/ImportSIPModal"
 import AssignAgentModal from "../components/AssignAgentModal"
 import ConfirmationModal from "@/components/ConfirmationModal"
 import { useSnackbar } from "@/components/ui/SnackbarProvider"
-import { FilterDropdown } from "@/components/ui/FilterDropdown"
+import DataTable, { DataTableColumn, useMemoizedCallback } from "@/components/hero-ui/DataTable"
+import { Button, Chip, DropdownItem, User, RadioGroup, Radio } from "@heroui/react"
+import { Icon } from "@iconify/react"
+import React from "react"
 
+// Types
 type StatusFilter = "all" | "assigned" | "unassigned"
+
+interface EnrichedPhoneNumber {
+  id: string
+  label: string
+  phone_number: string
+  provider: string
+  assigned_agent: {
+    agent_id: string
+    agent_name: string
+  } | null
+  status: "assigned" | "unassigned"
+}
+
+const columns: DataTableColumn[] = [
+  { uid: "name", name: "Name", sortable: true },
+  { uid: "phone_number", name: "Phone Number", sortable: true },
+  { uid: "provider", name: "Provider", sortable: true },
+  { uid: "assigned_agent", name: "Assigned Agent", sortable: true },
+  { uid: "actions", name: "Actions" },
+]
+
+const INITIAL_VISIBLE_COLUMNS = ["name", "phone_number", "provider", "assigned_agent", "actions"]
 
 export default function PhoneNumbers() {
   const dispatch = useAppDispatch()
   const { phoneNumbers, loading, error } = useAppSelector((state) => state.phoneNumbers)
   const { showSnackbar } = useSnackbar()
-  const [searchValue, setSearchValue] = useState("")
   const [isTwilioModalOpen, setIsTwilioModalOpen] = useState(false)
   const [isSIPModalOpen, setIsSIPModalOpen] = useState(false)
   const [isAssignAgentModalOpen, setIsAssignAgentModalOpen] = useState(false)
@@ -43,17 +64,17 @@ export default function PhoneNumbers() {
     dispatch(fetchPhoneNumbers())
   }, [dispatch])
 
-  const filteredPhoneNumbers = phoneNumbers.filter((pn) => {
-    const matchesSearch =
-      (pn.label || "").toLowerCase().includes(searchValue.toLowerCase()) || pn.phone_number.includes(searchValue)
-
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "assigned" && pn.assigned_agent) ||
-      (statusFilter === "unassigned" && !pn.assigned_agent)
-
-    return matchesSearch && matchesStatus
-  })
+  // Transform data for DataTable
+  const enrichedPhoneNumbers: EnrichedPhoneNumber[] = useMemo(() => {
+    return phoneNumbers.map((pn) => ({
+      id: pn.phone_number_id,
+      label: pn.label || "Untitled Number",
+      phone_number: pn.phone_number,
+      provider: pn.provider || "Twilio",
+      assigned_agent: pn.assigned_agent,
+      status: pn.assigned_agent ? "assigned" : "unassigned",
+    }))
+  }, [phoneNumbers])
 
   const handleAssignAgent = (phoneNumberId: string, currentAgentId?: string) => {
     setSelectedPhoneNumberId(phoneNumberId)
@@ -78,8 +99,6 @@ export default function PhoneNumbers() {
         message: "Phone number deleted successfully",
         variant: "success",
       })
-      // No need to fetch again if slice updates state, but fetching ensures sync
-      // dispatch(fetchPhoneNumbers())
       setIsDeleteModalOpen(false)
     } catch (error) {
       console.error("Failed to delete phone number:", error)
@@ -93,156 +112,154 @@ export default function PhoneNumbers() {
     }
   }
 
-  return (
-    <div className="flex flex-col gap-4 h-full p-4 max-w-7xl mx-auto w-full text-foreground">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-foreground">Phone Numbers</h1>
-          <p className="text-muted-foreground text-xs mt-1">Manage your Twilio phone numbers and agent assignments</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setIsTwilioModalOpen(true)}
-            className="flex items-center gap-2 bg-brand-gradient text-white font-medium px-3 py-1.5 rounded-lg transition-colors text-sm shadow-sm"
-          >
-            <Plus size={16} />
-            Import from Twilio
-          </button>
-          <button
-            onClick={() => setIsSIPModalOpen(true)}
-            className="flex items-center gap-2 bg-brand-gradient text-white font-medium px-3 py-1.5 rounded-lg transition-colors text-sm shadow-sm"
-          >
-            <Plus size={16} />
-            Import from SIP
-          </button>
-        </div>
-      </div>
+  const itemFilter = useCallback(
+    (item: EnrichedPhoneNumber) => {
+      if (statusFilter === "all") return true
+      return item.status === statusFilter
+    },
+    [statusFilter]
+  )
 
-      {/* Search and Filter Bar */}
-      <div className="flex flex-col md:flex-row gap-3 items-center bg-card p-3 rounded-lg border border-border shadow-sm">
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Search phone numbers..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            className="w-full pl-9 pr-4 py-1.5 bg-background hover:bg-accent/50 focus:bg-background border border-border focus:border-ring rounded-md outline-none transition-all text-sm text-foreground placeholder:text-muted-foreground"
-          />
-        </div>
-        <div className="relative">
-          <FilterDropdown
-            value={statusFilter}
-            onChange={(val) => setStatusFilter(val as StatusFilter)}
-            options={[
-              { label: "All Status", value: "all" },
-              { label: "Assigned", value: "assigned" },
-              { label: "Unassigned", value: "unassigned" },
-            ]}
-            icon={<Filter size={14} />}
-            placeholder="All Status"
-          />
-        </div>
-      </div>
-
-      {/* Phone Numbers List */}
-      <div className="flex flex-col gap-3">
-        {loading ? (
-          <LoadingSpinner fullScreen />
-        ) : filteredPhoneNumbers.length === 0 ? (
-          <div className="text-center py-10 text-muted-foreground text-sm">No phone numbers found.</div>
-        ) : (
-          filteredPhoneNumbers.map((pn) => (
-            <div
-              key={pn.phone_number_id}
-              className="bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-all p-4"
-            >
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                {/* Left Side: Icon & Info */}
-                <div className="flex items-start gap-3 w-full md:w-auto">
-                  <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground shrink-0">
-                    <Phone size={20} />
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <h3 className="text-base font-semibold text-card-foreground">{pn.label || "Untitled Number"}</h3>
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="text-muted-foreground">Number:</span>
-                      <span className="font-mono bg-muted px-1.5 py-0.5 rounded text-foreground border border-border">
-                        {pn.phone_number}
-                      </span>
-                      <span className="text-muted-foreground ml-1">Provider:</span>
-                      <span className="bg-muted px-1.5 py-0.5 rounded text-xs font-medium text-foreground capitalize border border-border">
-                        {pn.provider || "Twilio"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Side: Agent Status & Actions */}
-                <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto justify-end">
-                  {pn.assigned_agent ? (
-                    <div className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-lg border border-border">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] text-muted-foreground uppercase font-semibold">
-                          Assigned Agent
-                        </span>
-                        <span className="text-xs font-bold text-foreground">{pn.assigned_agent.agent_name}</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 text-amber-500 px-2">
-                      <AlertCircle size={16} />
-                      <span className="text-xs font-medium">No agent assigned</span>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-2">
-                    {pn.assigned_agent ? (
-                      <>
-                        <button
-                          onClick={() => handleAssignAgent(pn.phone_number_id, pn.assigned_agent?.agent_id)}
-                          className="flex items-center gap-1.5 bg-background hover:bg-accent text-foreground border border-border font-medium px-3 py-1.5 rounded-lg transition-colors text-xs shadow-sm"
-                        >
-                          <UserPlus size={14} />
-                          Change Agent
-                        </button>
-                        <button className="flex items-center gap-1.5 bg-white border-emerald-200 hover:bg-gray-50 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-900/30 dark:hover:bg-emerald-900/30 dark:text-emerald-400 border font-medium px-3 py-1.5 rounded-lg transition-colors text-xs">
-                          <PhoneOutgoing size={14} />
-                          Outbound Call
-                        </button>
-                        <button
-                          onClick={() => confirmDelete(pn.phone_number_id)}
-                          className="flex items-center gap-1.5 bg-white border-red-200 hover:bg-gray-50 text-red-700 dark:bg-red-900/20 dark:border-red-900/30 dark:hover:bg-red-900/30 dark:text-red-400 border font-medium px-3 py-1.5 rounded-lg transition-colors text-xs"
-                        >
-                          <Trash2 size={14} />
-                          Delete
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => handleAssignAgent(pn.phone_number_id)}
-                          className="flex items-center gap-1.5 bg-brand-gradient text-white font-medium px-3 py-1.5 rounded-lg transition-colors text-xs shadow-sm"
-                        >
-                          <UserPlus size={14} />
-                          Assign Agent
-                        </button>
-                        <button
-                          onClick={() => confirmDelete(pn.phone_number_id)}
-                          className="flex items-center gap-1.5 bg-white border-red-200 hover:bg-gray-50 text-red-700 dark:bg-red-900/20 dark:border-red-900/30 dark:hover:bg-red-900/30 dark:text-red-400 border font-medium px-3 py-1.5 rounded-lg transition-colors text-xs"
-                        >
-                          <Trash2 size={14} />
-                          Delete
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
+  const renderCell = useMemoizedCallback((item: EnrichedPhoneNumber, columnKey: React.Key) => {
+    switch (columnKey) {
+      case "name":
+        return (
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-default-100 flex items-center justify-center text-default-500">
+              <Phone size={16} />
             </div>
-          ))
-        )}
+            <span className="text-small font-semibold text-default-foreground">{item.label}</span>
+          </div>
+        )
+      case "phone_number":
+        return (
+          <span className="font-mono text-small text-default-600 bg-default-100 px-2 py-0.5 rounded border border-default-200">
+            {item.phone_number}
+          </span>
+        )
+      case "provider":
+        return (
+          <Chip className="capitalize" size="sm" variant="flat" color="primary">
+            {item.provider}
+          </Chip>
+        )
+      case "assigned_agent":
+        return item.assigned_agent ? (
+          <User
+            avatarProps={{ radius: "full", size: "sm" }}
+            classNames={{
+              name: "text-default-foreground font-medium",
+            }}
+            name={item.assigned_agent.agent_name}
+          />
+        ) : (
+          <div className="flex items-center gap-1.5 text-warning-500">
+            <AlertCircle size={16} />
+            <span className="text-small font-medium">Unassigned</span>
+          </div>
+        )
+      case "actions":
+        return (
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              size="sm"
+              variant="flat"
+              color={item.assigned_agent ? "default" : "primary"}
+              onPress={() => handleAssignAgent(item.id, item.assigned_agent?.agent_id)}
+              startContent={<UserPlus size={16} />}
+              className={!item.assigned_agent ? "shadow-sm" : ""}
+            >
+              {item.assigned_agent ? "Change" : "Assign"}
+            </Button>
+            
+            {item.assigned_agent && (
+              <Button
+                size="sm"
+                variant="flat"
+                color="success"
+                className="bg-success-50 dark:bg-success-900/20 text-success-600 dark:text-success-400"
+                startContent={<PhoneOutgoing size={16} />}
+              >
+                Call
+              </Button>
+            )}
+
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              color="danger"
+              onPress={() => confirmDelete(item.id)}
+            >
+              <Trash2 size={18} />
+            </Button>
+          </div>
+        )
+      default:
+        return null
+    }
+  })
+
+  // Top Bar Actions
+  const topBarAction = (
+    <div className="flex gap-2">
+      <Button
+        color="primary"
+        className="text-white shadow-sm font-medium"
+        startContent={<Plus size={18} />}
+        onPress={() => setIsTwilioModalOpen(true)}
+      >
+        Import from Twilio
+      </Button>
+      <Button
+        color="primary"
+        className="text-white shadow-sm font-medium"
+        startContent={<Plus size={18} />}
+        onPress={() => setIsSIPModalOpen(true)}
+      >
+        Import from SIP
+      </Button>
+    </div>
+  )
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full p-8">
+        <LoadingSpinner />
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="h-full w-full">
+        <DataTable<EnrichedPhoneNumber>
+          columns={columns}
+          data={enrichedPhoneNumbers}
+          renderCell={renderCell}
+          initialVisibleColumns={INITIAL_VISIBLE_COLUMNS}
+          searchPlaceholder="Search phone numbers..."
+          searchKeys={["label", "phone_number"]}
+          topBarTitle="Phone Numbers"
+          topBarCount={enrichedPhoneNumbers.length}
+          topBarAction={topBarAction}
+          emptyContent="No phone numbers found"
+          filterContent={
+            <RadioGroup label="Status" value={statusFilter} onValueChange={(val) => setStatusFilter(val as StatusFilter)}>
+              <Radio value="all">All Status</Radio>
+              <Radio value="assigned">Assigned</Radio>
+              <Radio value="unassigned">Unassigned</Radio>
+            </RadioGroup>
+          }
+          selectedActionsContent={
+            <DropdownItem key="delete" className="text-danger" color="danger" startContent={<Trash2 size={16}/>}>
+              Delete Selected
+            </DropdownItem>
+          }
+          onItemFilter={itemFilter}
+          sortableColumnKey="name"
+          ariaLabel="Phone numbers table"
+        />
       </div>
 
       <ImportTwilioModal isOpen={isTwilioModalOpen} onClose={() => setIsTwilioModalOpen(false)} />
@@ -263,6 +280,6 @@ export default function PhoneNumbers() {
         isDangerous={true}
         isLoading={isDeleting}
       />
-    </div>
+    </>
   )
 }

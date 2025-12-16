@@ -1,8 +1,8 @@
 "use client"
 
-import type React from "react"
-
-import { Mic } from "lucide-react"
+import { useState } from "react"
+import { Card, CardBody, Input, Button, Chip } from "@heroui/react"
+import { Mic, Plus, X } from "lucide-react"
 
 interface ASRKeywordsSectionProps {
   agent: any
@@ -10,38 +10,73 @@ interface ASRKeywordsSectionProps {
 }
 
 export function ASRKeywordsSection({ agent, onChange }: ASRKeywordsSectionProps) {
+  const [newKeyword, setNewKeyword] = useState("")
   const keywords = agent.conversation_config?.asr?.keywords || []
 
-  const handleKeywordsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    const keywordsArray = value
-      .split(",")
-      .map((k) => k.trim())
-      .filter(Boolean)
-    onChange("conversation_config.asr.keywords", keywordsArray)
+  const handleAddKeyword = () => {
+    if (newKeyword.trim() && !keywords.includes(newKeyword.trim())) {
+      onChange("conversation_config.asr.keywords", [...keywords, newKeyword.trim()])
+      setNewKeyword("")
+    }
+  }
+
+  const handleRemoveKeyword = (keyword: string) => {
+    onChange(
+      "conversation_config.asr.keywords",
+      keywords.filter((k: string) => k !== keyword)
+    )
   }
 
   return (
-    <div className="group surface-panel p-6 space-y-4 transition-all duration-300 hover:shadow-xl hover:border-primary/40">
-      <div className="flex items-center gap-3">
-        <div className="p-2.5 rounded-xl bg-gradient-to-r from-primary/20 via-yellow-500/20 to-red-500/20">
-          <Mic className="w-5 h-5 text-primary" />
+    <Card shadow="sm" className="border border-default-200">
+      <CardBody className="p-5 space-y-3">
+        <div className="flex items-center gap-2">
+          <Mic className="w-4 h-4 text-primary" />
+          <h3 className="text-sm font-semibold text-default-700">ASR Keywords</h3>
         </div>
-        <h3 className="text-base font-bold">ASR Keywords</h3>
-      </div>
+        
+        <div className="flex gap-2">
+          <Input
+            value={newKeyword}
+            onValueChange={setNewKeyword}
+            placeholder="Add keyword..."
+            variant="bordered"
+            size="sm"
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                handleAddKeyword()
+              }
+            }}
+          />
+          <Button
+            isIconOnly
+            size="sm"
+            color="primary"
+            variant="flat"
+            onPress={handleAddKeyword}
+          >
+            <Plus size={16} />
+          </Button>
+        </div>
 
-      <p className="text-sm text-muted-foreground leading-relaxed">
-        Enter keywords to improve speech recognition accuracy.
-      </p>
-
-      <input
-        type="text"
-        value={keywords.join(", ")}
-        onChange={handleKeywordsChange}
-        placeholder="Enter keywords, separated by commas"
-        className="w-full px-4 py-3 bg-accent border-2 border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground/50"
-      />
-    </div>
-    // </CHANGE>
+        {keywords.length === 0 ? (
+          <p className="text-small text-default-400">No keywords configured</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {keywords.map((keyword: string) => (
+              <Chip
+                key={keyword}
+                variant="flat"
+                size="sm"
+                color="primary"
+                onClose={() => handleRemoveKeyword(keyword)}
+              >
+                {keyword}
+              </Chip>
+            ))}
+          </div>
+        )}
+      </CardBody>
+    </Card>
   )
 }

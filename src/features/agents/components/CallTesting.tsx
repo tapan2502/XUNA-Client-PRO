@@ -112,10 +112,10 @@ const CallTesting: React.FC<CallTestingProps> = ({ agentId, dynamicVariables = {
 
   return (
     <div className="sticky top-8">
-      <div className="surface-panel overflow-hidden">
-        <div className="p-6 border-b border-border bg-[hsl(var(--accent)_/_0.45)]">
-          <h2 className="text-lg font-heading font-bold text-foreground">Test Your Agent</h2>
-          <p className="text-sm text-muted-foreground mt-1">Click the microphone to start a conversation</p>
+      <div className="bg-background border border-divider rounded-xl overflow-hidden shadow-sm">
+        <div className="p-6 border-b border-divider bg-default-50">
+          <h2 className="text-lg font-bold">Test Your Agent</h2>
+          <p className="text-sm text-default-500 mt-1">Click the microphone to start a conversation</p>
         </div>
 
         {hasPermission === false && (

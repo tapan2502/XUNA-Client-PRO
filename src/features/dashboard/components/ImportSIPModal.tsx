@@ -1,9 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import { Phone, X, Loader2 } from "lucide-react"
+import { Phone } from "lucide-react"
 import { useAppDispatch } from "@/app/hooks"
 import { createPhoneNumber } from "@/store/phoneNumbersSlice"
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Input,
+} from "@heroui/react"
+import { Icon } from "@iconify/react"
 
 interface ImportSIPModalProps {
   isOpen: boolean
@@ -46,139 +56,101 @@ export default function ImportSIPModal({ isOpen, onClose }: ImportSIPModalProps)
     }
   }
 
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/20 dark:bg-black/50 backdrop-blur-sm" 
-        onClick={onClose} 
-      />
-      
-      {/* Modal Container - Using explicit white background */}
-      <div className="relative w-full max-w-xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-h-[90vh]">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-          <div className="flex items-center gap-2">
-            <Phone className="w-4 h-4 text-gray-900 dark:text-gray-100" />
-            <span className="text-base font-semibold text-gray-900 dark:text-gray-100">Import SIP Trunk</span>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-500 dark:text-gray-400"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="p-5 overflow-y-auto bg-white dark:bg-gray-900">
-          <div className="flex flex-col gap-5">
-            {/* Info Box */}
-            <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-lg p-3 flex gap-3">
-              <div className="text-blue-600 dark:text-blue-400 mt-0.5">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                  <path
-                    fillRule="evenodd"
-                    d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+      <ModalContent>
+        {(onClose) => (
+          <>
+            <ModalHeader className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <Phone size={24} className="text-primary" />
+                <span>Import SIP Trunk</span>
               </div>
-              <div className="flex flex-col gap-1 text-xs">
-                <span className="font-semibold text-blue-700 dark:text-blue-300">Before you begin</span>
-                <span className="text-blue-600 dark:text-blue-400">Make sure you have:</span>
-                <ul className="list-disc list-inside text-blue-600 dark:text-blue-400 ml-1 space-y-0.5">
-                  <li>An active SIP trunk provider</li>
-                  <li>SIP credentials (username & password)</li>
-                  <li>SIP address/domain</li>
-                </ul>
+            </ModalHeader>
+            <ModalBody>
+              {/* Info Box */}
+              <div className="bg-primary-50 dark:bg-primary-900/10 border border-primary-100 dark:border-primary-900/30 rounded-lg p-3 flex gap-3">
+                <Icon icon="solar:info-circle-linear" className="text-primary mt-0.5 shrink-0" width={18} />
+                <div className="flex flex-col gap-1 text-xs">
+                  <span className="font-semibold text-primary">Before you begin</span>
+                  <span className="text-primary-600 dark:text-primary-300">Make sure you have:</span>
+                  <ul className="list-disc list-inside text-primary-600 dark:text-primary-300 ml-1 space-y-0.5">
+                    <li>An active SIP trunk provider</li>
+                    <li>SIP credentials (username & password)</li>
+                    <li>SIP address/domain</li>
+                  </ul>
+                </div>
               </div>
-            </div>
 
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-gray-900 dark:text-gray-100">Phone Number</label>
-                <input
-                  type="text"
+              <div className="flex flex-col gap-4">
+                <Input
+                  label="Phone Number"
                   placeholder="+1234567890"
+                  description="Enter the phone number in E.164 format (e.g., +1234567890)"
                   value={formData.phone_number}
-                  onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  onValueChange={(val) => setFormData({ ...formData, phone_number: val })}
+                  variant="bordered"
+                  labelPlacement="outside"
                 />
-                <p className="text-[10px] text-gray-600 dark:text-gray-400">
-                  Enter the phone number in E.164 format (e.g., +1234567890)
-                </p>
-              </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-gray-900 dark:text-gray-100">Label</label>
-                <input
-                  type="text"
+                <Input
+                  label="Label"
                   placeholder="Main SIP Line"
                   value={formData.label}
-                  onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  onValueChange={(val) => setFormData({ ...formData, label: val })}
+                  variant="bordered"
+                  labelPlacement="outside"
                 />
-              </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-gray-900 dark:text-gray-100">SIP Address</label>
-                <input
-                  type="text"
+                <Input
+                  label="SIP Address"
                   placeholder="sip.example.com"
                   value={formData.sip_address}
-                  onChange={(e) => setFormData({ ...formData, sip_address: e.target.value })}
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  onValueChange={(val) => setFormData({ ...formData, sip_address: val })}
+                  variant="bordered"
+                  labelPlacement="outside"
                 />
-              </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-gray-900 dark:text-gray-100">Username</label>
-                  <input
-                    type="text"
+                <div className="flex gap-4">
+                  <Input
+                    className="flex-1"
+                    label="Username"
                     placeholder="username"
                     value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                    onValueChange={(val) => setFormData({ ...formData, username: val })}
+                    variant="bordered"
+                    labelPlacement="outside"
                   />
-                </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-gray-900 dark:text-gray-100">Password</label>
-                  <input
-                    type="password"
+                  <Input
+                    className="flex-1"
+                    label="Password"
                     placeholder="password"
+                    type="password"
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                    onValueChange={(val) => setFormData({ ...formData, password: val })}
+                    variant="bordered"
+                    labelPlacement="outside"
                   />
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 font-medium rounded-lg transition-colors text-xs"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="flex items-center gap-2 px-3 py-1.5 bg-brand-gradient text-white font-medium rounded-lg transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading && <Loader2 size={14} className="animate-spin" />}
-            Import SIP Trunk
-          </button>
-        </div>
-      </div>
-    </div>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="danger" variant="light" onPress={onClose}>
+                Cancel
+              </Button>
+              <Button
+                color="primary"
+                className="shadow-sm"
+                onPress={handleSubmit}
+                isLoading={loading}
+              >
+                Import SIP Trunk
+              </Button>
+            </ModalFooter>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
   )
 }

@@ -26,7 +26,11 @@ export default function KnowledgeBaseDetails() {
   }, [documentId, dispatch])
 
   if (loading) {
-    return <LoadingSpinner fullScreen />
+    return (
+      <div className="flex items-center justify-center h-full p-8">
+        <LoadingSpinner />
+      </div>
+    )
   }
 
   if (!document) {

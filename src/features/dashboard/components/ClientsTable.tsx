@@ -282,7 +282,11 @@ export default function ClientsTable() {
   });
 
   if (loading) {
-    return <LoadingSpinner fullScreen />;
+    return (
+      <div className="flex items-center justify-center h-full p-8">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (

@@ -19,8 +19,8 @@ export function AgentConfigCards({ agent, voices, onChange }: AgentConfigCardsPr
   const dispatch = useAppDispatch()
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false)
 
-  const currentVoice = voices.find((v) => v.voice_id === agent.conversation_config?.tts?.voice_id)
-  const currentLanguage = languages.find((l) => l.code === agent.conversation_config?.agent?.language) || languages[0]
+  const currentVoice = (voices || []).find((v) => v.voice_id === agent.conversation_config?.tts?.voice_id)
+  const currentLanguage = languages.find((l) => l.code === agent.conversation_config?.agent?.language) || languages.find(l => l.code === 'en') || languages[0]
 
   const handleVoiceChange = (voiceId: string) => {
     onChange("conversation_config.tts.voice_id", voiceId)

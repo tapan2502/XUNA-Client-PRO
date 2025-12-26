@@ -71,16 +71,18 @@ const sidebarItems: SidebarItem[] = [
     icon: "solar:book-outline",
     title: "Knowledge Base",
   },
+  /*
   {
     key: "tools",
     href: "/dashboard/tools",
     icon: "solar:settings-outline",
     title: "Tools & Functions",
   },
+  */
   {
     key: "campaigns",
     href: "/dashboard/campaigns",
-    icon: "solar:megaphone-linear",
+    icon: "solar:bell-linear",
     title: "Campaigns",
   },
   /*
@@ -279,7 +281,8 @@ const handleCall = () => {
           />
         </ScrollShadow>
 
-        {/* Schedule a Call Section - Bordered card like Figma */}
+        {/* Schedule a Call Section - Hidden as per request */}
+        {/*
         <div className="mt-auto">
           <div className="rounded-2xl p-4 border border-default-200 bg-background">
             <p className="text-sm text-foreground font-medium mb-3 text-center">Schedule a Call</p>
@@ -312,6 +315,7 @@ const handleCall = () => {
             </Button>
           </div>
         </div>
+        */}
 
         <Spacer y={3} />
 
@@ -361,8 +365,7 @@ const handleCall = () => {
                 Settings
               </DropdownItem>
             </DropdownSection>
-            <DropdownSection aria-label="Help & Feedback">
-              <DropdownItem key="help">Help & Feedback</DropdownItem>
+            <DropdownSection aria-label="Account Actions">
               <DropdownItem key="logout" color="danger" onClick={handleLogout}>
                 Log Out
               </DropdownItem>

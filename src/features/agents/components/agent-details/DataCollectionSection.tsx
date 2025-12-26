@@ -10,7 +10,7 @@ interface DataCollectionSectionProps {
 
 export function DataCollectionSection({ agent, onChange }: DataCollectionSectionProps) {
   const dataCollection = agent.platform_settings?.data_collection || {}
-  const variables = Object.entries(dataCollection)
+  const variables = Object.entries(dataCollection).filter(([_, config]) => !!config)
 
   const handleAddVariable = () => {
     const newVarName = `variable_${variables.length + 1}`

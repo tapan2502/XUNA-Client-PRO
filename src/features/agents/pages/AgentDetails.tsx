@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { fetchAgentById, updateAgent, fetchVoices, fetchKnowledgeBase } from "@/store/agentsSlice"
+import { fetchAgentById, updateAgent, fetchVoices, fetchKnowledgeBase, fetchAgents } from "@/store/agentsSlice"
+import { getModelId } from "@/lib/constants/languages"
 import { Save, X, ArrowLeft } from "lucide-react"
 import { AgentDetailsHeader } from "../components/agent-details/AgentDetailsHeader"
 import { AgentConfigCards } from "../components/agent-details/AgentConfigCards"
@@ -27,7 +28,7 @@ export default function AgentDetails() {
   const { showSnackbar } = useSnackbar()
 
   const { agents, fetchingAgentDetails, error, voices, knowledgeBase } = useAppSelector((state) => state.agents)
-  const agent = agents.find((a) => a.agent_id === agentId)
+  const agent = (agents || []).find((a) => a && a.agent_id === agentId)
 
   const [editedAgent, setEditedAgent] = useState<any>(null)
   const [hasChanges, setHasChanges] = useState(false)
@@ -35,14 +36,16 @@ export default function AgentDetails() {
   const [saveError, setSaveError] = useState("")
 
   useEffect(() => {
-    console.log("[v0] AgentDetails state:", {
-      agentId,
-      fetchingAgentDetails,
-      hasAgent: !!agent,
-      hasEditedAgent: !!editedAgent,
-      error,
-    })
-  }, [agentId, fetchingAgentDetails, agent, editedAgent, error])
+    if (!fetchingAgentDetails) {
+        console.log("[DEBUG] AgentDetails state check:", {
+          agentId,
+          hasAgent: !!agent,
+          hasEditedAgent: !!editedAgent,
+          agentsCount: agents?.length,
+          error
+        });
+    }
+  }, [agentId, fetchingAgentDetails, agent, editedAgent, error, agents?.length])
 
   useEffect(() => {
     console.log("[v0] Fetching agent data for:", agentId)
@@ -50,20 +53,27 @@ export default function AgentDetails() {
       dispatch(fetchAgentById(agentId))
       dispatch(fetchVoices())
       dispatch(fetchKnowledgeBase())
+      dispatch(fetchAgents())
     }
   }, [agentId, dispatch])
 
   useEffect(() => {
-    console.log("[v0] Agent changed:", { hasAgent: !!agent, hasEditedAgent: !!editedAgent })
     if (agent && !editedAgent) {
-      console.log("[v0] Initializing editedAgent from agent data")
+      console.log("[DEBUG] Initializing editedAgent from agent data", agent.agent_id)
       setEditedAgent(JSON.parse(JSON.stringify(agent)))
     }
   }, [agent, editedAgent])
 
+  // Reset editedAgent when agentId changes to ensure we don't show old data
+  useEffect(() => {
+    console.log("[DEBUG] agentId changed, resetting editor state:", agentId)
+    setEditedAgent(null)
+  }, [agentId])
+
   const handleChange = (path: string, value: any) => {
     setEditedAgent((prev: any) => {
-      const newAgent = { ...prev }
+      // Deep clone to safely update nested properties
+      const newAgent = JSON.parse(JSON.stringify(prev))
       const keys = path.split(".")
       let current = newAgent
 
@@ -75,6 +85,19 @@ export default function AgentDetails() {
       }
 
       current[keys[keys.length - 1]] = value
+
+      // Automatically switch model if language changes to one that doesn't support the current model
+      if (path === "conversation_config.agent.language") {
+        const currentModel = newAgent.conversation_config?.tts?.model_id
+        const compatibleModel = getModelId(currentModel, value)
+        
+        if (!newAgent.conversation_config) newAgent.conversation_config = {}
+        if (!newAgent.conversation_config.tts) newAgent.conversation_config.tts = {}
+        newAgent.conversation_config.tts.model_id = compatibleModel
+        
+        console.log(`[DEBUG] Language changed to ${value}. Auto-switched model to ${compatibleModel}`);
+      }
+
       return newAgent
     })
     setHasChanges(true)
@@ -133,7 +156,10 @@ export default function AgentDetails() {
           },
           tts: {
             voice_id: editedAgent.conversation_config?.tts?.voice_id || voices[0]?.voice_id || "21m00Tcm4TlvDq8ikWAM", // Fallback to Rachel
-            model_id: editedAgent.conversation_config?.tts?.model_id || "eleven_turbo_v2_5",
+            model_id: getModelId(
+              editedAgent.conversation_config?.tts?.model_id || "eleven_turbo_v2_5",
+              editedAgent.conversation_config?.agent?.language || "en"
+            ),
             optimize_streaming_latency: editedAgent.conversation_config?.tts?.optimize_streaming_latency || 4,
             stability: editedAgent.conversation_config?.tts?.stability || 0.5,
             speed: editedAgent.conversation_config?.tts?.speed || 1.0,
@@ -192,18 +218,37 @@ export default function AgentDetails() {
     }
   }
 
+  // Debug logging for initial mount
+  useEffect(() => {
+    console.log("[DEBUG] AgentDetails Mounted. Params agentId:", agentId);
+    
+    const errorHandler = (event: ErrorEvent) => {
+      console.error("[CRITICAL] Global error caught in AgentDetails session:", event.error);
+    };
+    window.addEventListener('error', errorHandler);
+    return () => window.removeEventListener('error', errorHandler);
+  }, [agentId]);
+
+  console.log("[DEBUG] Render Cycle Start - Current State:", { 
+    agentId, 
+    fetchingAgentDetails, 
+    agentFound: !!agent, 
+    editedAgentInitialized: !!editedAgent,
+    agentsCount: agents?.length || 0
+  });
+
   if (fetchingAgentDetails && !agent) {
-    console.log("[v0] Showing loading spinner - fetching agent")
+    console.log("[DEBUG] Rendering: FETCHING_SPINNER");
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
         <LoadingSpinner />
-        <p className="text-default-500">Fetching agent details...</p>
+        <p className="text-default-500">Fetching assistant details...</p>
       </div>
     )
   }
 
   if (error && !agent) {
-    console.log("[v0] Showing error state")
+    console.log("[DEBUG] Rendering: ERROR_STATE", error);
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 p-8 min-h-[400px]">
         <p className="text-lg text-red-500">{error}</p>
@@ -219,7 +264,7 @@ export default function AgentDetails() {
   }
 
   if (!editedAgent) {
-    console.log("[v0] Waiting for editedAgent initialization")
+    console.log("[DEBUG] Rendering: INITIALIZING_SPINNER");
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
         <LoadingSpinner />
@@ -228,7 +273,7 @@ export default function AgentDetails() {
     )
   }
 
-  console.log("[v0] Rendering agent details page")
+  console.log("[DEBUG] Rendering: MAIN_PAGE");
 
   const dynamicVariables = editedAgent?.platform_settings?.data_collection || {}
 
@@ -276,7 +321,7 @@ export default function AgentDetails() {
                 </div>
                 <div className="grid gap-6">
                   <PromptSection agent={editedAgent} onChange={handleChange} />
-                  <ToolsSection agent={editedAgent} onChange={handleChange} />
+                  <ToolsSection agent={editedAgent} onChange={handleChange} agents={agents} />
                   <KnowledgeBaseSection agent={editedAgent} knowledgeBase={knowledgeBase} onChange={handleChange} />
                 </div>
               </section>

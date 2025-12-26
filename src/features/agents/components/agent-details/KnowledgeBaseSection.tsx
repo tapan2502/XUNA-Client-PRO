@@ -17,7 +17,7 @@ export function KnowledgeBaseSection({ agent, knowledgeBase, onChange }: Knowled
   const [selectedDocs, setSelectedDocs] = useState<string[]>([])
   const linkedDocs = agent.conversation_config?.agent?.prompt?.knowledge_base || []
 
-  const filteredDocs = knowledgeBase.filter((doc) => doc.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredDocs = (knowledgeBase || []).filter((doc) => (doc?.name || "").toLowerCase().includes(searchQuery.toLowerCase()))
 
   const handleAddDocuments = () => {
     const newDocs = [...new Set([...linkedDocs, ...selectedDocs])]

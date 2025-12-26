@@ -34,6 +34,12 @@ export interface Agent {
   created_at_unix_secs: number
   last_call_time_unix_secs?: number
   access_level: string
+  status?: "active" | "inactive"
+  phoneNumber?: string | null
+  usage?: number
+  usageMax?: number
+  languageName?: string
+  modelName?: string
   conversation_config?: {
     agent?: {
       prompt?: AgentPrompt
@@ -246,6 +252,18 @@ export const updateAgent = createAsyncThunk(
   },
 )
 
+export const updateAgentStatus = createAsyncThunk(
+  "agents/updateAgentStatus",
+  async ({ agentId, status }: { agentId: string; status: "active" | "inactive" }, { rejectWithValue }) => {
+    try {
+      const response = await http.patch(`/agents/${agentId}/status`, { status })
+      return { agentId, status }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to update agent status")
+    }
+  },
+)
+
 export const fetchKnowledgeBaseDocumentById = createAsyncThunk(
   "agents/fetchKnowledgeBaseDocumentById",
   async (documentId: string, { rejectWithValue }) => {
@@ -376,6 +394,13 @@ const agentsSlice = createSlice({
       .addCase(updateAgent.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload as string
+      })
+      // Update agent status
+      .addCase(updateAgentStatus.fulfilled, (state, action) => {
+        const index = state.agents.findIndex((a) => a.agent_id === action.payload.agentId)
+        if (index !== -1) {
+          state.agents[index].status = action.payload.status
+        }
       })
   },
 })

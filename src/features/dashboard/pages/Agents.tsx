@@ -1,20 +1,22 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchAgents } from "@/store/agentsSlice"
 import { CreateAgentModal } from "@/features/agents/components/CreateAgentModal"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
-import { Headset, ArrowRight, Plus } from "lucide-react"
-import { Button, User, useDisclosure, Snippet } from "@heroui/react"
+import { Headset, Eye, Trash2, Plus } from "lucide-react"
+import { Button, User, useDisclosure, Snippet, Switch, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/react"
 import DataTable, { type DataTableColumn } from "@/components/hero-ui/DataTable"
+import { updateAgentStatus, deleteAgent } from "@/store/agentsSlice"
 
 const columns: DataTableColumn[] = [
   { uid: "name", name: "Agent Name", sortable: true },
   { uid: "agent_id", name: "Agent ID" },
+  { uid: "status", name: "Status" },
   { uid: "created_at", name: "Created At", sortable: true },
   { uid: "actions", name: "Actions" },
 ]
@@ -22,12 +24,48 @@ const columns: DataTableColumn[] = [
 export default function Agents() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { agents, loading } = useAppSelector((state) => state.agents)
   const { isOpen, onOpen, onClose } = useDisclosure()
+  
+  const [agentToDelete, setAgentToDelete] = React.useState<any | null>(null)
+  const { 
+    isOpen: isDeleteModalOpen, 
+    onOpen: onDeleteModalOpen, 
+    onOpenChange: onDeleteModalOpenChange 
+  } = useDisclosure()
 
   useEffect(() => {
     dispatch(fetchAgents())
   }, [dispatch])
+
+  // Auto-open create modal if 'create' param is present
+  useEffect(() => {
+    if (searchParams.get('create') === 'true') {
+      onOpen()
+      // Remove the param after opening
+      searchParams.delete('create')
+      setSearchParams(searchParams, { replace: true })
+    }
+  }, [searchParams, onOpen, setSearchParams])
+
+  const handleDeletePress = (agent: any) => {
+    setAgentToDelete(agent)
+    onDeleteModalOpen()
+  }
+
+  const confirmDelete = async () => {
+    if (agentToDelete) {
+      await dispatch(deleteAgent(agentToDelete.agent_id))
+      setAgentToDelete(null)
+      onDeleteModalOpenChange()
+    }
+  }
+
+  const handleStatusToggle = async (agentId: string, currentStatus: string) => {
+    const newStatus = currentStatus === "active" ? "inactive" : "active"
+    await dispatch(updateAgentStatus({ agentId, status: newStatus as "active" | "inactive" }))
+  }
 
   const formatDate = (unixSecs: number) => {
     if (!unixSecs) return ""
@@ -77,6 +115,20 @@ export default function Agents() {
             {item.agent_id}
           </Snippet>
         )
+      case "status":
+        return (
+          <div className="flex items-center gap-2">
+            <Switch
+              size="sm"
+              isSelected={item.status === "active"}
+              onValueChange={() => handleStatusToggle(item.agent_id, item.status)}
+              aria-label="Agent Status"
+            />
+            <span className={`text-tiny capitalize ${item.status === "active" ? "text-success" : "text-default-400"}`}>
+              {item.status || "inactive"}
+            </span>
+          </div>
+        )
       case "created_at":
         return <span className="text-small text-default-500">{formatDate(item.created_at_unix_secs)}</span>
       case "actions":
@@ -85,12 +137,20 @@ export default function Agents() {
             <Button
               size="sm"
               variant="light"
-              color="primary"
               isIconOnly
               onPress={() => navigate(`/dashboard/assistants/${item.agent_id}`)}
-              className="text-default-400 data-[hover=true]:text-primary"
+              className="text-default-400 hover:text-primary transition-colors"
             >
-              <ArrowRight size={18} />
+              <Eye size={18} />
+            </Button>
+            <Button
+              size="sm"
+              variant="light"
+              isIconOnly
+              onPress={() => handleDeletePress(item)}
+              className="text-default-400 hover:text-danger transition-colors"
+            >
+              <Trash2 size={18} />
             </Button>
           </div>
         )
@@ -130,7 +190,7 @@ export default function Agents() {
         columns={columns}
         data={tableData}
         renderCell={renderCell}
-        initialVisibleColumns={["name", "agent_id", "created_at", "actions"]}
+        initialVisibleColumns={["name", "agent_id", "status", "created_at", "actions"]}
         searchKeys={["name", "agent_id"]}
         searchPlaceholder="Search agents..."
         topBarTitle="AI Agents"
@@ -147,6 +207,27 @@ export default function Agents() {
           dispatch(fetchAgents())
         }}
       />
+
+      <Modal isOpen={isDeleteModalOpen} onOpenChange={onDeleteModalOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>Delete Agent</ModalHeader>
+              <ModalBody>
+                <p>Are you sure you want to delete <b>{agentToDelete?.name}</b>? This action cannot be undone.</p>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="light" onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button color="danger" onPress={confirmDelete}>
+                  Delete
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   )
 }

@@ -86,7 +86,7 @@ export default function DataTable<T extends { id: string | number }>({
   const [filterValue, setFilterValue] = useState("");
   const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
   const [visibleColumns, setVisibleColumns] = useState<Selection>(new Set(initialVisibleColumns));
-  const [rowsPerPage] = useState(10);
+  const [rowsPerPage] = useState(5);
   const [page, setPage] = useState(1);
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
     column: sortableColumnKey || columns[0]?.uid,

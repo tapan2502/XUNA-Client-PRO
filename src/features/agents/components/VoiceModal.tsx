@@ -5,7 +5,7 @@ import { useState, useMemo, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Play, Search, Plus, Loader2 } from "lucide-react"
 import { http } from "@/lib/http"
-import { cn } from "@heroui/theme"
+import { cn } from "@/lib/utils"
 import { ModernDropdown } from "@/components/ui/ModernDropdown"
 
 interface VoiceLabels {

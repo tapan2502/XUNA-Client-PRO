@@ -25,8 +25,8 @@ import { Icon } from "@iconify/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { selectEffectiveUser, logout } from "@/store/authSlice";
-import { applyTheme } from "@/app/theme";
 import NotificationsCard from "./NotificationsCard";
+import NavbarActions from "./navbar/NavbarActions";
 
 // Logo component
 const AppIcon = () => (
@@ -52,19 +52,6 @@ export default function HeroUINavbar() {
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectEffectiveUser);
   
-  const [isDark, setIsDark] = React.useState(() => {
-    const theme = localStorage.getItem("theme") || "system";
-    if (theme === "system") {
-      return window.matchMedia("(prefers-color-scheme: dark)").matches;
-    }
-    return theme === "dark";
-  });
-
-  const handleThemeToggle = () => {
-    const newTheme = isDark ? "light" : "dark";
-    setIsDark(!isDark);
-    applyTheme(newTheme);
-  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -178,93 +165,40 @@ export default function HeroUINavbar() {
           </Link>
         </NavbarItem>
 
-        {/* Action Icons in Pill Container */}
-        <div className="flex items-center gap-1 bg-default-100 dark:bg-default-50 px-2 py-1.5 rounded-full ml-2">
-          <Button isIconOnly radius="full" variant="light" size="sm" className="hidden sm:flex">
-            <Icon className="text-default-500" icon="solar:magnifer-linear" width={20} />
-          </Button>
-          <Button 
-            isIconOnly 
-            radius="full" 
-            variant="light"
-            size="sm"
-            className="hidden sm:flex"
-            onPress={handleThemeToggle}
-          >
-            <Icon
-              className="text-default-500"
-              icon={isDark ? "solar:moon-bold" : "solar:sun-linear"}
-              width={20}
+        <NavbarActions />
+        
+        <Dropdown placement="bottom-end">
+          <DropdownTrigger>
+            <Avatar
+              isBordered
+              as="button"
+              className="ml-2 transition-transform shrink-0"
+              size="sm"
+              src={`https://ui-avatars.com/api/?name=${user?.email || "User"}&background=random`}
             />
-          </Button>
-          <Button 
-            isIconOnly 
-            radius="full" 
-            variant="light"
-            size="sm"
-            className="hidden sm:flex"
-            onClick={() => navigate("/dashboard/settings")}
-          >
-            <Icon className="text-default-500" icon="solar:settings-linear" width={20} />
-          </Button>
-          <Popover offset={12} placement="bottom-end">
-            <PopoverTrigger>
-              <Button
-                disableRipple
-                isIconOnly
-                className="overflow-visible"
-                radius="full"
-                variant="light"
-                size="sm"
-              >
-                <Badge color="danger" content="5" showOutline={false} size="sm">
-                  <Icon className="text-default-500" icon="solar:bell-linear" width={20} />
-                </Badge>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="max-w-[90vw] p-0 sm:max-w-[380px]">
-              <NotificationsCard className="w-full shadow-none" />
-            </PopoverContent>
-          </Popover>
-          <Dropdown placement="bottom-end">
-            <DropdownTrigger>
-              <Avatar
-                isBordered
-                as="button"
-                className="transition-transform"
-                size="sm"
-                src={`https://ui-avatars.com/api/?name=${user?.email || "User"}&background=random`}
-              />
-            </DropdownTrigger>
-            <DropdownMenu aria-label="Profile Actions" variant="flat">
-              <DropdownItem key="profile" className="h-14 gap-2">
-                <p className="font-semibold">Signed in as</p>
-                <p className="font-semibold">{user?.email || "user@example.com"}</p>
-              </DropdownItem>
-              <DropdownItem
-                key="profile_settings"
-                onClick={() => navigate("/dashboard/profile")}
-              >
-                My Profile
-              </DropdownItem>
-              <DropdownItem
-                key="settings"
-                onClick={() => navigate("/dashboard/settings")}
-              >
-                Settings
-              </DropdownItem>
-              <DropdownItem
-                key="help"
-                onClick={() => window.open("https://docs.xuna.ai", "_blank")}
-              >
-                Help & Feedback
-              </DropdownItem>
-              <DropdownItem key="logout" color="danger" onClick={handleLogout}>
-                Log Out
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
-        </div>
+          </DropdownTrigger>
+          <DropdownMenu aria-label="Profile Actions" variant="flat">
+            <DropdownItem key="profile" className="h-14 gap-2">
+              <p className="font-semibold">Signed in as</p>
+              <p className="font-semibold">{user?.email || "user@example.com"}</p>
+            </DropdownItem>
+            <DropdownItem
+              key="profile_settings"
+              onClick={() => navigate("/dashboard/profile")}
+            >
+              My Profile
+            </DropdownItem>
+            <DropdownItem
+              key="settings"
+              onClick={() => navigate("/dashboard/settings")}
+            >
+              Settings
+            </DropdownItem>
+            <DropdownItem key="logout" color="danger" onClick={handleLogout}>
+              Log Out
+            </DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
       </NavbarContent>
 
       {/* Mobile Menu */}

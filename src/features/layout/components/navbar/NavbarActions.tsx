@@ -1,31 +1,25 @@
-import { Button } from "@heroui/react"
-import { Search, Bell, SettingsIcon } from "lucide-react"
 import ThemeToggle from "@/features/settings/components/ThemeToggle"
+import { Button } from "@heroui/react"
+import { SettingsIcon } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 export default function NavbarActions() {
-  return (
-    <div className="flex items-center gap-2">
-      <Button isIconOnly variant="light" size="sm" className="text-foreground-600" aria-label="Search">
-        <Search className="size-[18px]" strokeWidth={2} />
-      </Button>
+  const navigate = useNavigate()
 
+  return (
+    <div className="flex items-center gap-1 bg-default-100 dark:bg-default-50/50 px-2 py-1.5 rounded-full ml-2 border border-divider/50">
       <ThemeToggle />
 
-      <Button isIconOnly variant="light" size="sm" className="text-foreground-600" aria-label="Settings">
+      <Button 
+        isIconOnly 
+        variant="light" 
+        size="sm" 
+        className="text-default-500 hover:text-foreground transition-colors" 
+        aria-label="Settings"
+        onPress={() => navigate("/dashboard/settings")}
+      >
         <SettingsIcon className="size-[18px]" strokeWidth={2} />
       </Button>
-
-      <div className="relative">
-        <Button isIconOnly variant="light" size="sm" className="text-foreground-600" aria-label="Notifications">
-          <Bell className="size-[18px]" strokeWidth={2} />
-        </Button>
-        <span
-          className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] leading-none font-semibold rounded-full min-w-4 h-4 px-1 flex items-center justify-center pointer-events-none"
-          aria-hidden="true"
-        >
-          5
-        </span>
-      </div>
     </div>
   )
 }

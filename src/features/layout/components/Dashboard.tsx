@@ -5,6 +5,37 @@ import { Suspense } from "react"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import { useAppSelector } from "@/app/hooks"
 import { selectAuthInitializing, selectEffectiveUser } from "@/store/authSlice"
+import { Component, ErrorInfo, ReactNode } from "react"
+
+class SimpleErrorBoundary extends Component<{children: ReactNode}, {hasError: boolean, error: any}> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error: any, errorInfo: ErrorInfo) {
+    console.error("SimpleErrorBoundary caught:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-8 bg-red-50 text-red-900 border border-red-200 rounded-2xl m-4">
+          <h2 className="text-xl font-bold mb-2">Something went wrong</h2>
+          <pre className="text-sm overflow-auto max-w-full">{this.state.error?.toString()}</pre>
+          <button 
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700"
+            onClick={() => window.location.reload()}
+          >
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export default function Dashboard() {
   const initializing = useAppSelector(selectAuthInitializing);
@@ -23,13 +54,15 @@ export default function Dashboard() {
           ) : !user ? (
             <Navigate to="/login" replace />
           ) : (
-            <Suspense fallback={
-              <div className="flex items-center justify-center h-full">
-                <LoadingSpinner />
-              </div>
-            }>
-              <Outlet />
-            </Suspense>
+            <SimpleErrorBoundary>
+              <Suspense fallback={
+                <div className="flex items-center justify-center h-full">
+                  <LoadingSpinner />
+                </div>
+              }>
+                <Outlet />
+              </Suspense>
+            </SimpleErrorBoundary>
           )}
         </main>
       </div>

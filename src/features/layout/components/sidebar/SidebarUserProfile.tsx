@@ -62,7 +62,6 @@ export default function SidebarUserProfile({ isCollapsed }: { isCollapsed?: bool
   }
 
   const bottomItems = [
-    { icon: HelpCircle, label: "Help", onClick: () => console.log("Help clicked") },
     { icon: LogOut, label: "Log out", onClick: handleLogout },
   ]
 

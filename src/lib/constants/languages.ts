@@ -1,37 +1,42 @@
 export const languages = [
-  { code: "ar", name: "Arabic" },
-  { code: "bg", name: "Bulgarian" },
-  { code: "zh", name: "Chinese" },
-  { code: "hr", name: "Croatian" },
-  { code: "cs", name: "Czech" },
-  { code: "da", name: "Danish" },
-  { code: "nl", name: "Dutch" },
-  { code: "en", name: "English" },
-  { code: "fi", name: "Finnish" },
-  { code: "fr", name: "French" },
-  { code: "de", name: "German" },
-  { code: "el", name: "Greek" },
-  { code: "hi", name: "Hindi" },
-  { code: "hu", name: "Hungarian" },
-  { code: "id", name: "Indonesian" },
-  { code: "it", name: "Italian" },
-  { code: "ja", name: "Japanese" },
-  { code: "ko", name: "Korean" },
-  { code: "ms", name: "Malay" },
-  { code: "no", name: "Norwegian" },
-  { code: "pl", name: "Polish" },
-  { code: "pt-br", name: "Portuguese (Brazil)" },
-  { code: "pt", name: "Portuguese (Portugal)" },
-  { code: "ro", name: "Romanian" },
-  { code: "ru", name: "Russian" },
-  { code: "sk", name: "Slovak" },
-  { code: "es", name: "Spanish" },
-  { code: "sv", name: "Swedish" },
-  { code: "ta", name: "Tamil" },
-  { code: "tr", name: "Turkish" },
-  { code: "uk", name: "Ukrainian" },
-  { code: "vi", name: "Vietnamese" },
+  { code: "ar", name: "Arabic", flag: "sa" },
+  { code: "bg", name: "Bulgarian", flag: "bg" },
+  { code: "zh", name: "Chinese", flag: "cn" },
+  { code: "hr", name: "Croatian", flag: "hr" },
+  { code: "cs", name: "Czech", flag: "cz" },
+  { code: "da", name: "Danish", flag: "dk" },
+  { code: "nl", name: "Dutch", flag: "nl" },
+  { code: "en", name: "English", flag: "us" },
+  { code: "fi", name: "Finnish", flag: "fi" },
+  { code: "fr", name: "French", flag: "fr" },
+  { code: "de", name: "German", flag: "de" },
+  { code: "el", name: "Greek", flag: "gr" },
+  { code: "hi", name: "Hindi", flag: "in" },
+  { code: "hu", name: "Hungarian", flag: "hu" },
+  { code: "id", name: "Indonesian", flag: "id" },
+  { code: "it", name: "Italian", flag: "it" },
+  { code: "ja", name: "Japanese", flag: "jp" },
+  { code: "ko", name: "Korean", flag: "kr" },
+  { code: "ms", name: "Malay", flag: "my" },
+  { code: "no", name: "Norwegian", flag: "no" },
+  { code: "pl", name: "Polish", flag: "pl" },
+  { code: "pt-br", name: "Portuguese (Brazil)", flag: "br" },
+  { code: "pt", name: "Portuguese (Portugal)", flag: "pt" },
+  { code: "ro", name: "Romanian", flag: "ro" },
+  { code: "ru", name: "Russian", flag: "ru" },
+  { code: "sk", name: "Slovak", flag: "sk" },
+  { code: "es", name: "Spanish", flag: "es" },
+  { code: "sv", name: "Swedish", flag: "se" },
+  { code: "ta", name: "Tamil", flag: "in" },
+  { code: "tr", name: "Turkish", flag: "tr" },
+  { code: "uk", name: "Ukrainian", flag: "ua" },
+  { code: "vi", name: "Vietnamese", flag: "vn" },
 ]
+
+export const getLanguageFlag = (code: string) => {
+  const language = languages.find((lang) => lang.code === code)
+  return language ? language.flag : "us"
+}
 
 export const llmOptions = [
   "gpt-5",
@@ -83,31 +88,38 @@ export const modelOptions = [
   },
 ]
 
-export const getModelId = (modelType: string, language: string) => {
-  // If modelType is already a full model ID, return it directly
-  if (modelType.startsWith("eleven_")) {
+export const getModelId = (modelType: string | undefined, language: string | undefined) => {
+  const safeModelType = modelType || "eleven_turbo_v2_5"
+  const safeLanguage = language || "en"
+
+  // If safeModelType is already a full model ID, return it directly
+  if (safeModelType.startsWith("eleven_")) {
     // For English, ensure we only use v2 models
-    if (language === "en") {
-      if (modelType === "eleven_turbo_v2_5") return "eleven_turbo_v2"
-      if (modelType === "eleven_flash_v2_5") return "eleven_flash_v2"
+    if (safeLanguage === "en") {
+      if (safeModelType === "eleven_turbo_v2_5") return "eleven_turbo_v2"
+      if (safeModelType === "eleven_flash_v2_5") return "eleven_flash_v2"
+    } else {
+      // For Non-English, ensure we only use v2_5 models
+      if (safeModelType === "eleven_turbo_v2") return "eleven_turbo_v2_5"
+      if (safeModelType === "eleven_flash_v2") return "eleven_flash_v2_5"
     }
-    return modelType
+    return safeModelType
   }
 
   // Legacy support for old 'turbo'/'flash' format
-  if (modelType === "turbo") {
-    return language === "en" ? "eleven_turbo_v2" : "eleven_turbo_v2_5"
+  if (safeModelType === "turbo") {
+    return safeLanguage === "en" ? "eleven_turbo_v2" : "eleven_turbo_v2_5"
   }
-  return language === "en" ? "eleven_flash_v2" : "eleven_flash_v2_5"
+  return safeLanguage === "en" ? "eleven_flash_v2" : "eleven_flash_v2_5"
 }
 
 export const getAvailableModels = (language: string) => {
   if (language === "en") {
-    // For English, only v2 models are available
+    // For English, only v2 models are available (optimized)
     return modelOptions.filter((model) => model.id === "eleven_turbo_v2" || model.id === "eleven_flash_v2")
   }
-  // For all other languages, all models are available
-  return modelOptions
+  // For all other languages, only v2.5 models are available
+  return modelOptions.filter((model) => model.id === "eleven_turbo_v2_5" || model.id === "eleven_flash_v2_5")
 }
 
 export const getLanguageName = (code: string) => {

@@ -4,11 +4,13 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { fetchAgents } from "@/store/agentsSlice";
 import { useNavigate } from "react-router-dom";
+import { getLanguageFlag } from "@/lib/constants/languages";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import DataTable, { DataTableColumn, useMemoizedCallback } from "@/components/hero-ui/DataTable";
-import { User, Chip, Button, RadioGroup, Radio, DropdownItem, useButton } from "@heroui/react";
+import { User, Chip, Button, RadioGroup, Radio, DropdownItem, useButton, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import React from "react";
+import { deleteAgent } from "@/store/agentsSlice";
 
 // Data enrichment utilities
 const getRandomPhone = () =>
@@ -38,7 +40,6 @@ interface EnrichedAgent {
   name: string;
   assistantId: string;
   model: string;
-  modelUser: string;
   status: string;
   billing: string;
   phoneNumber: string;
@@ -132,38 +133,46 @@ const DeleteFilledIcon = (props: any) => (
 
 export default function ClientsTable() {
   const [statusFilter, setStatusFilter] = React.useState("all");
+  const [agentToDelete, setAgentToDelete] = React.useState<EnrichedAgent | null>(null);
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { agents, loading } = useAppSelector((s) => s.agents);
-
-  const eyesRef = React.useRef<HTMLButtonElement | null>(null);
-  const editRef = React.useRef<HTMLButtonElement | null>(null);
-  const deleteRef = React.useRef<HTMLButtonElement | null>(null);
-  const { getButtonProps: getEyesProps } = useButton({ ref: eyesRef });
-  const { getButtonProps: getEditProps } = useButton({ ref: editRef });
-  const { getButtonProps: getDeleteProps } = useButton({ ref: deleteRef });
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   useEffect(() => {
     dispatch(fetchAgents());
   }, [dispatch]);
 
+  const handleDeletePress = (agent: EnrichedAgent) => {
+    setAgentToDelete(agent);
+    onOpen();
+  };
+
+  const confirmDelete = async () => {
+    if (agentToDelete) {
+      await dispatch(deleteAgent(agentToDelete.id));
+      setAgentToDelete(null);
+      onOpenChange();
+    }
+  };
+
   const enrichedAgents: EnrichedAgent[] = useMemo(() => {
     return (agents || []).map((agent: any) => {
-      const modelUser = getRandomModelUser();
-
       return {
         id: agent.agent_id,
         name: agent.name || "Untitled Agent",
         assistantId: agent.agent_id,
-        model: "ChatGPT 4o",
-        modelUser: modelUser,
-        status: ["active", "paused", "inactive"][Math.floor(Math.random() * 3)] as StatusOptions,
+        model: agent.modelName || "ChatGPT 4o",
+        status: agent.status || "inactive",
         billing: "stripe",
-        phoneNumber: getRandomPhone(),
-        language: getRandomLanguage(),
-        usage: getRandomUsage(),
-        usageMax: 6000,
+        phoneNumber: agent.phoneNumber || "None",
+        language: { 
+          name: agent.languageName || "English", 
+          code: getLanguageFlag(agent.language || "en")
+        },
+        usage: agent.usage || 0,
+        usageMax: agent.usageMax || 100,
       };
     });
   }, [agents]);
@@ -191,25 +200,19 @@ export default function ClientsTable() {
         );
       case "model":
         return (
-          <User
-            avatarProps={{ radius: "lg", src: `https://i.pravatar.cc/150?u=${user.modelUser}` }}
-            classNames={{
-              name: "text-default-foreground",
-              description: "text-default-500",
-            }}
-            description={user.model}
-            name={user.modelUser}
-          >
-            {user.modelUser}
-          </User>
+          <div className="flex flex-col">
+            <span className="text-small text-default-foreground font-semibold line-clamp-1">
+              {user.model}
+            </span>
+          </div>
         );
       case "phoneNumber":
         return (
           <div className="flex items-center gap-2">
             <img
-              alt="US Flag"
+              alt="Flag"
               className="w-5 h-3.5 object-cover rounded-sm"
-              src="https://flagcdn.com/us.svg"
+              src={`https://flagcdn.com/${user.language.code}.svg`}
             />
             <p className="text-small text-default-foreground text-nowrap">{user.phoneNumber}</p>
           </div>
@@ -239,13 +242,13 @@ export default function ClientsTable() {
             <div className="h-1.5 w-full bg-default-200 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full ${
-                  user.usage > 5000
+                  user.usage > (user.usageMax * 0.8)
                     ? "bg-danger"
-                    : user.usage > 3000
+                    : user.usage > (user.usageMax * 0.5)
                     ? "bg-warning"
                     : "bg-success"
                 }`}
-                style={{ width: `${(user.usage / user.usageMax) * 100}%` }}
+                style={{ width: `${user.usageMax > 0 ? (user.usage / user.usageMax) * 100 : 0}%` }}
               />
             </div>
             <span className="text-[10px] text-default-500">
@@ -256,24 +259,24 @@ export default function ClientsTable() {
       case "actions":
         return (
           <div className="flex items-center justify-end gap-2">
-            <EyeFilledIcon
-              {...getEyesProps()}
-              className="text-default-400 cursor-pointer"
-              height={18}
-              width={18}
-            />
-            <EditLinearIcon
-              {...getEditProps()}
-              className="text-default-400 cursor-pointer"
-              height={18}
-              width={18}
-            />
-            <DeleteFilledIcon
-              {...getDeleteProps()}
-              className="text-default-400 cursor-pointer"
-              height={18}
-              width={18}
-            />
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              className="text-default-400 cursor-pointer min-w-unit-8 w-8 h-8"
+              onPress={() => navigate(`/dashboard/assistants/${user.id}`)}
+            >
+              <EyeFilledIcon height={18} width={18} />
+            </Button>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              className="text-danger cursor-pointer min-w-unit-8 w-8 h-8"
+              onPress={() => handleDeletePress(user)}
+            >
+              <DeleteFilledIcon height={18} width={18} />
+            </Button>
           </div>
         );
       default:
@@ -281,7 +284,7 @@ export default function ClientsTable() {
     }
   });
 
-  if (loading) {
+  if (loading && agents.length === 0) {
     return (
       <div className="flex items-center justify-center h-full p-8">
         <LoadingSpinner />
@@ -290,39 +293,59 @@ export default function ClientsTable() {
   }
 
   return (
-    <DataTable<EnrichedAgent>
-      columns={columns}
-      data={enrichedAgents}
-      renderCell={renderCell}
-      initialVisibleColumns={INITIAL_VISIBLE_COLUMNS}
-      searchPlaceholder="Search"
-      searchKeys={["name", "assistantId", "modelUser"]}
-      topBarTitle="Team Members"
-      topBarCount={enrichedAgents.length}
-      topBarAction={
-        <Button color="primary" endContent={<Icon icon="solar:add-circle-bold" width={20} />}>
-          Add Member
-        </Button>
-      }
-      emptyContent="No agents found"
-      filterContent={
-        <RadioGroup label="Status" value={statusFilter} onValueChange={setStatusFilter}>
-          <Radio value="all">All</Radio>
-          <Radio value="active">Active</Radio>
-          <Radio value="inactive">Inactive</Radio>
-          <Radio value="paused">Paused</Radio>
-        </RadioGroup>
-      }
-      selectedActionsContent={
-        <>
-          <DropdownItem key="send-email">Send email</DropdownItem>
-          <DropdownItem key="bulk-edit">Bulk edit</DropdownItem>
-          <DropdownItem key="delete">Delete</DropdownItem>
-        </>
-      }
-      onItemFilter={itemFilter}
-      sortableColumnKey="name"
-      ariaLabel="Agents table with custom cells, pagination and sorting"
-    />
+    <>
+      <DataTable<EnrichedAgent>
+        columns={columns}
+        data={enrichedAgents}
+        renderCell={renderCell}
+        initialVisibleColumns={INITIAL_VISIBLE_COLUMNS}
+        searchPlaceholder="Search"
+        searchKeys={["name", "assistantId", "model"]}
+        topBarTitle="Team Members"
+        topBarCount={enrichedAgents.length}
+        topBarAction={
+          <Button 
+            color="primary" 
+            endContent={<Icon icon="solar:add-circle-bold" width={20} />}
+            onPress={() => navigate('/dashboard/assistants?create=true')}
+          >
+            Add Member
+          </Button>
+        }
+        emptyContent="No agents found"
+        filterContent={
+          <RadioGroup label="Status" value={statusFilter} onValueChange={setStatusFilter}>
+            <Radio value="all">All</Radio>
+            <Radio value="active">Active</Radio>
+            <Radio value="inactive">Inactive</Radio>
+            <Radio value="paused">Paused</Radio>
+          </RadioGroup>
+        }
+        onItemFilter={itemFilter}
+        sortableColumnKey="name"
+        ariaLabel="Agents table with custom cells, pagination and sorting"
+      />
+
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>Delete Agent</ModalHeader>
+              <ModalBody>
+                <p>Are you sure you want to delete <b>{agentToDelete?.name}</b>? This action cannot be undone.</p>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="light" onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button color="danger" onPress={confirmDelete}>
+                  Delete
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </>
   );
 }

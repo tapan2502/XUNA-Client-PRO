@@ -61,7 +61,6 @@ export default function Sidebar() {
         <div className={isCollapsed ? "px-2" : ""}>
           <SidebarLogo 
             isCollapsed={isCollapsed} 
-            toggleCollapse={() => setIsCollapsed(!isCollapsed)} 
           />
         </div>
 

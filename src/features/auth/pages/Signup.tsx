@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Loader2,
 } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export default function Signup() {
   const dispatch = useAppDispatch();
@@ -48,10 +49,11 @@ export default function Signup() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-extrabold tracking-tight">
-            <span className="text-neutral-900 dark:text-white">X</span>
-            <span className="text-primary">UNA</span>
-          </h1>
+
+
+          <div className="flex justify-center mb-6">
+            <img src={logo} alt="XUNA Logo" className="h-24 w-auto object-contain invert dark:invert-0" />
+          </div>
           <h2 className="mt-2 text-lg font-semibold text-neutral-800 dark:text-neutral-200">
             Create your account
           </h2>
@@ -197,7 +199,7 @@ export default function Signup() {
             <button
               type="submit"
               disabled={disabled}
-              className="group w-full inline-flex items-center justify-center gap-2 rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-sm active:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition"
+              className="group w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-600 active:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition"
             >
               {loading ? (
                 <>

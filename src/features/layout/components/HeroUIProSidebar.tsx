@@ -5,11 +5,8 @@ import type { SidebarItem } from "@/components/hero-ui/HeroSidebar";
 import React from "react";
 import {
   ScrollShadow,
-  Select,
-  SelectItem,
   Input,
   Spacer,
-  SelectSection,
   Button,
   User as HeroUser,
   Avatar,
@@ -130,23 +127,7 @@ const configItems: SidebarItem[] = [
   },
 ];
 
-// Workspace configuration
-const workspaces = [
-  {
-    value: "0",
-    label: "XUNA AI",
-    items: [
-      {
-        value: "1",
-        label: "Core workspace",
-      },
-      {
-        value: "2",
-        label: "Development workspace",
-      },
-    ],
-  },
-];
+
 
 export default function HeroUIProSidebar() {
   const navigate = useNavigate();
@@ -198,57 +179,16 @@ const handleCall = () => {
   return (
     <div className="h-full">
       <div className="border-r border-divider relative flex h-full w-64 flex-1 flex-col px-3 py-4 bg-background">
-        {/* Workspace Selector - Matching Figma exactly */}
-        <div className="mb-4">
-          <Select
-            disableSelectorIconRotation
-            aria-label="Select workspace"
-            classNames={{
-              trigger: "h-14 bg-background border border-default-200 rounded-2xl px-3",
-              value: "text-sm",
-              innerWrapper: "gap-2",
-              selectorIcon: "text-default-400"
-            }}
-            defaultSelectedKeys={["1"]}
-            items={workspaces}
-            placeholder="Select workspace"
-            renderValue={(items) => {
-              return items.map((item) => (
-                <div key={item.key} className="flex flex-col gap-0 items-start">
-                  <span className="text-sm font-semibold text-foreground">Xuna AI</span>
-                  <span className="text-xs text-default-400">{item.data?.label}</span>
-                </div>
-              ));
-            }}
-            selectorIcon={
-              <Icon className="text-default-400" icon="lucide:chevrons-up-down" width={14} />
-            }
-            startContent={
-              <div className="relative h-9 w-9 flex-none rounded-full border border-default-200 flex items-center justify-center bg-background">
-                <Icon className="text-default-400" icon="solar:users-group-rounded-linear" width={18} />
-              </div>
-            }
-          >
-            {(section) => (
-              <SelectSection
-                key={section.value}
-                hideSelectedIcon
-                showDivider
-                aria-label={section.label}
-                items={section.items}
-                title={section.label}
-              >
-                {/* @ts-ignore */}
-                {(item) => (
-                  <SelectItem key={item.value} aria-label={item.label} textValue={item.label}>
-                    <div className="flex flex-row items-center justify-between gap-1">
-                      <span>{item.label}</span>
-                    </div>
-                  </SelectItem>
-                )}
-              </SelectSection>
-            )}
-          </Select>
+        
+        {/* Static Workspace Header */}
+        <div className="mb-6 flex items-center gap-3 px-2 py-3 border border-default-200 rounded-2xl bg-background">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-default-100 text-default-500">
+            <Icon icon="solar:users-group-rounded-linear" width={20} />
+          </div>
+          <div className="flex flex-col overflow-hidden">
+             <span className="text-sm font-bold text-foreground truncate">Xuna AI</span>
+             <span className="text-xs text-default-500 truncate">Core workspace</span>
+          </div>
         </div>
 
         {/* Sidebar Navigation - Simple like Figma */}

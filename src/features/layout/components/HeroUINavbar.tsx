@@ -27,24 +27,9 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { selectEffectiveUser, logout } from "@/store/authSlice";
 import NotificationsCard from "./NotificationsCard";
 import NavbarActions from "./navbar/NavbarActions";
+import logoImage from "@/assets/logo.png";
 
-// Logo component
-const AppIcon = () => (
-  <svg
-    className="text-primary"
-    fill="none"
-    height="36"
-    viewBox="0 0 32 32"
-    width="36"
-  >
-    <path
-      clipRule="evenodd"
-      d="M17.6482 10.1305L15.8785 7.02583L7.02979 22.5499H10.5278L17.6482 10.1305ZM19.8798 14.0457L18.11 17.1983L19.394 19.4511H16.8453L15.1056 22.5499H24.7272L19.8798 14.0457Z"
-      fill="currentColor"
-      fillRule="evenodd"
-    />
-  </svg>
-);
+
 
 export default function HeroUINavbar() {
   const navigate = useNavigate();
@@ -74,9 +59,14 @@ export default function HeroUINavbar() {
     >
       {/* Left: Logo */}
       <NavbarBrand className="gap-2 flex-grow-0">
+
         <NavbarMenuToggle className="mr-2 h-6 sm:hidden" />
-        <AppIcon />
-        <p className="font-bold text-inherit">XUNA AI</p>
+        <img 
+          src={logoImage} 
+          alt="XUNA" 
+          className="h-12 w-auto object-contain invert dark:invert-0"
+          style={{ minWidth: '120px' }}
+        />
       </NavbarBrand>
 
       {/* Right: Navigation Links + Action Icons */}

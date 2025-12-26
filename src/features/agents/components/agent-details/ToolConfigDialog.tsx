@@ -177,34 +177,41 @@ export function ToolConfigDialog({ isOpen, onClose, onSave, editingTool, agents 
       isOpen={isOpen} 
       onClose={onClose}
       placement="right"
-      size="md"
+      size="lg"
       backdrop="transparent"
+      hideCloseButton
       classNames={{
-        base: "max-w-[500px] border-l border-default-200 shadow-2xl",
-        header: "border-b-0 pb-0",
-        body: "py-6",
-        footer: "border-t border-default-100"
+        base: "max-w-[650px] border-l border-default-200 shadow-2xl",
+        header: "border-b border-default-100 px-6 py-4",
+        body: "px-6 py-6 overflow-y-auto",
+        footer: "border-t border-default-100 px-6 py-4"
       }}
     >
       <DrawerContent>
-        <DrawerHeader className="flex items-center gap-4 px-6 pt-6">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${editingTool ? "bg-blue-50 text-blue-600" : "bg-blue-50 text-blue-600"}`}>
+        <DrawerHeader className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
             {editingTool ? <Settings size={20} /> : <Plus size={20} />}
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-bold text-default-900 leading-tight">
+            <h3 className="text-lg font-bold text-default-900">
               {editingTool ? "Edit Tool" : "Add Tool"}
             </h3>
-            <p className="text-tiny text-default-500 font-normal">
+            <p className="text-sm text-default-500">
               {editingTool ? "Edit the selected tool configuration" : "Add a tool to your agent"}
             </p>
           </div>
-          <Button isIconOnly variant="light" size="sm" onPress={onClose} className="rounded-full">
-            <X size={20} className="text-default-400" />
+          <Button 
+            isIconOnly 
+            variant="light" 
+            size="sm" 
+            onPress={onClose}
+            className="text-default-400 hover:text-default-600"
+          >
+            <X size={20} />
           </Button>
         </DrawerHeader>
 
-        <DrawerBody className="px-6 space-y-7">
+        <DrawerBody className="space-y-6">
           {/* Tool Type Selection */}
           <div className="space-y-2">
             <label className="text-small font-bold text-default-900">Tool Type</label>
@@ -235,178 +242,211 @@ export function ToolConfigDialog({ isOpen, onClose, onSave, editingTool, agents 
 
           {toolType === "webhook" ? (
             <div className="space-y-6">
-              <Input
-                label="Tool Name"
-                placeholder="Enter tool name (letters, numbers, hyphens, underscores only)"
-                value={name}
-                onValueChange={setName}
-                variant="bordered"
-                labelPlacement="outside"
-                isRequired
-                description="Format: letters, numbers, hyphens, and underscores only (1-64 characters)"
-              />
-
-              <Textarea
-                label="Description"
-                placeholder="Describe what this tool does"
-                value={description}
-                onValueChange={setDescription}
-                variant="bordered"
-                labelPlacement="outside"
-                isRequired
-                minRows={3}
-              />
-
-              <Input
-                label="Webhook URL"
-                placeholder="https://your-webhook-url.com"
-                value={url}
-                onValueChange={setUrl}
-                variant="bordered"
-                labelPlacement="outside"
-                isRequired
-              />
-
-              <Input
-                label="Response Timeout (seconds)"
-                type="number"
-                value={timeout.toString()}
-                onValueChange={(v) => setTimeout(parseInt(v) || 20)}
-                variant="bordered"
-                labelPlacement="outside"
-              />
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-small font-bold text-default-900">Request Body Schema</label>
-                  <Button 
-                    variant="light" 
-                    size="sm" 
-                    color="primary" 
-                    className="p-0 h-auto font-bold text-tiny"
-                    onPress={onSampleModalOpen}
-                  >
-                    View Sample Schema
-                  </Button>
-                </div>
-                <p className="text-tiny text-default-400">Define the structure of the request body in JSON format</p>
-                <Textarea
-                  value={requestBody}
-                  onValueChange={setRequestBody}
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Tool Name"
+                  placeholder="e.g. get_weather"
+                  value={name}
+                  onValueChange={setName}
                   variant="bordered"
-                  rows={8}
+                  labelPlacement="outside"
+                  isRequired
                   classNames={{
-                    input: "font-mono text-xs p-4 bg-default-50/50"
+                    label: "text-sm font-semibold text-default-900 mb-1.5",
+                    input: "text-sm"
                   }}
                 />
+                <Input
+                  label="Timeout (sec)"
+                  type="number"
+                  value={timeout.toString()}
+                  onValueChange={(v) => setTimeout(parseInt(v) || 20)}
+                  variant="bordered"
+                  labelPlacement="outside"
+                  classNames={{
+                    label: "text-sm font-semibold text-default-900 mb-1.5",
+                    input: "text-sm"
+                  }}
+                />
+              </div>
+
+              <div className="pt-3">
+                <Textarea
+                  label="Description"
+                  placeholder="Describe what this tool does in detail..."
+                  value={description}
+                  onValueChange={setDescription}
+                  variant="bordered"
+                  labelPlacement="outside"
+                  isRequired
+                  minRows={2}
+                  classNames={{
+                    label: "text-sm font-semibold text-default-900 mb-1.5",
+                    input: "text-sm"
+                  }}
+                />
+              </div>
+
+              <div className="pt-3">
+                <Input
+                  label="Webhook URL"
+                  placeholder="https://api.example.com/webhook"
+                  value={url}
+                  onValueChange={setUrl}
+                  variant="bordered"
+                  labelPlacement="outside"
+                  isRequired
+                  classNames={{
+                    label: "text-sm font-semibold text-default-900 mb-1.5",
+                    input: "text-sm"
+                  }}
+                />
+              </div>
+
+              <div className="space-y-2.5 pt-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold text-default-900">Request Body Schema</label>
+                  <Button 
+                    variant="flat" 
+                    size="sm" 
+                    color="primary" 
+                    className="h-7 text-xs font-semibold px-3"
+                    onPress={onSampleModalOpen}
+                  >
+                    Load Sample
+                  </Button>
+                </div>
+                <div className="border border-default-200 rounded-xl overflow-hidden">
+                    <Textarea
+                    value={requestBody}
+                    onValueChange={setRequestBody}
+                    variant="flat"
+                    minRows={8}
+                    classNames={{
+                        input: "font-mono text-xs bg-default-50/50 p-3",
+                        inputWrapper: "shadow-none bg-transparent"
+                    }}
+                    />
+                </div>
+                <p className="text-xs text-default-400">Define the JSON schema for the request body.</p>
               </div>
             </div>
           ) : (
             <div className="space-y-6">
-              <Textarea
-                label="Description"
-                placeholder="Describe what this tool does"
-                value={description}
-                onValueChange={setDescription}
-                variant="bordered"
-                labelPlacement="outside"
-                minRows={3}
-              />
-
-              <Input
-                label="Response Timeout (seconds)"
-                type="number"
-                value={timeout.toString()}
-                onValueChange={(v) => setTimeout(parseInt(v) || 20)}
-                variant="bordered"
-                labelPlacement="outside"
-              />
-
-              <div className="space-y-5">
-                <div className="flex items-center gap-2">
-                  <span className="text-small font-bold text-default-900">Transfer Configuration</span>
-                </div>
-
-                <Select
-                  label="Target Agent"
-                  placeholder="Select an agent"
-                  selectedKeys={targetAgentId ? [targetAgentId] : []}
-                  onSelectionChange={(keys) => setTargetAgentId(Array.from(keys)[0] as string)}
-                  variant="bordered"
-                  labelPlacement="outside"
-                  isRequired
-                >
-                  {agents.map((a: any) => (
-                    <SelectItem key={a.agent_id} textValue={a.name}>
-                      {a.name} ({a.agent_id})
-                    </SelectItem>
-                  ))}
-                </Select>
-
-                <Input
-                  label="Transfer Condition"
-                  placeholder="e.g. When user asks for technical support"
-                  value={transferCondition}
-                  onValueChange={setTransferCondition}
-                  variant="bordered"
-                  labelPlacement="outside"
-                  isRequired
-                />
-
-                <Input
-                  label="Delay (milliseconds)"
-                  type="number"
-                  value={delay.toString()}
-                  onValueChange={(v) => setDelay(parseInt(v) || 0)}
-                  variant="bordered"
-                  labelPlacement="outside"
-                />
-
-                <Textarea
-                  label="Transfer Message"
-                  placeholder="Optional message to play before transfer"
-                  value={transferMessage}
-                  onValueChange={setTransferMessage}
-                  variant="bordered"
-                  labelPlacement="outside"
-                  minRows={2}
-                />
-
-                <Checkbox 
-                  isSelected={enableFirstMessage}
-                  onValueChange={setEnableFirstMessage}
-                  classNames={{ label: "text-small font-bold" }}
-                >
-                  Enable transferred agent first message
-                </Checkbox>
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="col-span-2">
+                    <Textarea
+                    label="Description"
+                    placeholder="Describe the purpose of this transfer..."
+                    value={description}
+                    onValueChange={setDescription}
+                    variant="bordered"
+                    labelPlacement="outside"
+                    minRows={2}
+                    classNames={{
+                        label: "text-sm font-semibold text-default-900 mb-1.5",
+                        input: "text-sm"
+                    }}
+                    />
+                 </div>
               </div>
 
-              {editingTool && (
-                <div className="space-y-4 pt-4">
-                  <p className="text-tiny text-default-400 italic">The following fields are system-defined and cannot be modified:</p>
-                  <Input
-                    label="Name"
-                    value="transfer_to_agent"
-                    variant="bordered"
-                    labelPlacement="outside"
-                    isDisabled
-                  />
-                  <Input
-                    label="Type"
-                    value="system"
-                    variant="bordered"
-                    labelPlacement="outside"
-                    isDisabled
-                  />
-                  <Input
-                    label="System Tool Type"
-                    value="transfer_to_agent"
-                    variant="bordered"
-                    labelPlacement="outside"
-                    isDisabled
-                  />
+              <div className="border border-default-200 rounded-xl p-5 bg-default-50/30 space-y-5">
+                <div className="flex items-center justify-between border-b border-default-200 pb-3">
+                  <span className="text-sm font-bold text-default-900 flex items-center gap-2">
+                    <PhoneForwarded size={16} className="text-primary" />
+                    Transfer Configuration
+                  </span>
+                  <div className="w-32">
+                     <Input
+                        label="Timeout (sec)"
+                        type="number"
+                        size="sm"
+                        value={timeout.toString()}
+                        onValueChange={(v) => setTimeout(parseInt(v) || 20)}
+                        variant="bordered"
+                        labelPlacement="outside-left"
+                        classNames={{
+                            label: "text-xs font-medium text-default-600 pr-2",
+                            input: "text-xs"
+                        }}
+                    />
+                  </div>
                 </div>
-              )}
+
+                <div className="grid grid-cols-1 gap-5">
+                    <Select
+                        label="Target Agent"
+                        placeholder="Select destination agent"
+                        selectedKeys={targetAgentId ? [targetAgentId] : []}
+                        onSelectionChange={(keys) => setTargetAgentId(Array.from(keys)[0] as string)}
+                        variant="bordered"
+                        labelPlacement="outside"
+                        isRequired
+                        classNames={{
+                        label: "text-sm font-semibold text-default-900 mb-1.5"
+                        }}
+                    >
+                        {agents.map((a: any) => (
+                        <SelectItem key={a.agent_id} textValue={a.name}>
+                            {a.name}
+                        </SelectItem>
+                        ))}
+                    </Select>
+
+                    <Input
+                        label="Transfer Condition"
+                        placeholder="e.g. User asks to speak with a human agent"
+                        value={transferCondition}
+                        onValueChange={setTransferCondition}
+                        variant="bordered"
+                        labelPlacement="outside"
+                        isRequired
+                        classNames={{
+                        label: "text-sm font-semibold text-default-900 mb-1.5",
+                        input: "text-sm"
+                        }}
+                    />
+
+                    <div className="grid grid-cols-2 gap-4 items-start">
+                        <Input
+                            label="Pre-transfer Delay (ms)"
+                            type="number"
+                            value={delay.toString()}
+                            onValueChange={(v) => setDelay(parseInt(v) || 0)}
+                            variant="bordered"
+                            labelPlacement="outside"
+                            classNames={{
+                                label: "text-sm font-semibold text-default-900 mb-1.5",
+                                input: "text-sm"
+                            }}
+                        />
+                         <div className="pt-7">
+                            <Checkbox 
+                                isSelected={enableFirstMessage}
+                                onValueChange={setEnableFirstMessage}
+                                classNames={{ label: "text-sm text-default-700" }}
+                            >
+                                Enable first message
+                            </Checkbox>
+                        </div>
+                    </div>
+                    
+                    <Textarea
+                        label="Transfer Message (Optional)"
+                        placeholder="e.g. Connecting you to a specialist now..."
+                        value={transferMessage}
+                        onValueChange={setTransferMessage}
+                        variant="bordered"
+                        labelPlacement="outside"
+                        minRows={2}
+                        classNames={{
+                        label: "text-sm font-semibold text-default-900 mb-1.5",
+                        input: "text-sm"
+                        }}
+                    />
+                </div>
+              </div>
             </div>
           )}
         </DrawerBody>

@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { signIn, signInWithGoogle } from "@/store/authSlice";
+import { signIn, signInWithGoogle, selectAuthError } from "@/store/authSlice";
 import { Link } from "react-router-dom";
-import { Mail, Lock, LogIn, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Lock, LogIn, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 export default function Login() {
   const dispatch = useAppDispatch();
   const loading = useAppSelector((s) => s.auth.loading);
+  const error = useAppSelector(selectAuthError);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -44,6 +45,14 @@ export default function Login() {
               onSubmit();
             }}
           >
+            {/* Error Message */}
+            {error && (
+              <div className="flex items-center gap-2 p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <p>{error}</p>
+              </div>
+            )}
+
             {/* Email */}
             <div className="space-y-2">
               <label

@@ -15,12 +15,30 @@ export function KnowledgeBaseSection({ agent, knowledgeBase, onChange }: Knowled
   const [showModal, setShowModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedDocs, setSelectedDocs] = useState<string[]>([])
-  const linkedDocs = agent.conversation_config?.agent?.prompt?.knowledge_base || []
+  const linkedDocs = (agent.conversation_config?.agent?.prompt?.knowledge_base || []) as any[]
+  // Extract IDs for easy checking
+  const linkedDocIds = linkedDocs.map(d => typeof d === 'string' ? d : d.id)
 
   const filteredDocs = (knowledgeBase || []).filter((doc) => (doc?.name || "").toLowerCase().includes(searchQuery.toLowerCase()))
 
   const handleAddDocuments = () => {
-    const newDocs = [...new Set([...linkedDocs, ...selectedDocs])]
+    // We need to add the full document objects, not just IDs
+    const docsToAdd = selectedDocs.map(id => knowledgeBase.find(d => d.id === id)).filter(Boolean)
+    
+    // Combine existing docs with new ones, avoiding duplicates by ID
+    const existingIds = new Set(linkedDocIds)
+    const newDocs = [...linkedDocs]
+    
+    docsToAdd.forEach(doc => {
+      if (doc && !existingIds.has(doc.id)) {
+        newDocs.push({
+          id: doc.id,
+          name: doc.name,
+          type: doc.type
+        })
+      }
+    })
+
     onChange("conversation_config.agent.prompt.knowledge_base", newDocs)
     setShowModal(false)
     setSelectedDocs([])
@@ -28,7 +46,10 @@ export function KnowledgeBaseSection({ agent, knowledgeBase, onChange }: Knowled
   }
 
   const handleRemoveDocument = (docId: string) => {
-    const newDocs = linkedDocs.filter((id: string) => id !== docId)
+    const newDocs = linkedDocs.filter((doc: any) => {
+      const id = typeof doc === 'string' ? doc : doc.id
+      return id !== docId
+    })
     onChange("conversation_config.agent.prompt.knowledge_base", newDocs)
   }
 
@@ -66,8 +87,13 @@ export function KnowledgeBaseSection({ agent, knowledgeBase, onChange }: Knowled
             </div>
           ) : (
             <div className="space-y-2">
-              {linkedDocs.map((docId: string) => {
-                const doc = knowledgeBase.find((d) => d.id === docId)
+              {linkedDocs.map((docItem: any) => {
+                const docId = typeof docItem === 'string' ? docItem : docItem.id
+                // Try to find in full KB list to get latest details, fallback to item data
+                const docFromStore = knowledgeBase.find((d) => d.id === docId)
+                const name = docFromStore?.name || (typeof docItem === 'object' ? docItem.name : docId)
+                const type = docFromStore?.type || (typeof docItem === 'object' ? docItem.type : "Document")
+                
                 return (
                   <Card key={docId} shadow="sm" className="border border-default-200">
                     <CardBody className="p-3 flex flex-row items-center justify-between">
@@ -76,8 +102,8 @@ export function KnowledgeBaseSection({ agent, knowledgeBase, onChange }: Knowled
                           <BookOpen className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium">{doc?.name || docId}</p>
-                          <p className="text-tiny text-default-400">{doc?.type || "Document"}</p>
+                          <p className="text-sm font-medium">{name}</p>
+                          <p className="text-tiny text-default-400">{type}</p>
                         </div>
                       </div>
                       <Button
@@ -129,7 +155,7 @@ export function KnowledgeBaseSection({ agent, knowledgeBase, onChange }: Knowled
                 </div>
               ) : (
                 filteredDocs.map((doc) => {
-                  const isLinked = linkedDocs.includes(doc.id)
+                  const isLinked = linkedDocIds.includes(doc.id)
                   const isSelected = selectedDocs.includes(doc.id)
 
                   return (

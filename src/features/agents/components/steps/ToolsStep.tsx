@@ -19,24 +19,38 @@ export function ToolsStep({ toolIds, setToolIds, builtInTools, setBuiltInTools }
   const [isToolModalOpen, setIsToolModalOpen] = useState(false)
   const [editingToolId, setEditingToolId] = useState<string | null>(null)
 
-  const handleAddTool = (toolId: string) => {
-    if (!toolIds.includes(toolId)) {
-      setToolIds((prev) => [...prev, toolId])
-    }
+  const handleAddTool = (tool: any) => {
+    // Add to builtInTools, NOT toolIds
+    // toolIds is for shared library tools
+    setBuiltInTools((prev) => ({ ...prev, [tool.name]: tool }))
     setIsToolModalOpen(false)
     setEditingToolId(null)
   }
 
-  const handleRemoveTool = (toolId: string) => {
-    setToolIds((prev) => prev.filter((id) => id !== toolId))
+  const handleRemoveTool = (toolName: string) => {
+    // Remove from builtInTools
+    setBuiltInTools((prev) => {
+      const newState = { ...prev }
+      delete newState[toolName]
+      return newState
+    })
+    
+    // Also remove from toolIds if it was there (legacy/cleanup)
+    setToolIds((prev) => prev.filter((id) => id !== toolName))
   }
 
   const handleRemoveBuiltInTool = (key: string) => {
     setBuiltInTools((prev) => ({ ...prev, [key]: null }))
   }
 
-  const activeBuiltInTools = Object.entries(builtInTools).filter(([_, v]) => v !== null)
-  const hasNoTools = toolIds.length === 0 && activeBuiltInTools.length === 0
+  // Separate system tools (presets) from custom webhook tools
+  const activeSystemTools = Object.entries(builtInTools)
+    .filter(([_, v]) => v !== null && v.type === "system")
+  
+  const activeWebhookTools = Object.entries(builtInTools)
+    .filter(([_, v]) => v !== null && v.type === "webhook")
+
+  const hasNoTools = toolIds.length === 0 && activeSystemTools.length === 0 && activeWebhookTools.length === 0
 
   return (
     <div className="space-y-6">
@@ -74,8 +88,8 @@ export function ToolsStep({ toolIds, setToolIds, builtInTools, setBuiltInTools }
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            {/* Built-in Tools */}
-            {activeBuiltInTools.map(([key, tool]) => (
+            {/* System Tools */}
+            {activeSystemTools.map(([key, tool]) => (
               <Card key={key} shadow="sm" className="border border-default-200">
                 <CardBody className="flex flex-row items-center justify-between p-3">
                   <div className="flex items-center gap-3">
@@ -107,17 +121,17 @@ export function ToolsStep({ toolIds, setToolIds, builtInTools, setBuiltInTools }
               </Card>
             ))}
 
-            {/* Webhook Tools */}
-            {toolIds.map((toolId) => (
-              <Card key={toolId} shadow="sm" className="border border-default-200">
+            {/* Custom Webhook Tools (from builtInTools) */}
+            {activeWebhookTools.map(([key, tool]) => (
+              <Card key={key} shadow="sm" className="border border-default-200">
                 <CardBody className="flex flex-row items-center justify-between p-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
                       <Webhook className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <div className="text-small font-medium text-default-900">{toolId}</div>
-                      <div className="text-tiny text-default-500">Webhook tool</div>
+                      <div className="text-small font-medium text-default-900">{tool!.name}</div>
+                      <div className="text-tiny text-default-500">{tool!.description || "Webhook tool"}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
@@ -126,7 +140,7 @@ export function ToolsStep({ toolIds, setToolIds, builtInTools, setBuiltInTools }
                       size="sm"
                       variant="light"
                       onPress={() => {
-                        setEditingToolId(toolId)
+                        setEditingToolId(key)
                         setIsToolModalOpen(true)
                       }}
                     >
@@ -137,11 +151,37 @@ export function ToolsStep({ toolIds, setToolIds, builtInTools, setBuiltInTools }
                       size="sm"
                       variant="light"
                       color="danger"
-                      onPress={() => handleRemoveTool(toolId)}
+                      onPress={() => handleRemoveTool(key)}
                     >
                       <X size={18} />
                     </Button>
                   </div>
+                </CardBody>
+              </Card>
+            ))}
+
+            {/* Legacy/Library Tools (from toolIds) */}
+            {toolIds.map((toolId) => (
+              <Card key={toolId} shadow="sm" className="border border-default-200">
+                <CardBody className="flex flex-row items-center justify-between p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-default-100 flex items-center justify-center">
+                      <Settings className="w-5 h-5 text-default-500" />
+                    </div>
+                    <div>
+                      <div className="text-small font-medium text-default-900">{toolId}</div>
+                      <div className="text-tiny text-default-500">Library Tool</div>
+                    </div>
+                  </div>
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="light"
+                    color="danger"
+                    onPress={() => handleRemoveTool(toolId)}
+                  >
+                    <X size={18} />
+                  </Button>
                 </CardBody>
               </Card>
             ))}

@@ -24,8 +24,8 @@ export function ToolsSection({ agent, onChange, agents }: ToolsSectionProps) {
       const newBuiltInTools = { ...builtInTools, [tool.name]: tool }
       onChange("conversation_config.agent.prompt.built_in_tools", newBuiltInTools)
     } else {
-      const newToolIds = [...toolIds, tool.name]
-      onChange("conversation_config.agent.prompt.tool_ids", newToolIds)
+      // For custom webhook tools defined in built_in_tools, we DO NOT add them to tool_ids
+      // tool_ids is only for referencing shared/library tools by ID
       const newBuiltInTools = { ...builtInTools, [tool.name]: tool }
       onChange("conversation_config.agent.prompt.built_in_tools", newBuiltInTools)
     }

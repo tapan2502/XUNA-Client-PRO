@@ -151,11 +151,19 @@ export default function CallHistoryDetails({ details, onClose, loading }: CallHi
                       <BarChart className="w-4 h-4 text-primary" />
                       <span className="text-tiny text-default-500">Cost</span>
                     </div>
-                    <p className="text-2xl font-bold text-primary">
-                      {details.conversation.metadata.cost !== undefined
-                        ? `$${(details.conversation.metadata.cost / 100).toFixed(4)}`
-                        : "N/A"}
-                    </p>
+                    <div>
+                      <p className="text-2xl font-bold text-primary">
+                        {details.conversation.metadata.cost !== undefined
+                          ? `$${(details.conversation.metadata.cost / 100).toFixed(4)}`
+                          : "N/A"}
+                      </p>
+                      {details.conversation.metadata.cost !== undefined &&
+                        details.conversation.metadata.call_duration_secs > 0 && (
+                          <p className="text-[10px] text-default-400 mt-1">
+                            ${((details.conversation.metadata.cost / 100) / (details.conversation.metadata.call_duration_secs / 60)).toFixed(4)}/min
+                          </p>
+                        )}
+                    </div>
                   </CardBody>
                 </Card>
               </div>

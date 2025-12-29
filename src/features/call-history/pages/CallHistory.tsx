@@ -1,12 +1,13 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchConversations, fetchConversationDetails, clearSelectedConversation } from "@/store/callHistorySlice"
 import { Phone, Clock, MessageSquare, Copy, Check } from "lucide-react"
 import { Chip, Button } from "@heroui/react"
 import DataTable from "@/components/hero-ui/DataTable"
 import CallHistoryDetails from "../components/CallHistoryDetails"
+import CallHistoryFilters from "../components/CallHistoryFilters"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 
 interface Column {
@@ -22,6 +23,14 @@ export default function CallHistory() {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("")
+  const [dateAfter, setDateAfter] = useState("")
+  const [dateBefore, setDateBefore] = useState("")
+  const [selectedAgent, setSelectedAgent] = useState("")
+  const [selectedEvaluation, setSelectedEvaluation] = useState("")
+  const [sortOrder, setSortOrder] = useState<"latest" | "oldest">("latest")
+
   useEffect(() => {
     dispatch(fetchConversations())
   }, [dispatch])
@@ -33,6 +42,28 @@ export default function CallHistory() {
       dispatch(clearSelectedConversation())
     }
   }, [selectedConversationId, dispatch])
+
+  const filteredConversations = useMemo(() => {
+    return conversations.filter((conv) => {
+      // Agent Filter
+      if (selectedAgent && conv.agent_id !== selectedAgent) return false
+
+      // Sentiment Filter
+      if (selectedEvaluation && conv.call_successful !== selectedEvaluation) return false
+
+      // Date Filters
+      if (dateAfter) {
+        const afterDate = new Date(dateAfter).getTime() / 1000
+        if (conv.start_time_unix_secs < afterDate) return false
+      }
+      if (dateBefore) {
+        const beforeDate = new Date(dateBefore).getTime() / 1000
+        if (conv.start_time_unix_secs > beforeDate) return false
+      }
+
+      return true
+    })
+  }, [conversations, selectedAgent, selectedEvaluation, dateAfter, dateBefore])
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
@@ -60,10 +91,20 @@ export default function CallHistory() {
   }
 
   // Map conversations to include id for DataTable
-  const tableData = conversations.map((conv) => ({
-    ...conv,
-    id: conv.conversation_id,
-  }))
+  const tableData = useMemo(() => {
+    let data = filteredConversations.map((conv) => ({
+      ...conv,
+      id: conv.conversation_id,
+    }))
+
+    if (sortOrder === "latest") {
+      data.sort((a, b) => b.start_time_unix_secs - a.start_time_unix_secs)
+    } else {
+      data.sort((a, b) => a.start_time_unix_secs - b.start_time_unix_secs)
+    }
+
+    return data
+  }, [filteredConversations, sortOrder])
 
   const columns: Column[] = [
     { uid: "timestamp", name: "Date & Time", sortable: true },
@@ -159,7 +200,7 @@ export default function CallHistory() {
         searchKeys={["agent_name", "agent_id", "conversation_id"]}
         searchPlaceholder="Search conversations..."
         topBarTitle="Call History"
-        topBarCount={conversations.length}
+        topBarCount={tableData.length}
         emptyContent="No call history found. Start making calls to see them here."
       />
 

@@ -6,7 +6,7 @@ import { X } from "lucide-react"
 interface ToolConfigModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (toolId: string) => void
+  onSave: (tool: any) => void
   editingToolId?: string | null
 }
 
@@ -28,7 +28,19 @@ export function ToolConfigModal({ isOpen, onClose, onSave, editingToolId }: Tool
 
   const handleSave = () => {
     if (!toolName.trim()) return
-    onSave(toolName)
+    onSave({
+      name: toolName,
+      description: toolDescription,
+      type: "webhook",
+      api_schema: {
+        url: toolUrl,
+        method: "POST",
+        request_body_schema: {
+          properties: {},
+          type: "object"
+        }
+      }
+    })
     handleClose()
   }
 

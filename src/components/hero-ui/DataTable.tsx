@@ -32,9 +32,15 @@ import React, { useMemo, useRef, useCallback, useState } from "react";
 import { Icon } from "@iconify/react";
 import { cn } from "@heroui/react";
 
-// Utility hook for memoized callbacks (from Hero UI Pro)
+// Utility hook for memoized callbacks (safe version)
 export function useMemoizedCallback<T extends (...args: any[]) => any>(callback: T): T {
-  return useCallback(callback, []) as T;
+  const callbackRef = useRef(callback);
+  
+  React.useLayoutEffect(() => {
+    callbackRef.current = callback;
+  });
+
+  return useCallback(((...args) => callbackRef.current(...args)) as T, []);
 }
 
 // Types
@@ -86,7 +92,7 @@ export default function DataTable<T extends { id: string | number }>({
   const [filterValue, setFilterValue] = useState("");
   const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
   const [visibleColumns, setVisibleColumns] = useState<Selection>(new Set(initialVisibleColumns));
-  const [rowsPerPage] = useState(5);
+  const [rowsPerPage] = useState(6);
   const [page, setPage] = useState(1);
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
     column: sortableColumnKey || columns[0]?.uid,
@@ -133,24 +139,57 @@ export default function DataTable<T extends { id: string | number }>({
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage) || 1;
 
-  const items = useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
+  // Reset page when filtering or data changes
+  React.useEffect(() => {
+    setPage(1);
+  }, [filterValue, data.length, onItemFilter]);
 
-    return filteredItems.slice(start, end);
-  }, [page, filteredItems, rowsPerPage]);
+  // Ensure current page is within bounds if pages count decreases
+  React.useEffect(() => {
+    if (page > pages) {
+      setPage(pages);
+    }
+  }, [pages, page]);
 
   const sortedItems = useMemo(() => {
-    return [...items].sort((a: T, b: T) => {
-      const col = sortDescriptor.column as keyof T;
-      let first = a[col];
-      let second = b[col];
+    let sortableData = [...filteredItems];
+    
+    return sortableData.sort((a: T, b: T) => {
+      const col = sortDescriptor.column as string;
+      
+      // Handle special column keys where the UID doesn't match the data field
+      let first: any;
+      let second: any;
+      
+      if (col === "timestamp") {
+        first = (a as any).start_time_unix_secs || 0;
+        second = (b as any).start_time_unix_secs || 0;
+      } else if (col === "agent") {
+        first = (a as any).agent_name || "";
+        second = (b as any).agent_name || "";
+      } else if (col === "duration") {
+        first = (a as any).call_duration_secs || 0;
+        second = (b as any).call_duration_secs || 0;
+      } else if (col === "messages") {
+        first = (a as any).message_count || 0;
+        second = (b as any).message_count || 0;
+      } else {
+        first = a[col as keyof T];
+        second = b[col as keyof T];
+      }
 
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
     });
-  }, [sortDescriptor, items]);
+  }, [sortDescriptor, filteredItems]);
+
+  const items = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    return sortedItems.slice(start, end);
+  }, [page, sortedItems, rowsPerPage]);
 
   const filterSelectedKeys = useMemo(() => {
     if (selectedKeys === "all") return selectedKeys;
@@ -182,17 +221,13 @@ export default function DataTable<T extends { id: string | number }>({
     onClick: onMemberInfoClick || (() => {}),
   }));
 
-  const onNextPage = useMemoizedCallback(() => {
-    if (page < pages) {
-      setPage(page + 1);
-    }
-  });
+  const onNextPage = useCallback(() => {
+    setPage((prev) => Math.min(prev + 1, pages));
+  }, [pages]);
 
-  const onPreviousPage = useMemoizedCallback(() => {
-    if (page > 1) {
-      setPage(page - 1);
-    }
-  });
+  const onPreviousPage = useCallback(() => {
+    setPage((prev) => Math.max(prev - 1, 1));
+  }, []);
 
   const onSearchChange = useMemoizedCallback((value?: string) => {
     if (value) {
@@ -415,10 +450,20 @@ export default function DataTable<T extends { id: string | number }>({
               : `${filterSelectedKeys.size} of ${filteredItems.length} selected`}
           </span>
           <div className="flex items-center gap-3">
-            <Button isDisabled={page === 1} size="sm" variant="flat" onPress={onPreviousPage}>
+            <Button 
+              isDisabled={page === 1} 
+              size="sm" 
+              variant="flat" 
+              onPress={onPreviousPage}
+            >
               Previous
             </Button>
-            <Button isDisabled={page === pages} size="sm" variant="flat" onPress={onNextPage}>
+            <Button 
+              isDisabled={page === pages} 
+              size="sm" 
+              variant="flat" 
+              onPress={onNextPage}
+            >
               Next
             </Button>
           </div>
@@ -494,7 +539,7 @@ export default function DataTable<T extends { id: string | number }>({
             </TableColumn>
           )}
         </TableHeader>
-        <TableBody emptyContent={emptyContent} items={sortedItems}>
+        <TableBody emptyContent={emptyContent} items={items}>
           {(item) => (
             <TableRow key={item.id}>
               {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}

@@ -11,9 +11,9 @@ export interface KnowledgeBaseDocument {
 export interface BuiltInTool {
   name: string
   description: string
-  response_timeout_secs: number
-  type: "system"
-  assignments: any[]
+  response_timeout_secs?: number
+  type: "system" | "webhook"
+  assignments?: any[]
   disable_interruptions: boolean
   force_pre_tool_speech: boolean
   params: Record<string, any>

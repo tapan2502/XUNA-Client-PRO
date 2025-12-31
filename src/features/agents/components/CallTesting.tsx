@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Mic, MicOff, Volume2, Phone } from "lucide-react"
 import { Conversation } from "@11labs/client"
+import { cn } from "@/lib/utils"
 
 interface CallTestingProps {
   agentId: string
@@ -48,7 +49,6 @@ const CallTesting: React.FC<CallTestingProps> = ({ agentId, dynamicVariables = {
 
         const conv = await Conversation.startSession({
           agentId,
-          connectionType: "webrtc",
           dynamicVariables: Object.keys(dynamicVariables).length > 0 ? dynamicVariables : undefined,
           onConnect: () => {
             setIsConnected(true)
@@ -87,28 +87,28 @@ const CallTesting: React.FC<CallTestingProps> = ({ agentId, dynamicVariables = {
   }, [conversation])
 
   const statusClasses = isLoading
-    ? "bg-[hsl(var(--accent))] text-muted-foreground"
+    ? "bg-default-100 text-default-500"
     : isConnected
       ? isSpeaking
-        ? "bg-[hsl(var(--primary)_/_0.2)] text-[hsl(var(--primary))]"
-        : "bg-[hsl(var(--destructive)_/_0.15)] text-[hsl(var(--destructive))]"
-      : "bg-[hsl(var(--accent))] text-muted-foreground"
+        ? "bg-primary/10 text-primary border border-primary/20"
+        : "bg-danger/10 text-danger border border-danger/20"
+      : "bg-default-100 text-default-500"
 
   const statusDotClasses = isLoading
-    ? "bg-[hsl(var(--muted-foreground)_/_0.7)]"
+    ? "bg-default-400"
     : isConnected
       ? isSpeaking
-        ? "bg-[hsl(var(--primary))]"
-        : "bg-[hsl(var(--destructive))]"
-      : "bg-[hsl(var(--muted-foreground)_/_0.7)]"
+        ? "bg-primary"
+        : "bg-danger"
+      : "bg-default-400"
 
   const micButtonClasses = isLoading
-    ? "bg-[hsl(var(--accent))]"
+    ? "bg-default-100"
     : isConnected
       ? isSpeaking
-        ? "bg-[hsl(var(--primary))] shadow-[0_16px_35px_hsl(var(--primary)/0.35)] text-white"
-        : "bg-[hsl(var(--destructive))] text-white shadow-[0_16px_35px_hsl(var(--destructive)/0.35)]"
-      : "bg-[hsl(var(--accent))] text-muted-foreground hover:bg-[hsl(var(--accent)_/_0.8)] shadow-[0_12px_28px_hsl(var(--foreground)/0.06)]"
+        ? "bg-primary shadow-lg shadow-primary/40 text-white"
+        : "bg-danger text-white shadow-lg shadow-danger/40"
+      : "bg-white dark:bg-black/20 text-default-500 hover:text-foreground hover:bg-default-50 shadow-sm border border-divider"
 
   return (
     <div className="sticky top-8">
@@ -122,13 +122,13 @@ const CallTesting: React.FC<CallTestingProps> = ({ agentId, dynamicVariables = {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="px-6 py-4 bg-[hsl(var(--destructive)_/_0.12)] border-b border-[hsl(var(--destructive)_/_0.3)]"
+            className="px-6 py-4 bg-danger/10 border-b border-danger/20"
           >
-            <div className="flex items-center space-x-3 text-[hsl(var(--destructive))]">
+            <div className="flex items-center space-x-3 text-danger">
               <MicOff className="w-5 h-5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium">Microphone Access Required</p>
-                <p className="text-xs mt-0.5 text-[hsl(var(--destructive)_/_0.7)]">
+                <p className="text-sm font-bold">Microphone Access Required</p>
+                <p className="text-xs mt-0.5 text-danger/80 font-medium">
                   Please allow microphone access to test the voice agent
                 </p>
               </div>
@@ -193,8 +193,8 @@ const CallTesting: React.FC<CallTestingProps> = ({ agentId, dynamicVariables = {
                       }}
                       className={`absolute inset-0 rounded-full ${
                         isSpeaking
-                          ? "bg-[hsl(var(--primary)_/_0.25)]"
-                          : "bg-[hsl(var(--destructive)_/_0.25)]"
+                          ? "bg-primary/30"
+                          : "bg-danger/30"
                       }`}
                     />
                   </motion.div>
@@ -225,16 +225,17 @@ const CallTesting: React.FC<CallTestingProps> = ({ agentId, dynamicVariables = {
                     repeat: isConnected ? Number.POSITIVE_INFINITY : 0,
                     ease: "easeInOut",
                   }}
-                  className={`transition-colors duration-300 ${
+                  className={cn(
+                    "transition-colors duration-300",
                     isLoading
-                      ? "text-muted-foreground"
+                      ? "text-default-400"
                       : isConnected
                         ? "text-white"
-                        : "text-muted-foreground group-hover:text-foreground"
-                  }`}
+                        : "text-default-400 group-hover:text-foreground"
+                  )}
                 >
                   {isLoading ? (
-                    <div className="w-8 h-8 border-4 border-muted border-t-[hsl(var(--primary))] rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-4 border-default-200 border-t-primary rounded-full animate-spin" />
                   ) : isSpeaking ? (
                     <Volume2 className="w-8 h-8" />
                   ) : (
@@ -251,10 +252,10 @@ const CallTesting: React.FC<CallTestingProps> = ({ agentId, dynamicVariables = {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 onClick={toggleConversation}
-                className="mt-6 flex items-center space-x-2 px-4 py-2 rounded-lg bg-[hsl(var(--destructive)_/_0.18)] text-[hsl(var(--destructive))] hover:bg-[hsl(var(--destructive)_/_0.24)] transition-colors"
+                className="mt-6 flex items-center space-x-2 px-4 py-2 rounded-lg bg-danger/10 text-danger hover:bg-danger/20 transition-colors border border-danger/20 font-bold text-[13px]"
               >
                 <Phone className="w-4 h-4" />
-                <span className="text-sm font-medium">End Call</span>
+                <span>End Call</span>
               </motion.button>
             )}
           </div>

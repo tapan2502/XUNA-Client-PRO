@@ -3,7 +3,8 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchBatchCallDetails, clearSelectedCampaign } from "@/store/campaignsSlice"
 import { X, CheckCircle2, Clock, Phone, Users } from "lucide-react"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
-
+import { PremiumSidePanel } from "@/components/premium/PremiumSidePanel"
+import { PremiumPanelContent } from "@/components/premium/PremiumPanelContent"
 interface CampaignDetailsModalProps {
   isOpen: boolean
   onClose: () => void
@@ -25,25 +26,14 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaignId }: Ca
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/20 dark:bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-900 w-full max-w-3xl rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-h-[90vh]">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-            <div className="p-1.5 bg-[#3b82f6]/10 rounded-lg">
-              <div className="w-4 h-4 border-2 border-[#3b82f6] rounded-full" />
-            </div>
-            <h2 className="font-semibold text-lg">
-              {selectedCampaign ? selectedCampaign.call_name : "Campaign Details"}
-            </h2>
-          </div>
-          <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 overflow-y-auto">
+    <PremiumSidePanel
+      isOpen={isOpen}
+      onClose={onClose}
+      title={selectedCampaign ? selectedCampaign.call_name : "Campaign Details"}
+      subtitle={selectedCampaign ? `Detailed metrics for ${selectedCampaign.call_name}` : undefined}
+      size="xl"
+    >
+      <PremiumPanelContent>
           {loading || !selectedCampaign ? (
             <div className="flex justify-center py-12">
               <LoadingSpinner size="md" />
@@ -52,84 +42,74 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaignId }: Ca
             <div className="space-y-8">
               {/* Stats Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-xl">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Status</p>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded text-xs font-medium capitalize ${
-                      selectedCampaign.status === 'completed' 
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                    }`}>
-                      {selectedCampaign.status}
-                    </span>
+                {[
+                  { label: "Status", value: selectedCampaign.status, isStatus: true },
+                  { label: "Total Recipients", value: selectedCampaign.recipients.length, icon: Users },
+                  { label: "Calls Dispatched", value: selectedCampaign.calls_dispatched, icon: Phone },
+                  { label: "Provider", value: selectedCampaign.provider }
+                ].map((stat, idx) => (
+                  <div key={idx} className="bg-white dark:bg-black/20 border border-divider p-4 rounded-xl shadow-sm">
+                    <p className="text-[12px] text-default-500 font-medium mb-1">{stat.label}</p>
+                    <div className="flex items-center gap-2">
+                      {stat.icon && <stat.icon size={16} className="text-primary" />}
+                      {stat.isStatus ? (
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold capitalize ${
+                          stat.value === 'completed' 
+                            ? 'bg-success/10 text-success'
+                            : 'bg-primary/10 text-primary'
+                        }`}>
+                          {stat.value}
+                        </span>
+                      ) : (
+                        <span className="font-bold text-[16px] text-foreground capitalize">{stat.value}</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-xl">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Recipients</p>
-                  <div className="flex items-center gap-2">
-                    <Users size={16} className="text-gray-500 dark:text-gray-400" />
-                    <span className="font-semibold text-lg">{selectedCampaign.recipients.length}</span>
-                  </div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-xl">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Calls Dispatched</p>
-                  <div className="flex items-center gap-2">
-                    <Phone size={16} className="text-gray-500 dark:text-gray-400" />
-                    <span className="font-semibold text-lg">{selectedCampaign.calls_dispatched}</span>
-                  </div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-xl">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Provider</p>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-lg capitalize">{selectedCampaign.provider}</span>
-                  </div>
-                </div>
+                ))}
               </div>
 
               {/* Campaign Info */}
               <div className="space-y-4">
-                <h3 className="font-medium text-gray-900 dark:text-gray-100">Campaign Info</h3>
+                <h3 className="text-[14px] font-bold text-foreground">Campaign Info</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-sm">
-                  <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                    <span className="text-gray-600 dark:text-gray-400">Agent:</span>
-                    <span className="font-medium">{selectedCampaign.agent_name || selectedCampaign.agent_id}</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                    <span className="text-gray-600 dark:text-gray-400">Created:</span>
-                    <span className="font-medium">
-                      {new Date(selectedCampaign.created_at).toLocaleString()}
-                    </span>
-                  </div>
-                  {/* Add more fields if available in API response */}
+                  {[
+                    { label: "Agent", value: selectedCampaign.agent_name || selectedCampaign.agent_id },
+                    { label: "Created", value: new Date(selectedCampaign.created_at).toLocaleString() }
+                  ].map((info, idx) => (
+                    <div key={idx} className="flex justify-between py-2 border-b border-divider">
+                      <span className="text-default-500 font-medium">{info.label}:</span>
+                      <span className="font-bold text-foreground">{info.value}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
               {/* Recipients List */}
               <div className="space-y-4">
-                <h3 className="font-medium text-gray-900 dark:text-gray-100">Recipients ({selectedCampaign.recipients.length})</h3>
-                <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                <h3 className="text-[14px] font-bold text-foreground">Recipients ({selectedCampaign.recipients.length})</h3>
+                <div className="border border-divider rounded-xl overflow-hidden shadow-sm">
                   <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 font-medium">
+                    <thead className="bg-default-50/50 text-default-500 border-b border-divider font-bold text-[11px] uppercase tracking-wider">
                       <tr>
                         <th className="px-4 py-3">Phone Number</th>
                         <th className="px-4 py-3">Status</th>
                         <th className="px-4 py-3">Updated</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody className="divide-y divide-divider">
                       {selectedCampaign.recipients.map((recipient, index) => (
-                        <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                          <td className="px-4 py-3 font-mono">{recipient.phone_number}</td>
+                        <tr key={index} className="hover:bg-default-50 transition-colors">
+                          <td className="px-4 py-3 font-mono text-foreground text-[13px]">{recipient.phone_number}</td>
                           <td className="px-4 py-3">
-                            <span className={`px-2 py-0.5 rounded text-xs font-medium capitalize ${
+                            <span className={`px-2 py-0.5 rounded text-[11px] font-bold capitalize ${
                               recipient.status === 'completed' || recipient.status === 'initiated'
-                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+                                ? 'bg-success/10 text-success'
+                                : 'bg-default-100 text-default-600'
                             }`}>
                               {recipient.status}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+                          <td className="px-4 py-3 text-default-500 font-medium text-[13px]">
                             {new Date(recipient.updated_at).toLocaleString()}
                           </td>
                         </tr>
@@ -140,8 +120,7 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaignId }: Ca
               </div>
             </div>
           )}
-        </div>
-      </div>
-    </div>
+      </PremiumPanelContent>
+    </PremiumSidePanel>
   )
 }

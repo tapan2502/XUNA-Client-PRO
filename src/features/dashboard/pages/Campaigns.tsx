@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react"
 import { useAppSelector, useAppDispatch } from "@/app/hooks"
 import { selectCurrentUserData, fetchUserDetails } from "@/store/authSlice"
-import { Users, Eye, CheckCircle2, Clock, Plus } from "lucide-react"
+import { Users, Eye, CheckCircle2, Clock } from "lucide-react"
+import { Icon } from "@iconify/react"
 import DataTable from "@/components/hero-ui/DataTable"
 import { Button, Chip, Select, SelectItem } from "@heroui/react"
 import CreateCampaignModal from "../components/CreateCampaignModal"
@@ -92,7 +93,12 @@ export default function Campaigns() {
   }
 
   const topBarAction = (
-    <Button color="primary" onPress={() => setIsCreateModalOpen(true)} startContent={<Plus size={18} />}>
+    <Button 
+      color="primary" 
+      className="font-bold px-4 shadow-lg shadow-primary/20 h-9"
+      onPress={() => setIsCreateModalOpen(true)} 
+      startContent={<Icon icon="solar:add-circle-bold" width={20} />}
+    >
       Create Campaign
     </Button>
   )
@@ -118,7 +124,7 @@ export default function Campaigns() {
     statusFilter === "all" ? tableData : tableData.filter((campaign) => campaign.status === statusFilter)
 
   return (
-    <div className="h-full p-4 w-full max-w-[95rem] mx-auto flex flex-col gap-4">
+    <div className="flex flex-col gap-4 p-6 h-full overflow-hidden">
       <DataTable
         columns={columns}
         data={filteredData}

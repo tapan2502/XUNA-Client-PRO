@@ -8,7 +8,8 @@ import { fetchAgents } from "@/store/agentsSlice"
 import { CreateAgentModal } from "@/features/agents/components/CreateAgentModal"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
-import { Headset, Eye, Trash2, Plus } from "lucide-react"
+import { Headset, Eye, Trash2 } from "lucide-react"
+import { Icon } from "@iconify/react"
 import { Button, User, useDisclosure, Snippet, Switch, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/react"
 import DataTable, { type DataTableColumn } from "@/components/hero-ui/DataTable"
 import { updateAgentStatus, deleteAgent } from "@/store/agentsSlice"
@@ -162,8 +163,8 @@ export default function Agents() {
   const topBarAction = (
     <Button
       color="primary"
-      className="text-white shadow-sm font-medium"
-      startContent={<Plus size={18} />}
+      className="font-bold px-4 shadow-lg shadow-primary/20 h-9 text-white"
+      startContent={<Icon icon="solar:add-circle-bold" width={20} />}
       onPress={onOpen}
     >
       Create Agent
@@ -185,15 +186,15 @@ export default function Agents() {
   }))
 
   return (
-    <div className="h-full p-4 w-full max-w-[95rem] mx-auto flex flex-col gap-4">
+    <div className="flex flex-col gap-4 p-6 h-full overflow-hidden">
       <DataTable
         columns={columns}
         data={tableData}
         renderCell={renderCell}
         initialVisibleColumns={["name", "agent_id", "status", "created_at", "actions"]}
         searchKeys={["name", "agent_id"]}
-        searchPlaceholder="Search agents..."
-        topBarTitle="AI Agents"
+        searchPlaceholder="Search"
+        topBarTitle="Agents"
         topBarCount={agents.length}
         topBarAction={topBarAction}
         emptyContent="No agents found. Create one to get started."

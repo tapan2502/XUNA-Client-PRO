@@ -92,7 +92,7 @@ export default function DataTable<T extends { id: string | number }>({
   const [filterValue, setFilterValue] = useState("");
   const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
   const [visibleColumns, setVisibleColumns] = useState<Selection>(new Set(initialVisibleColumns));
-  const [rowsPerPage] = useState(6);
+  const [rowsPerPage] = useState(8);
   const [page, setPage] = useState(1);
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
     column: sortableColumnKey || columns[0]?.uid,
@@ -269,191 +269,157 @@ export default function DataTable<T extends { id: string | number }>({
     }
   });
 
-  const topContent = useMemo(() => {
+  const topBar = useMemo(() => {
     return (
-      <div className="flex items-center justify-between gap-4 px-1 py-2">
-        {/* Left: Search Bar */}
-        <Input
-          className="max-w-[320px]"
-          classNames={{
-            inputWrapper: "h-9 bg-default-100 dark:bg-default-50 border-none",
-          }}
-          placeholder={searchPlaceholder}
-          size="sm"
-          startContent={<Icon className="text-default-400" icon="solar:magnifier-linear" width={16} />}
-          value={filterValue}
-          onValueChange={onSearchChange}
-        />
-
-        {/* Right: Filter, Sort, Columns, Selection info, Actions */}
-        <div className="flex items-center gap-2">
-          {filterContent && (
-            <Popover placement="bottom-end">
-              <PopoverTrigger>
-                <Button
-                  className="bg-transparent border-none text-default-600 hover:text-default-900"
-                  size="sm"
-                  variant="light"
-                  startContent={
-                    <Icon className="text-default-400" icon="solar:filter-linear" width={16} />
-                  }
-                >
-                  Filter
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80">
-                <div className="flex w-full flex-col gap-4 p-4">
-                  {filterContent}
-                </div>
-              </PopoverContent>
-            </Popover>
-          )}
-          
-          <Dropdown>
-            <DropdownTrigger>
-              <Button
-                className="bg-transparent border-none text-default-600 hover:text-default-900"
-                size="sm"
-                variant="light"
-                startContent={
-                  <Icon className="text-default-400" icon="solar:sort-linear" width={16} />
-                }
-              >
-                Sort
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu
-              aria-label="Sort"
-              items={headerColumns.filter((c) => !["actions"].includes(c.uid))}
-            >
-              {(item) => (
-                <DropdownItem
-                  key={item.uid}
-                  onPress={() => {
-                    setSortDescriptor({
-                      column: item.uid,
-                      direction:
-                        sortDescriptor.direction === "ascending" ? "descending" : "ascending",
-                    });
-                  }}
-                >
-                  {item.name}
-                </DropdownItem>
-              )}
-            </DropdownMenu>
-          </Dropdown>
-          
-          <Dropdown closeOnSelect={false}>
-            <DropdownTrigger>
-              <Button
-                className="bg-transparent border-none text-default-600 hover:text-default-900"
-                size="sm"
-                variant="light"
-                startContent={
-                  <Icon
-                    className="text-default-400"
-                    icon="solar:menu-dots-linear"
-                    width={16}
-                  />
-                }
-              >
-                Columns
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu
-              disallowEmptySelection
-              aria-label="Columns"
-              items={columns.filter((c) => !["actions"].includes(c.uid))}
-              selectedKeys={visibleColumns}
-              selectionMode="multiple"
-              onSelectionChange={setVisibleColumns}
-            >
-              {(item) => <DropdownItem key={item.uid}>{item.name}</DropdownItem>}
-            </DropdownMenu>
-          </Dropdown>
-
-          <div className="text-default-500 text-sm whitespace-nowrap">
-            {filterSelectedKeys === "all"
-              ? "All items selected"
-              : filterSelectedKeys.size > 0
-              ? `${filterSelectedKeys.size} Selected`
-              : ""}
+      <div className="flex flex-col gap-3 mb-3">
+        {/* Row 1: Title and Action */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl leading-[28px] font-bold text-foreground">{topBarTitle}</h1>
+            {topBarCount !== undefined && (
+              <Chip className="text-default-500 bg-default-100" size="sm" variant="flat">
+                {topBarCount}
+              </Chip>
+            )}
           </div>
+          {topBarAction}
+        </div>
 
-          {(filterSelectedKeys === "all" || filterSelectedKeys.size > 0) && selectedActionsContent && (
-            <Dropdown>
+        {/* Row 2: Search and Controls */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex-1 max-w-sm">
+            <Input
+              isClearable
+              className="w-full"
+              placeholder={searchPlaceholder}
+              startContent={<Icon icon="solar:magnifier-linear" className="text-default-300" width={18} />}
+              value={filterValue}
+              onClear={() => onSearchChange("")}
+              onValueChange={onSearchChange}
+              size="sm"
+              variant="flat"
+              classNames={{
+                inputWrapper: "bg-white dark:bg-default-100 border border-default-200 shadow-sm transition-all hover:border-default-400 focus-within:!border-primary h-9",
+              }}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="flat" 
+              size="sm" 
+              className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 min-w-0 shadow-sm text-[12px]"
+              startContent={<Icon icon="solar:filter-linear" width={16} />}
+            >
+              Filter
+            </Button>
+
+            <Button 
+              variant="flat" 
+              size="sm" 
+              className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 min-w-0 shadow-sm text-[12px]"
+              startContent={<Icon icon="solar:sort-linear" width={16} />}
+            >
+              Sort
+            </Button>
+
+            <Dropdown closeOnSelect={false}>
               <DropdownTrigger>
-                <Button
-                  className="bg-transparent border-none text-default-600 hover:text-default-900"
-                  endContent={
-                    <Icon className="text-default-400" icon="solar:alt-arrow-down-linear" width={14} />
-                  }
-                  size="sm"
-                  variant="light"
+                <Button 
+                  variant="flat" 
+                  size="sm" 
+                  className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 min-w-0 shadow-sm text-[12px]"
+                  startContent={<Icon icon="solar:menu-dots-square-linear" width={16} />}
                 >
-                  Selected Actions
+                  Columns
                 </Button>
               </DropdownTrigger>
-              <DropdownMenu aria-label="Selected Actions">
-                {selectedActionsContent}
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                selectedKeys={visibleColumns}
+                selectionMode="multiple"
+                onSelectionChange={setVisibleColumns}
+              >
+                {columns.map((column) => (
+                  <DropdownItem key={column.uid} className="capitalize">{column.name}</DropdownItem>
+                ))}
               </DropdownMenu>
             </Dropdown>
-          )}
+
+            <div className="h-5 w-px bg-default-200 mx-0.5" />
+
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-default-400 font-medium px-1.5">
+                {filterSelectedKeys === "all" ? items.length : filterSelectedKeys.size} Selected
+              </span>
+              {(filterSelectedKeys === "all" || filterSelectedKeys.size > 0) && selectedActionsContent && (
+                <Dropdown>
+                  <DropdownTrigger>
+                    <Button 
+                      variant="flat" 
+                      size="sm" 
+                      className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 shadow-sm text-[12px]"
+                      endContent={<Icon icon="solar:alt-arrow-down-linear" width={12} />}
+                    >
+                      Actions
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu aria-label="Selected actions">
+                    {selectedActionsContent}
+                  </DropdownMenu>
+                </Dropdown>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     );
   }, [
+    topBarTitle,
+    topBarCount,
+    topBarAction,
     filterValue,
-    visibleColumns,
-    filterSelectedKeys,
-    headerColumns,
-    sortDescriptor,
-    searchPlaceholder,
-    filterContent,
-    selectedActionsContent,
-    columns,
     onSearchChange,
+    visibleColumns,
+    columns,
+    filterSelectedKeys,
+    items.length,
+    searchPlaceholder,
+    selectedActionsContent,
+    setVisibleColumns
   ]);
-
-  const topBar = useMemo(() => {
-    return (
-      <div className="mb-[18px] flex items-center justify-between">
-        <div className="flex w-[226px] items-center gap-2">
-          <h1 className="text-2xl leading-[32px] font-bold">{topBarTitle}</h1>
-          {topBarCount !== undefined && (
-            <Chip className="text-default-500 hidden items-center sm:flex" size="sm" variant="flat">
-              {topBarCount}
-            </Chip>
-          )}
-        </div>
-        {topBarAction}
-      </div>
-    );
-  }, [topBarTitle, topBarCount, topBarAction]);
 
   const bottomContent = useMemo(() => {
     return (
-      <div className="flex flex-col items-center justify-between gap-2 px-2 py-2 sm:flex-row">
-        <Pagination
-          isCompact
-          showControls
-          showShadow
-          color="primary"
-          page={page}
-          total={pages}
-          onChange={setPage}
-        />
-        <div className="flex items-center justify-end gap-6">
-          <span className="text-small text-default-400">
+      <div className="flex items-center justify-between gap-1 px-1 py-2">
+        <div className="flex-1 flex items-center">
+            <Pagination
+              isCompact={false}
+              showControls={false}
+              showShadow={false}
+              page={page}
+              total={pages}
+              onChange={setPage}
+              classNames={{
+                wrapper: "gap-2 shadow-none",
+                item: "bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium w-8 h-8 rounded-lg shadow-sm hover:border-default-400 transition-all text-[12px]",
+                cursor: "bg-primary text-white font-bold",
+              }}
+            />
+        </div>
+        <div className="flex items-center justify-end gap-4 flex-1">
+          <span className="text-[12px] text-default-400 font-medium">
             {filterSelectedKeys === "all"
               ? "All items selected"
               : `${filterSelectedKeys.size} of ${filteredItems.length} selected`}
           </span>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button 
               isDisabled={page === 1} 
               size="sm" 
               variant="flat" 
+              className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-4 rounded-lg shadow-sm hover:border-default-400 transition-all text-[12px]"
               onPress={onPreviousPage}
             >
               Previous
@@ -462,6 +428,7 @@ export default function DataTable<T extends { id: string | number }>({
               isDisabled={page === pages} 
               size="sm" 
               variant="flat" 
+              className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-4 rounded-lg shadow-sm hover:border-default-400 transition-all text-[12px]"
               onPress={onNextPage}
             >
               Next
@@ -482,71 +449,80 @@ export default function DataTable<T extends { id: string | number }>({
   );
 
   return (
-    <div className="h-full w-full p-6">
+    <div className="h-full w-full flex flex-col">
       {topBar}
-      <Table
-        isHeaderSticky
-        aria-label={ariaLabel}
-        bottomContent={bottomContent}
-        bottomContentPlacement="outside"
-        classNames={{
-          td: "before:bg-transparent",
-        }}
-        selectedKeys={filterSelectedKeys}
-        selectionMode="multiple"
-        sortDescriptor={sortDescriptor}
-        topContent={topContent}
-        topContentPlacement="outside"
-        onSelectionChange={onSelectionChange}
-        onSortChange={setSortDescriptor}
-      >
-        <TableHeader columns={headerColumns}>
-          {(column) => (
-            <TableColumn
-              key={column.uid}
-              align={column.uid === "actions" ? "end" : "start"}
-              className={cn([
-                column.uid === "actions" ? "flex items-center justify-end px-[20px]" : "",
-              ])}
-            >
-              {column.uid === sortableColumnKey ? (
-                <div
-                  {...getMemberInfoProps()}
-                  className="flex w-full cursor-pointer items-center justify-between"
-                >
-                  {column.name}
-                  {column.sortDirection === "ascending" ? (
-                    <ArrowUpIcon className="text-default-400" />
-                  ) : (
-                    <ArrowDownIcon className="text-default-400" />
-                  )}
-                </div>
-              ) : column.info ? (
-                <div className="flex min-w-[108px] items-center justify-between">
-                  {column.name}
-                  <Tooltip content={column.info}>
-                    <Icon
-                      className="text-default-300"
-                      height={16}
-                      icon="solar:info-circle-linear"
-                      width={16}
-                    />
-                  </Tooltip>
-                </div>
-              ) : (
-                column.name
-              )}
-            </TableColumn>
-          )}
-        </TableHeader>
-        <TableBody emptyContent={emptyContent} items={items}>
-          {(item) => (
-            <TableRow key={item.id}>
-              {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+      <div className="flex-1 min-h-0 flex flex-col mt-3">
+        <Table
+          isHeaderSticky
+          aria-label={ariaLabel}
+          bottomContent={bottomContent}
+          bottomContentPlacement="outside"
+          classNames={{
+            wrapper: "shadow-none border border-divider rounded-2xl bg-white dark:bg-black/20 p-0 max-h-full",
+            th: "bg-default-50/50 text-default-500 font-semibold text-[11px] capitalize tracking-wide h-8 border-b border-divider/50 px-2 first:pl-4 last:pr-4",
+            td: "px-2 first:pl-4 last:pr-4 py-1.5 border-b border-divider/10 group-last:border-none text-[13px] text-default-600",
+            table: "border-collapse",
+          }}
+          selectedKeys={filterSelectedKeys}
+          selectionMode="none"
+          sortDescriptor={sortDescriptor}
+          onSelectionChange={onSelectionChange}
+          onSortChange={setSortDescriptor}
+        >
+          <TableHeader columns={headerColumns}>
+            {(column) => (
+              <TableColumn
+                key={column.uid}
+                align={column.uid === "actions" ? "end" : "start"}
+                className={cn([
+                  column.uid === "actions" ? "flex items-center justify-end px-[20px]" : "",
+                ])}
+              >
+                {column.uid === sortDescriptor.column && column.sortable ? (
+                  <div
+                    {...getMemberInfoProps()}
+                    className="flex w-full cursor-pointer items-center justify-between"
+                    onClick={() => {
+                      setSortDescriptor({
+                        column: column.uid,
+                        direction: sortDescriptor.direction === "ascending" ? "descending" : "ascending",
+                      });
+                    }}
+                  >
+                    {column.name}
+                    {column.sortDirection === "ascending" ? (
+                      <ArrowUpIcon className="text-default-400" />
+                    ) : (
+                      <ArrowDownIcon className="text-default-400" />
+                    )}
+                  </div>
+                ) : column.info ? (
+                  <div className="flex min-w-[108px] items-center justify-between">
+                     {column.name}
+                     <Tooltip content={column.info}>
+                       <Icon
+                         className="text-default-300"
+                         height={16}
+                         icon="solar:info-circle-linear"
+                         width={16}
+                       />
+                     </Tooltip>
+                  </div>
+                ) : (
+                  column.name
+                )}
+              </TableColumn>
+            )}
+          </TableHeader>
+          <TableBody emptyContent={emptyContent} items={items}>
+            {(item) => (
+              <TableRow key={item.id}>
+                {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

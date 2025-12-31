@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchAgentById, updateAgent, fetchVoices, fetchKnowledgeBase, fetchAgents } from "@/store/agentsSlice"
-import { getModelId } from "@/lib/constants/languages"
+import { getModelId, llmOptions } from "@/lib/constants/languages"
 import { Save, X, ArrowLeft } from "lucide-react"
 import { AgentDetailsHeader } from "../components/agent-details/AgentDetailsHeader"
 import { AgentConfigCards } from "../components/agent-details/AgentConfigCards"
@@ -34,6 +34,11 @@ export default function AgentDetails() {
   const [hasChanges, setHasChanges] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState("")
+
+  const dynamicVariables = React.useMemo(() => 
+    editedAgent?.platform_settings?.data_collection || {}, 
+    [editedAgent?.platform_settings?.data_collection]
+  )
 
   useEffect(() => {
     if (!fetchingAgentDetails) {
@@ -139,28 +144,47 @@ export default function AgentDetails() {
         }
       }
 
-      const payload: any = {
+      const payload = {
         name: editedAgent.name,
         conversation_config: {
           agent: {
             prompt: {
               prompt: editedAgent.conversation_config?.agent?.prompt?.prompt || "",
-              llm: editedAgent.conversation_config?.agent?.prompt?.llm || "gpt-4-turbo",
+              llm: (() => {
+                const current = editedAgent.conversation_config?.agent?.prompt?.llm;
+                return llmOptions.includes(current) ? current : "gpt-4o";
+              })(),
               temperature: editedAgent.conversation_config?.agent?.prompt?.temperature || 0.7,
               knowledge_base: editedAgent.conversation_config?.agent?.prompt?.knowledge_base || [],
-              tool_ids: editedAgent.conversation_config?.agent?.prompt?.tool_ids || [],
-              built_in_tools: editedAgent.conversation_config?.agent?.prompt?.built_in_tools || {},
+              tool_ids: editedAgent.conversation_config?.agent?.tool_ids || [],
+              built_in_tools: (() => {
+                const builtInRecord = editedAgent.conversation_config?.agent?.built_in_tools || {};
+                const cleaned: any = {};
+                Object.entries(builtInRecord).forEach(([key, tool]: [string, any]) => {
+                  if (tool && tool.type === "system") {
+                     cleaned[key] = {
+                       tool_type: tool.name,
+                       ...tool.params
+                     };
+                  }
+                });
+                return Object.keys(cleaned).length > 0 ? cleaned : undefined;
+              })(),
             },
             first_message: editedAgent.conversation_config?.agent?.first_message || "",
             language: editedAgent.conversation_config?.agent?.language || "en",
+            ...(Array.isArray(editedAgent.conversation_config?.agent?.additional_languages) && 
+                editedAgent.conversation_config.agent.additional_languages.length > 0
+              ? { additional_languages: editedAgent.conversation_config.agent.additional_languages }
+              : {}),
           },
           tts: {
-            voice_id: editedAgent.conversation_config?.tts?.voice_id || voices[0]?.voice_id || "21m00Tcm4TlvDq8ikWAM", // Fallback to Rachel
+            voice_id: editedAgent.conversation_config?.tts?.voice_id || voices[0]?.voice_id || "21m00Tcm4TlvDq8ikWAM",
             model_id: getModelId(
               editedAgent.conversation_config?.tts?.model_id || "eleven_turbo_v2_5",
               editedAgent.conversation_config?.agent?.language || "en"
             ),
-            optimize_streaming_latency: editedAgent.conversation_config?.tts?.optimize_streaming_latency || 4,
+            optimize_streaming_latency: editedAgent.conversation_config?.tts?.optimize_streaming_latency ?? 0,
             stability: editedAgent.conversation_config?.tts?.stability || 0.5,
             speed: editedAgent.conversation_config?.tts?.speed || 1.0,
             similarity_boost: editedAgent.conversation_config?.tts?.similarity_boost || 0.8,
@@ -209,6 +233,7 @@ export default function AgentDetails() {
       setSaving(false)
     }
   }
+
 
   const handleCancel = () => {
     if (agent) {
@@ -275,7 +300,7 @@ export default function AgentDetails() {
 
   console.log("[DEBUG] Rendering: MAIN_PAGE");
 
-  const dynamicVariables = editedAgent?.platform_settings?.data_collection || {}
+
 
   return (
     <>

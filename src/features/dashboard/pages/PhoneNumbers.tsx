@@ -139,34 +139,34 @@ export default function PhoneNumbers() {
         )
       case "provider":
         return (
-          <Chip className="capitalize" size="sm" variant="flat" color="primary">
+          <Chip className="capitalize border-small" size="sm" variant="bordered" color="default">
             {item.provider}
           </Chip>
         )
       case "assigned_agent":
         return item.assigned_agent ? (
           <User
-            avatarProps={{ radius: "full", size: "sm" }}
+            avatarProps={{ radius: "full", size: "sm", isBordered: true }}
             classNames={{
               name: "text-default-foreground font-medium",
             }}
             name={item.assigned_agent.agent_name}
           />
         ) : (
-          <div className="flex items-center gap-1.5 text-warning-500">
+          <div className="flex items-center gap-1.5 text-default-400">
             <AlertCircle size={16} />
             <span className="text-small font-medium">Unassigned</span>
           </div>
         )
       case "actions":
         return (
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-end gap-1">
             <Button
               size="sm"
-              variant="flat"
+              variant={item.assigned_agent ? "light" : "solid"}
               color={item.assigned_agent ? "default" : "primary"}
               onPress={() => handleAssignAgent(item.id, item.assigned_agent?.agent_id)}
-              startContent={<UserPlus size={16} />}
+              startContent={!item.assigned_agent && <UserPlus size={16} />}
               className={!item.assigned_agent ? "shadow-sm" : ""}
             >
               {item.assigned_agent ? "Change" : "Assign"}
@@ -175,9 +175,8 @@ export default function PhoneNumbers() {
             {item.assigned_agent && (
               <Button
                 size="sm"
-                variant="flat"
-                color="success"
-                className="bg-success-50 dark:bg-success-900/20 text-success-600 dark:text-success-400"
+                variant="light"
+                color="primary"
                 startContent={<PhoneOutgoing size={16} />}
               >
                 Call
@@ -190,6 +189,7 @@ export default function PhoneNumbers() {
               variant="light"
               color="danger"
               onPress={() => confirmDelete(item.id)}
+              className="opacity-70 hover:opacity-100"
             >
               <Trash2 size={18} />
             </Button>
@@ -205,16 +205,16 @@ export default function PhoneNumbers() {
     <div className="flex gap-2">
       <Button
         color="primary"
-        className="text-white shadow-sm font-medium"
-        startContent={<Plus size={18} />}
+        className="font-bold px-4 shadow-lg shadow-primary/20 h-9 text-white"
+        startContent={<Icon icon="solar:add-circle-bold" width={20} />}
         onPress={() => setIsTwilioModalOpen(true)}
       >
         Import from Twilio
       </Button>
       <Button
         color="primary"
-        className="text-white shadow-sm font-medium"
-        startContent={<Plus size={18} />}
+        className="font-bold px-4 shadow-lg shadow-primary/20 h-9 text-white"
+        startContent={<Icon icon="solar:add-circle-bold" width={20} />}
         onPress={() => setIsSIPModalOpen(true)}
       >
         Import from SIP
@@ -232,7 +232,7 @@ export default function PhoneNumbers() {
 
   return (
     <>
-      <div className="h-full w-full">
+      <div className="flex flex-col gap-4 p-6 h-full overflow-hidden">
         <DataTable<EnrichedPhoneNumber>
           columns={columns}
           data={enrichedPhoneNumbers}

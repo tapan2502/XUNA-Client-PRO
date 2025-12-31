@@ -2,11 +2,12 @@
 
 import type React from "react"
 import { useState, useMemo, useRef, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { X, Play, Search, Plus, Loader2 } from "lucide-react"
+import { Play, Search, Plus, Loader2 } from "lucide-react"
 import { http } from "@/lib/http"
 import { cn } from "@/lib/utils"
 import { ModernDropdown } from "@/components/ui/ModernDropdown"
+import { PremiumSidePanel } from "@/components/premium/PremiumSidePanel"
+import { PremiumPanelContent } from "@/components/premium/PremiumPanelContent"
 
 interface VoiceLabels {
   accent?: string
@@ -231,76 +232,44 @@ export const VoiceModal = ({
   if (!isOpen) return null
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-          />
-          {/* Flex container to center the modal */}
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            {/* Modal box */}
-            <motion.div
-              className="w-full max-w-2xl rounded-xl bg-white dark:bg-gray-900 shadow-xl border border-gray-200 dark:border-gray-800"
-              initial={{ scale: 0.95 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.95 }}
-              onClick={(e) => e.stopPropagation()}
+    <PremiumSidePanel
+      isOpen={isOpen}
+      onClose={onClose}
+      title={activeTab === "my-voices" ? "Select Voice" : "Get Custom Voice"}
+      
+      headerContent={
+         <div className="flex border-b border-divider pt-4">
+            <button
+            onClick={() => setActiveTab("my-voices")}
+            className={cn(
+                "flex-1 px-4 py-3 text-sm font-bold transition-colors -mb-px",
+                activeTab === "my-voices"
+                ? "text-primary border-b-2 border-primary"
+                : "text-default-500 hover:text-foreground",
+            )}
             >
-              {/* Header */}
-              <div className="border-b border-gray-200 dark:border-gray-800">
-                <div className="flex items-center justify-between p-4">
-                  <h2 className="text-lg font-semibold">
-                    {activeTab === "my-voices" ? "Select Voice" : "Get Custom Voice"}
-                  </h2>
-                  <button
-                    onClick={onClose}
-                    className="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Tabs */}
-                <div className="flex border-t border-gray-200 dark:border-gray-800">
-                  <button
-                    onClick={() => setActiveTab("my-voices")}
-                    className={cn(
-                      "flex-1 px-4 py-3 text-sm font-medium transition-colors",
-                      activeTab === "my-voices"
-                        ? "text-primary border-b-2 border-primary bg-primary/5"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    My Voices
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("custom-voices")}
-                    className={cn(
-                      "flex-1 px-4 py-3 text-sm font-medium transition-colors",
-                      activeTab === "custom-voices"
-                        ? "text-primary border-b-2 border-primary bg-primary/5"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    Get Custom Voice
-                  </button>
-                </div>
-              </div>
+            My Voices
+            </button>
+            <button
+            onClick={() => setActiveTab("custom-voices")}
+            className={cn(
+                "flex-1 px-4 py-3 text-sm font-bold transition-colors -mb-px",
+                activeTab === "custom-voices"
+                ? "text-primary border-b-2 border-primary"
+                : "text-default-500 hover:text-foreground",
+            )}
+            >
+            Get Custom Voice
+            </button>
+        </div>
+      }
+      size="2xl"
+    >
+      <PremiumPanelContent>
               {/* Filters Row */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+              <div className="flex flex-col md:flex-row items-center gap-4 py-2">
                 {/* Gender Filter */}
-                <div className="w-32">
+                <div className="w-full md:w-32">
                   <ModernDropdown
                     value={activeTab === "my-voices" ? genderFilter : customGenderFilter}
                     options={[
@@ -326,7 +295,7 @@ export const VoiceModal = ({
                   />
                 </div>
                 {/* Dynamic Accent Filter */}
-                <div className="w-40">
+                <div className="w-full md:w-40">
                   <ModernDropdown
                     value={activeTab === "my-voices" ? accentFilter : customAccentFilter}
                     options={[
@@ -348,7 +317,7 @@ export const VoiceModal = ({
                   />
                 </div>
                 {/* Search */}
-                <div className="flex items-center ml-auto border border-border rounded-md px-2 py-1.5 bg-background">
+                <div className="flex items-center ml-auto border border-border rounded-md px-2 py-1.5 bg-background w-full md:w-auto">
                   <Search className="w-4 h-4 text-muted-foreground mr-1" />
                   <input
                     type="text"
@@ -361,22 +330,23 @@ export const VoiceModal = ({
                       }
                     }}
                     placeholder="Search..."
-                    className="text-sm focus:outline-none bg-transparent w-32"
+                    className="text-sm focus:outline-none bg-transparent w-full md:w-32"
                   />
                 </div>
               </div>
-              {/* Scrollable table container */}
-              <div className="overflow-auto px-4 max-h-80">
-                <table className="w-full text-sm text-left mt-2 border-separate border-spacing-y-1">
-                  <thead className="text-muted-foreground">
+
+              {/* Table */}
+              <div className="border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+                <table className="w-full text-sm text-left">
+                  <thead className="bg-gray-50 dark:bg-gray-800/50 text-muted-foreground border-b border-gray-200 dark:border-gray-800">
                     <tr>
-                      <th className="py-2 w-8"></th>
-                      <th className="py-2">Voice</th>
-                      <th className="py-2">Voice ID</th>
-                      {activeTab === "custom-voices" && <th className="py-2 w-16">Add</th>}
+                      <th className="py-3 px-4 w-12"></th>
+                      <th className="py-3 px-4">Voice</th>
+                      <th className="py-3 px-4">Voice ID</th>
+                      {activeTab === "custom-voices" && <th className="py-3 px-4 w-20 text-center">Add</th>}
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
                     {loadingSharedVoices && activeTab === "custom-voices" ? (
                       <tr>
                         <td colSpan={5} className="py-8 text-center">
@@ -397,27 +367,28 @@ export const VoiceModal = ({
                               key={voice.voice_id}
                               onClick={activeTab === "my-voices" ? () => onVoiceChange(voice.voice_id) : undefined}
                               className={cn(
+                                "transition-colors",
                                 activeTab === "my-voices" && "cursor-pointer hover:bg-muted/50",
                                 isSelected && "bg-primary/5",
                               )}
                             >
-                              <td className="py-2 w-8 align-middle text-center">
+                              <td className="py-3 px-4 align-middle text-center">
                                 <button
                                   onClick={(e) => handlePlay(voice.preview_url, e)}
-                                  className="text-muted-foreground hover:text-primary"
+                                  className="text-muted-foreground hover:text-primary p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
                                 >
                                   <Play className="w-4 h-4" />
                                 </button>
                               </td>
-                              <td className="py-2 font-medium align-middle">{voice.name}</td>
+                              <td className="py-3 px-4 font-medium align-middle">{voice.name}</td>
 
-                              <td className="py-2 align-middle text-muted-foreground">{voice.voice_id}</td>
+                              <td className="py-3 px-4 align-middle text-muted-foreground font-mono text-xs">{voice.voice_id}</td>
                               {activeTab === "custom-voices" && (
-                                <td className="py-2 w-16 align-middle text-center">
+                                <td className="py-3 px-4 align-middle text-center">
                                   <button
                                     onClick={() => handleAddCustomVoice(voice.voice_id)}
                                     disabled={isAdding}
-                                    className="p-1 text-muted-foreground hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="p-1.5 text-muted-foreground hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
                                   >
                                     {isAdding ? (
                                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -434,7 +405,7 @@ export const VoiceModal = ({
                           <tr>
                             <td
                               colSpan={activeTab === "custom-voices" ? 5 : 4}
-                              className="py-4 text-center text-muted-foreground"
+                              className="py-8 text-center text-muted-foreground"
                             >
                               No voices found.
                             </td>
@@ -445,19 +416,7 @@ export const VoiceModal = ({
                   </tbody>
                 </table>
               </div>
-              {/* Footer */}
-              <div className="flex justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-800">
-                <button
-                  onClick={onClose}
-                  className="px-4 py-2 text-sm font-semibold text-foreground bg-muted rounded hover:bg-muted/80"
-                >
-                  Close
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+      </PremiumPanelContent>
+    </PremiumSidePanel>
   )
 }

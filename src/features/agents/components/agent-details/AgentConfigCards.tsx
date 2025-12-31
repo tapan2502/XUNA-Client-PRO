@@ -44,7 +44,7 @@ export function AgentConfigCards({ agent, voices, onChange }: AgentConfigCardsPr
               <h3 className="text-xs font-bold uppercase tracking-wider text-default-500">Model</h3>
             </div>
             <Select
-              selectedKeys={[agent.conversation_config?.agent?.prompt?.llm || "gpt-4.1"]}
+              selectedKeys={[agent.conversation_config?.agent?.prompt?.llm || "gpt-4o"]}
               onChange={(e) => onChange("conversation_config.agent.prompt.llm", e.target.value)}
               variant="bordered"
               size="sm"

@@ -1,18 +1,15 @@
-"use client"
-
 import { useState } from "react"
-import { Plus, FileText, LinkIcon, Upload } from "lucide-react"
+import { Plus, FileText, LinkIcon, Upload, Trash2 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { createKnowledgeBaseDocument, fetchKnowledgeBase } from "@/store/agentsSlice"
 import { 
   Button, 
-  Input, 
-  Checkbox, 
-  Card, 
-  CardBody,
   Tabs,
   Tab
 } from "@heroui/react"
+import { PremiumFormSection } from "@/components/premium/PremiumFormComponents"
+import { PremiumInput } from "@/components/premium/PremiumInput"
+import { SelectionCard } from "@/components/premium/SelectionCard"
 
 interface KnowledgeSourcesStepProps {
   selectedDocuments: string[]
@@ -73,136 +70,122 @@ export function KnowledgeSourcesStep({ selectedDocuments, setSelectedDocuments }
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <label className="block text-small font-medium text-default-700">Knowledge sources</label>
-        <Button
-          size="sm"
-          color="primary"
-          onPress={() => setIsCreating(true)}
-          startContent={<Plus size={16} />}
-        >
-          Add Document
-        </Button>
-      </div>
-
-      {isCreating && (
-        <Card className="border border-default-200 shadow-none">
-          <CardBody className="gap-4">
-            <Tabs 
-              selectedKey={createType} 
-              onSelectionChange={(key) => setCreateType(key as "file" | "url")}
-              variant="underlined"
-              size="sm"
-            >
-              <Tab key="file" title="Upload File" />
-              <Tab key="url" title="Add URL" />
-            </Tabs>
-
-            {createType === "url" ? (
-              <Input
-                label="Document URL"
-                placeholder="https://example.com/document"
-                value={url}
-                onValueChange={setUrl}
-                variant="bordered"
-                labelPlacement="outside"
-              />
-            ) : (
-              <div className="relative">
-                <input
-                  type="file"
-                  id="file-upload"
-                  className="hidden"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
-                />
-                <label 
-                  htmlFor="file-upload"
-                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-default-300 rounded-lg cursor-pointer hover:bg-default-50 transition-colors"
-                >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-8 h-8 mb-3 text-default-400" />
-                    <p className="mb-2 text-sm text-default-500">
-                      <span className="font-semibold">Click to upload</span> or drag and drop
-                    </p>
-                    <p className="text-xs text-default-400">
-                      {file ? file.name : "PDF, TXT, DOCX up to 10MB"}
-                    </p>
-                  </div>
-                </label>
-              </div>
-            )}
-
-            {error && <p className="text-tiny text-danger">{error}</p>}
-
-            <div className="flex items-center gap-2 justify-end">
-              <Button
-                variant="light"
-                onPress={() => {
-                  setIsCreating(false)
-                  setUrl("")
-                  setFile(null)
-                  setError("")
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
+    <div className="space-y-8">
+      <PremiumFormSection 
+        title="Knowledge Base" 
+        description="Select documents or links that your agent should use for reference."
+        action={
+            <Button
+                size="sm"
                 color="primary"
-                onPress={handleCreate}
-                isLoading={isLoading}
-              >
-                Create
-              </Button>
+                className="shadow-sm"
+                onPress={() => setIsCreating(true)}
+                startContent={<Plus size={16} />}
+            >
+                Add Source
+            </Button>
+        }
+      >
+        {isCreating && (
+            <div className="p-3 rounded-lg border border-gray-200 dark:border-gray-800 space-y-3 animate-in fade-in slide-in-from-top-2">
+                <Tabs 
+                    selectedKey={createType} 
+                    onSelectionChange={(key) => setCreateType(key as "file" | "url")}
+                    variant="underlined"
+                    size="sm"
+                    classNames={{
+                        tabList: "p-0 gap-4 border-b border-gray-200 dark:border-gray-800 w-full",
+                        cursor: "bg-primary w-full",
+                        tab: "px-0 pb-2 h-auto text-gray-500 data-[selected=true]:text-primary font-medium",
+                        tabContent: "group-data-[selected=true]:text-primary"
+                    }}
+                >
+                    <Tab key="file" title="Upload File" />
+                    <Tab key="url" title="Add URL" />
+                </Tabs>
+
+                {createType === "url" ? (
+                    <PremiumInput
+                        placeholder="https://example.com/document"
+                        value={url}
+                        onValueChange={setUrl}
+                        icon={<LinkIcon size={18} />}
+                    />
+                ) : (
+                    <div className="relative group">
+                        <input
+                            type="file"
+                            id="file-upload"
+                            className="hidden"
+                            onChange={(e) => setFile(e.target.files?.[0] || null)}
+                        />
+                        <label 
+                            htmlFor="file-upload"
+                            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl cursor-pointer hover:bg-white dark:hover:bg-gray-800 hover:border-primary/50 transition-all"
+                        >
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6 text-gray-400 group-hover:text-primary transition-colors">
+                                <Upload className="w-8 h-8 mb-3" />
+                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="font-semibold text-gray-700 dark:text-gray-200">Click to upload</span> or drag and drop
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                    {file ? file.name : "PDF, TXT, DOCX up to 10MB"}
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+                )}
+
+                {error && <p className="text-xs text-danger font-medium">{error}</p>}
+
+                <div className="flex items-center gap-2 justify-end pt-2">
+                    <Button
+                        size="sm"
+                        variant="light"
+                        onPress={() => {
+                            setIsCreating(false)
+                            setUrl("")
+                            setFile(null)
+                            setError("")
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        size="sm"
+                        color="primary"
+                        className="shadow-sm"
+                        onPress={handleCreate}
+                        isLoading={isLoading}
+                    >
+                        Add to Library
+                    </Button>
+                </div>
             </div>
-          </CardBody>
-        </Card>
-      )}
+        )}
 
       {knowledgeBase.length === 0 ? (
-        <div className="rounded-lg border-2 border-dashed border-default-200 p-8 text-center">
-          <p className="text-small text-default-500">
-            No knowledge base documents yet. Add from your Knowledge page.
+        <div className="rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-8 text-center bg-gray-50/50 dark:bg-gray-900/20">
+          <p className="text-sm text-gray-500">
+            No documents in your library. Add one to get started.
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
           {knowledgeBase.map((doc) => (
-            <Card 
-              key={doc.id}
-              isPressable
-              onPress={() => toggleDocument(doc.id)}
-              className={`border transition-colors ${
-                selectedDocuments.includes(doc.id) 
-                  ? "border-primary bg-primary-50 dark:bg-primary-900/20" 
-                  : "border-default-200 bg-transparent hover:bg-default-50"
-              }`}
-              shadow="sm"
-            >
-              <CardBody className="p-3">
-                <div className="flex items-center gap-3">
-                  <Checkbox 
-                    isSelected={selectedDocuments.includes(doc.id)}
-                    radius="full"
-                    className="pointer-events-none" // Handled by Card onPress
-                  />
-                  <div className="p-2 rounded-lg bg-default-100">
-                    {doc.type === "file" ? (
-                      <FileText className="w-5 h-5 text-default-500" />
-                    ) : (
-                      <LinkIcon className="w-5 h-5 text-default-500" />
-                    )}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-small font-semibold">{doc.name}</span>
-                    <span className="text-tiny text-default-400 uppercase">{doc.type}</span>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
+            <SelectionCard
+                key={doc.id}
+                title={doc.name}
+                description={`${doc.type.toUpperCase()}`}
+                icon={doc.type === "file" ? <FileText size={20} /> : <LinkIcon size={20} />}
+                isSelected={selectedDocuments.includes(doc.id)}
+                onClick={() => toggleDocument(doc.id)}
+                className="py-3"
+            />
           ))}
         </div>
       )}
+      </PremiumFormSection>
     </div>
   )
 }

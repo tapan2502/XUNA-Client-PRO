@@ -47,7 +47,7 @@ const sidebarItems: SidebarItem[] = [
   {
     key: "dashboard",
     href: "/dashboard",
-    icon: "solar:home-2-linear",
+    icon: "solar:widget-5-linear",
     title: "Dashboard",
   },
   {
@@ -59,57 +59,52 @@ const sidebarItems: SidebarItem[] = [
   {
     key: "assistants",
     href: "/dashboard/assistants",
-    icon: "solar:widget-2-outline",
+    icon: "solar:users-group-rounded-linear",
     title: "Assistants",
   },
   {
     key: "knowledge-base",
     href: "/dashboard/knowledge-base",
-    icon: "solar:book-outline",
+    icon: "solar:notebook-linear",
     title: "Knowledge Base",
   },
-  /*
   {
     key: "tools",
     href: "/dashboard/tools",
-    icon: "solar:settings-outline",
+    icon: "solar:code-2-linear",
     title: "Tools & Functions",
   },
-  */
   {
     key: "campaigns",
     href: "/dashboard/campaigns",
-    icon: "solar:bell-linear",
+    icon: "solar:plain-2-linear",
     title: "Campaigns",
   },
-  /*
   {
     key: "contacts",
     href: "/dashboard/contacts",
-    icon: "solar:users-group-rounded-linear",
+    icon: "solar:user-rounded-linear",
     title: "Contacts",
   },
   {
     key: "automation",
     href: "/dashboard/automation",
-    icon: "solar:widget-5-linear",
+    icon: "solar:infinity-linear",
     title: "Automation",
   },
-  */
   {
     key: "call-logs",
     href: "/dashboard/call-history",
-    icon: "solar:headphones-round-linear",
+    icon: "solar:phone-calling-linear",
     title: "Call Logs",
   },
 ];
 
 const configItems: SidebarItem[] = [
-  /*
   {
     key: "api-keys",
     href: "/dashboard/api-keys",
-    icon: "solar:key-linear",
+    icon: "solar:key-minimalistic-linear",
     title: "API Keys",
   },
   {
@@ -118,11 +113,10 @@ const configItems: SidebarItem[] = [
     icon: "solar:microphone-linear",
     title: "Voice API Providers",
   },
-  */
   {
     key: "settings",
     href: "/dashboard/settings",
-    icon: "solar:settings-linear",
+    icon: "solar:tuning-2-linear",
     title: "Settings",
   },
 ];
@@ -178,86 +172,87 @@ const handleCall = () => {
 
   return (
     <div className="h-full">
-      <div className="border-r border-divider relative flex h-full w-64 flex-1 flex-col px-3 py-4 bg-background">
+      <div className="border-r border-default-200 relative flex h-full w-[280px] flex-1 flex-col px-5 py-6 bg-background">
         
         {/* Static Workspace Header */}
-        <div className="mb-6 flex items-center gap-3 px-2 py-3 border border-default-200 rounded-2xl bg-background">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-default-100 text-default-500">
-            <Icon icon="solar:users-group-rounded-linear" width={20} />
+        <div className="mb-8 flex items-center gap-3 px-3 py-3 border border-default-200 rounded-2xl bg-background hover:bg-default-50 cursor-pointer transition-colors group">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-default-100 text-default-500 group-hover:bg-white group-hover:shadow-sm transition-all">
+             <Icon icon="solar:users-group-rounded-linear" width={20} />
           </div>
           <div className="flex flex-col overflow-hidden">
              <span className="text-sm font-bold text-foreground truncate">Xuna AI</span>
              <span className="text-xs text-default-500 truncate">Core workspace</span>
           </div>
+          <div className="ml-auto">
+             <Icon icon="solar:alt-arrow-down-linear" width={14} className="text-default-400" />
+          </div>
         </div>
 
         {/* Sidebar Navigation - Simple like Figma */}
-        <ScrollShadow className="-mr-3 h-full max-h-full pr-3">
+        <ScrollShadow className="-mr-4 pr-4 flex-1">
           <HeroSidebar
             defaultSelectedKey={currentPath}
-            iconClassName="text-default-500 w-5 h-5"
+            iconClassName="text-default-400 w-5 h-5 group-data-[selected=true]:text-foreground transition-colors"
             itemClasses={{
-              base: "px-3 py-2.5 rounded-xl data-[selected=true]:bg-default-100 data-[hover=true]:bg-default-50 mb-0.5",
-              title: "text-sm text-foreground",
+              base: "px-3 py-3 rounded-xl data-[selected=true]:bg-default-100 data-[hover=true]:bg-default-50 mb-1 transition-all",
+              title: "text-sm text-foreground/60 data-[selected=true]:text-foreground font-medium ml-2",
             }}
             items={sidebarItems}
             onSelect={handleSelect}
           />
           
-          <Spacer y={4} />
-          <div className="px-3 mb-1">
-            <p className="text-xs text-default-400">Configuration</p>
+          <Spacer y={6} />
+          <div className="px-3 mb-3 mt-2">
+            <p className="text-xs font-semibold text-default-400 uppercase tracking-wider">Configuration</p>
           </div>
           
           <HeroSidebar
             defaultSelectedKey={currentPath}
-            iconClassName="text-default-500 w-5 h-5"
+            iconClassName="text-default-400 w-5 h-5 group-data-[selected=true]:text-foreground transition-colors"
             itemClasses={{
-              base: "px-3 py-2.5 rounded-xl data-[selected=true]:bg-default-100 data-[hover=true]:bg-default-50 mb-0.5",
-              title: "text-sm text-foreground",
+                base: "px-3 py-3 rounded-xl data-[selected=true]:bg-default-100 data-[hover=true]:bg-default-50 mb-1 transition-all",
+                title: "text-sm text-foreground/60 data-[selected=true]:text-foreground font-medium ml-2",
             }}
             items={configItems}
             onSelect={handleSelect}
           />
         </ScrollShadow>
 
-        {/* Schedule a Call Section - Hidden as per request */}
-        {/*
-        <div className="mt-auto">
-          <div className="rounded-2xl p-4 border border-default-200 bg-background">
-            <p className="text-sm text-foreground font-medium mb-3 text-center">Schedule a Call</p>
-            <div className="flex items-center border border-default-200 rounded-lg overflow-hidden mb-3">
-              <div className="flex items-center gap-1.5 px-2.5 py-2 border-r border-default-200 bg-background">
-                <span className="text-base">🇺🇸</span>
-                <span className="text-sm text-foreground">+1</span>
+        {/* Pinned Bottom Section */}
+        <div className="mt-auto pt-6 pb-2">
+          {/* Schedule a Call Section */}
+          <div className="mb-6">
+            <div className="rounded-[20px] p-5 border border-default-200 bg-white dark:bg-default-50/10 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+              <p className="text-sm text-foreground font-bold mb-4 text-center">Schedule a Call</p>
+              <div className="flex items-center border border-default-200 rounded-xl overflow-hidden mb-4 bg-white dark:bg-black/20 h-11 transition-colors hover:border-default-300">
+                <div className="flex items-center gap-2 px-3 border-r border-default-200 h-full bg-default-50/50">
+                  <span className="text-lg">🇺🇸</span>
+                  <span className="text-sm font-medium text-foreground">+1</span>
+                </div>
+                <Input
+                  aria-label="Phone number"
+                  className="flex-1"
+                  classNames={{
+                    inputWrapper: "h-full bg-transparent border-none shadow-none",
+                    input: "text-sm px-3",
+                  }}
+                  placeholder=""
+                  size="sm"
+                  type="tel"
+                  value={phoneNumber}
+                  onValueChange={setPhoneNumber}
+                />
               </div>
-              <Input
-                aria-label="Phone number"
-                className="flex-1"
-                classNames={{
-                  inputWrapper: "h-9 bg-transparent border-none shadow-none",
-                  input: "text-sm",
-                }}
-                placeholder=""
-                size="sm"
-                type="tel"
-                value={phoneNumber}
-                onValueChange={setPhoneNumber}
-              />
+              <Button
+                className="w-full h-11 rounded-xl font-semibold shadow-lg shadow-primary/20 text-white text-sm"
+                color="primary"
+                size="md"
+                onPress={handleCall}
+              >
+                Call Me
+              </Button>
             </div>
-            <Button
-              className="w-full rounded-xl font-medium"
-              color="primary"
-              size="md"
-              onPress={handleCall}
-            >
-              Call Me
-            </Button>
           </div>
-        </div>
-        */}
-
-        <Spacer y={3} />
 
         {/* User Profile at Bottom - Simple row like Figma */}
         <Dropdown placement="top">
@@ -269,7 +264,7 @@ const handleCall = () => {
                   className="w-9 h-9"
                   src="https://i.pravatar.cc/150?u=kate"
                 />
-                <div className="flex flex-col">
+                <div className="flex flex-col text-left">
                   <span className="text-sm font-medium text-foreground">Kate Moore</span>
                   <span className="text-xs text-default-400">Customer Support</span>
                 </div>
@@ -312,6 +307,7 @@ const handleCall = () => {
             </DropdownSection>
           </DropdownMenu>
         </Dropdown>
+        </div>
       </div>
     </div>
   );

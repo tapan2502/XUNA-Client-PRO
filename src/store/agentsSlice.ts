@@ -17,6 +17,11 @@ export interface BuiltInTool {
   disable_interruptions: boolean
   force_pre_tool_speech: boolean
   params: Record<string, any>
+  api_schema?: {
+    url: string
+    method: string
+    request_body_schema?: any
+  }
 }
 
 export interface AgentPrompt {
@@ -24,8 +29,6 @@ export interface AgentPrompt {
   llm: string
   temperature: number
   knowledge_base?: KnowledgeBaseDocument[]
-  tool_ids?: string[]
-  built_in_tools?: Record<string, BuiltInTool>
 }
 
 export interface Agent {
@@ -45,6 +48,9 @@ export interface Agent {
       prompt?: AgentPrompt
       language?: string
       first_message?: string
+      tool_ids?: string[]
+      built_in_tools?: any[]
+      tools?: any[]
       dynamic_variables?: {
         dynamic_variable_placeholders?: Record<string, string>
       }
@@ -107,9 +113,10 @@ export interface CreateAgentPayload {
         llm: string
         temperature: number
         knowledge_base?: KnowledgeBaseDocument[]
-        tool_ids?: string[]
-        built_in_tools?: Record<string, BuiltInTool>
       }
+      tool_ids?: string[]
+      built_in_tools?: any[]
+      tools?: any[]
       language: string
     }
   }
@@ -239,6 +246,8 @@ export const fetchAgentById = createAsyncThunk(
     }
   },
 )
+
+
 
 export const updateAgent = createAsyncThunk(
   "agents/updateAgent",

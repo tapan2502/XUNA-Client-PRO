@@ -191,7 +191,7 @@ export default function CallHistory() {
   }
 
   return (
-    <div className="h-full p-4 w-full max-w-[95rem] mx-auto flex flex-col gap-4">
+    <div className="flex flex-col gap-4 p-6 h-full overflow-hidden">
       <DataTable
         columns={columns}
         data={tableData}

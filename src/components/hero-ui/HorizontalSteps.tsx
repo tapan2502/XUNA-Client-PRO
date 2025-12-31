@@ -31,7 +31,7 @@ export default function HorizontalSteps({ steps, currentStep, onStepClick }: Hor
                   className={cn(
                     "w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all",
                     "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-                    isCompleted && "bg-success text-success-foreground",
+                    isCompleted && "bg-primary text-primary-foreground",
                     isCurrent && "bg-primary text-primary-foreground ring-4 ring-primary/20",
                     isUpcoming && "bg-default-200 text-default-500 cursor-not-allowed",
                     !isUpcoming && "cursor-pointer hover:scale-110"
@@ -56,7 +56,7 @@ export default function HorizontalSteps({ steps, currentStep, onStepClick }: Hor
                   <div
                     className={cn(
                       "absolute inset-0 transition-all duration-300",
-                      index < currentStep ? "bg-success w-full" : "bg-transparent w-0"
+                      index < currentStep ? "bg-primary w-full" : "bg-transparent w-0"
                     )}
                   />
                 </div>

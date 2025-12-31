@@ -1,21 +1,15 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import { Check, Bot } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { updatePhoneNumber } from "@/store/phoneNumbersSlice"
 import { fetchAgents } from "@/store/agentsSlice"
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Snippet,
-  Avatar,
-} from "@heroui/react"
+import { Button, Avatar } from "@heroui/react"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
+import { PremiumSidePanel } from "@/components/premium/PremiumSidePanel"
+import { PremiumFormSection } from "@/components/premium/PremiumFormComponents"
+import { PremiumPanelContent } from "@/components/premium/PremiumPanelContent"
+import { PremiumPanelFooter } from "@/components/premium/PremiumPanelFooter"
+import { SelectionCard } from "@/components/premium/SelectionCard"
 
 interface AssignAgentModalProps {
   isOpen: boolean
@@ -56,88 +50,72 @@ export default function AssignAgentModal({ isOpen, onClose, phoneNumberId, curre
     }
   }
 
+  const footer = (
+    <PremiumPanelFooter>
+      <div className="flex justify-end gap-2 w-full">
+        <Button variant="light" onPress={onClose} className="font-medium">
+          Cancel
+        </Button>
+        <Button
+          color="primary"
+          className="font-bold px-4 shadow-lg shadow-primary/20 h-9"
+          onPress={handleSubmit}
+          isLoading={isSubmitting}
+          isDisabled={!selectedAgentId}
+        >
+          Save Assignment
+        </Button>
+      </div>
+    </PremiumPanelFooter>
+  )
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="md" scrollBehavior="inside">
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <Bot size={24} className="text-primary" />
-                <span>Assign Agent</span>
-              </div>
-            </ModalHeader>
-            <ModalBody>
-              <div className="flex flex-col gap-2">
-                <p className="text-small text-default-500 font-medium">Select an agent to handle calls for this number</p>
-                
-                {agentsLoading ? (
-                   <div className="flex justify-center py-8">
-                     <LoadingSpinner />
-                   </div>
+    <PremiumSidePanel
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Assign Agent"
+      subtitle="Select an agent to handle calls for this number"
+      size="md"
+      footer={footer}
+    >
+      <PremiumPanelContent>
+        <PremiumFormSection title="Available Agents" description="Choose an agent from the list below.">
+            {agentsLoading ? (
+                <div className="flex justify-center py-8">
+                    <LoadingSpinner />
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {agents.length === 0 ? (
+                    <div className="text-center py-8 text-default-500 bg-default-50 rounded-lg col-span-2">
+                    No agents found. Create an agent first.
+                    </div>
                 ) : (
-                  <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1">
-                    {agents.length === 0 ? (
-                      <div className="text-center py-8 text-default-500 bg-default-50 rounded-lg">
-                        No agents found. Create an agent first.
-                      </div>
-                    ) : (
-                      agents.map((agent) => (
-                        <button
-                          key={agent.agent_id}
-                          onClick={() => setSelectedAgentId(agent.agent_id)}
-                          className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all text-left group ${
-                            selectedAgentId === agent.agent_id
-                              ? "border-primary bg-primary-50 dark:bg-primary-900/20"
-                              : "border-default-200 hover:border-default-300 bg-transparent"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <Avatar
-                              name={agent.name}
-                              size="sm"
-                              isBordered
-                              color={selectedAgentId === agent.agent_id ? "primary" : "default"}
+                    agents.map((agent) => (
+                    <SelectionCard
+                        key={agent.agent_id}
+                        title={agent.name}
+                        description={`ID: ${agent.agent_id.slice(0, 8)}...`}
+                        className="p-2"
+                        icon={
+                             <Avatar
+                                name={agent.name}
+                                size="sm"
+                                isBordered
+                                color={selectedAgentId === agent.agent_id ? "primary" : "default"}
+                                className="shrink-0"
                             />
-                            <div className="flex flex-col">
-                              <span className={`text-small font-semibold ${
-                                selectedAgentId === agent.agent_id ? "text-primary" : "text-default-foreground"
-                              }`}>
-                                {agent.name}
-                              </span>
-                              <span className="text-tiny text-default-400">ID: {agent.agent_id.slice(0, 8)}...</span>
-                            </div>
-                          </div>
-                          
-                          {selectedAgentId === agent.agent_id && (
-                            <div className="bg-primary text-primary-foreground rounded-full p-1">
-                              <Check size={12} strokeWidth={3} />
-                            </div>
-                          )}
-                        </button>
-                      ))
-                    )}
-                  </div>
+                        }
+                        isSelected={selectedAgentId === agent.agent_id}
+                        onClick={() => setSelectedAgentId(agent.agent_id)}
+                    />
+                    ))
                 )}
-              </div>
-            </ModalBody>
-            <ModalFooter>
-              <Button color="danger" variant="light" onPress={onClose}>
-                Cancel
-              </Button>
-              <Button
-                color="primary"
-                className="shadow-sm"
-                onPress={handleSubmit}
-                isLoading={isSubmitting}
-                isDisabled={!selectedAgentId}
-              >
-                Save Assignment
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
-    </Modal>
+                </div>
+            )}
+        </PremiumFormSection>
+      </PremiumPanelContent>
+    </PremiumSidePanel>
   )
 }
+

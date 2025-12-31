@@ -1,8 +1,10 @@
-"use client"
-
-import type React from "react"
-import { Input, Select, SelectItem, Textarea } from "@heroui/react"
+import { SelectItem } from "@heroui/react"
 import { languages } from "@/lib/constants/languages"
+import { PremiumInput } from "@/components/premium/PremiumInput"
+import { PremiumSelect } from "@/components/premium/PremiumSelect"
+import { PremiumTextarea } from "@/components/premium/PremiumTextarea"
+import { PremiumFormSection, PremiumFormGrid } from "@/components/premium/PremiumFormComponents"
+import { Bot, Languages, MessageSquare } from "lucide-react"
 
 interface FormData {
   name: string
@@ -25,46 +27,46 @@ export function TemplateBackgroundStep({
   setNameError,
 }: TemplateBackgroundStepProps) {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
-          label="Agent name"
-          placeholder="e.g., Lead Qualifier"
-          value={formData.name}
-          onValueChange={(value) => {
-            setFormData((prev) => ({ ...prev, name: value }))
-            if (value.trim()) setNameError("")
-          }}
-          isInvalid={!!nameError}
-          errorMessage={nameError}
-          isRequired
-          variant="bordered"
-          labelPlacement="outside"
+    <div className="space-y-8">
+      <PremiumFormSection title="Identity" description="Define who your agent is and how they communicate.">
+        <PremiumFormGrid>
+          <PremiumInput
+            label="Agent Name"
+            placeholder="e.g., Lead Qualifier"
+            value={formData.name}
+            onValueChange={(value) => {
+              setFormData((prev) => ({ ...prev, name: value }))
+              if (value.trim()) setNameError("")
+            }}
+            isInvalid={!!nameError}
+            errorMessage={nameError}
+            isRequired
+            icon={<Bot size={18} />}
+          />
+
+          <PremiumSelect
+            label="Primary Language"
+            placeholder="Select language"
+            selectedKeys={[formData.language]}
+            onChange={(e) => setFormData((prev) => ({ ...prev, language: e.target.value }))}
+            startContent={<Languages size={18} className="text-gray-400" />}
+          >
+            {languages.map((lang) => (
+              <SelectItem key={lang.code}>{lang.name}</SelectItem>
+            ))}
+          </PremiumSelect>
+        </PremiumFormGrid>
+      </PremiumFormSection>
+
+      <PremiumFormSection title="Persona & Behavior" description="Provide detailed instructions on how the agent should handle conversations.">
+        <PremiumTextarea
+          label="System Prompt"
+          placeholder="You are a helpful assistant..."
+          value={formData.prompt}
+          onValueChange={(value) => setFormData((prev) => ({ ...prev, prompt: value }))}
+          minRows={12}
         />
-
-        <Select
-          label="Agent language"
-          placeholder="Select language"
-          selectedKeys={[formData.language]}
-          onChange={(e) => setFormData((prev) => ({ ...prev, language: e.target.value }))}
-          variant="bordered"
-          labelPlacement="outside"
-        >
-          {languages.map((lang) => (
-            <SelectItem key={lang.code}>{lang.name}</SelectItem>
-          ))}
-        </Select>
-      </div>
-
-      <Textarea
-        label="Prompt"
-        placeholder="Describe how the agent should behave..."
-        value={formData.prompt}
-        onValueChange={(value) => setFormData((prev) => ({ ...prev, prompt: value }))}
-        variant="bordered"
-        labelPlacement="outside"
-        minRows={10}
-      />
+      </PremiumFormSection>
     </div>
   )
 }

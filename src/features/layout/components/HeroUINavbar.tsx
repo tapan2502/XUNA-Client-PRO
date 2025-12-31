@@ -36,11 +36,23 @@ export default function HeroUINavbar() {
   const location = useLocation();
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectEffectiveUser);
-  
+
+  const [theme, setTheme] = React.useState<"light" | "dark">(() => {
+    return document.documentElement.classList.contains("dark") ? "dark" : "light";
+  });
 
   const handleLogout = () => {
     dispatch(logout());
     navigate("/login");
+  };
+
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    import("@/app/theme").then(({ applyTheme }) => {
+      applyTheme(next);
+      localStorage.setItem("theme", next);
+      setTheme(next);
+    });
   };
 
   const isActive = (path: string) => {
@@ -50,34 +62,29 @@ export default function HeroUINavbar() {
   return (
     <Navbar
       classNames={{
-        base: "bg-background border-b border-divider",
-        wrapper: "px-6 max-w-full",
-        item: "data-[active=true]:text-primary",
+        base: "bg-white dark:bg-background border-b border-divider/50 h-[64px]",
+        wrapper: "px-6 pl-2 max-w-full",
       }}
       height="64px"
       maxWidth="full"
     >
-      {/* Left: Logo */}
-      <NavbarBrand className="gap-2 flex-grow-0">
-
-        <NavbarMenuToggle className="mr-2 h-6 sm:hidden" />
+      <NavbarBrand className="flex-grow-0 min-w-fit p-0">
         <img 
           src={logoImage} 
           alt="XUNA" 
-          className="h-12 w-auto object-contain invert dark:invert-0"
-          style={{ minWidth: '120px' }}
+          className="h-12 w-auto object-contain brightness-0 dark:brightness-0 dark:invert"
         />
       </NavbarBrand>
 
-      {/* Right: Navigation Links + Action Icons */}
+      {/* Right: Navigation Links & Actions */}
       <NavbarContent className="gap-6" justify="end">
         {/* Navigation Links */}
-        <NavbarItem className="hidden sm:flex" isActive={isActive("/dashboard")}>
+        <div className="flex items-center gap-6 mr-4">
           <Link
-            className={`text-sm font-medium transition-colors ${
+            className={`text-[14px] font-medium transition-colors ${
               isActive("/dashboard") 
-                ? "text-primary" 
-                : "text-default-600 hover:text-foreground"
+                ? "text-foreground font-semibold" 
+                : "text-default-500 hover:text-foreground"
             }`}
             href="#"
             onClick={(e) => {
@@ -85,65 +92,13 @@ export default function HeroUINavbar() {
               navigate("/dashboard");
             }}
           >
-            Dashboard
+            Agents
           </Link>
-        </NavbarItem>
-        {/*
-        <NavbarItem className="hidden sm:flex" isActive={isActive("/dashboard/deployments")}>
           <Link
-            className={`text-sm font-medium transition-colors ${
-              isActive("/dashboard/deployments") 
-                ? "text-primary" 
-                : "text-default-600 hover:text-foreground"
-            }`}
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/dashboard/deployments");
-            }}
-          >
-            Deployments
-          </Link>
-        </NavbarItem>
-        <NavbarItem className="hidden sm:flex" isActive={isActive("/dashboard/analytics")}>
-          <Link
-            className={`text-sm font-medium transition-colors ${
-              isActive("/dashboard/analytics") 
-                ? "text-primary" 
-                : "text-default-600 hover:text-foreground"
-            }`}
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/dashboard/analytics");
-            }}
-          >
-            Analytics
-          </Link>
-        </NavbarItem>
-        <NavbarItem className="hidden sm:flex" isActive={isActive("/dashboard/team")}>
-          <Link
-            className={`text-sm font-medium transition-colors ${
-              isActive("/dashboard/team") 
-                ? "text-primary" 
-                : "text-default-600 hover:text-foreground"
-            }`}
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/dashboard/team");
-            }}
-          >
-            Team
-          </Link>
-        </NavbarItem>
-        */}
-        <NavbarItem className="hidden sm:flex" isActive={isActive("/dashboard/settings")}>
-          <Link
-            className={`text-sm font-medium transition-colors ${
+            className={`text-[14px] font-medium transition-colors ${
               isActive("/dashboard/settings") 
-                ? "text-primary" 
-                : "text-default-600 hover:text-foreground"
+                ? "text-foreground font-semibold" 
+                : "text-default-500 hover:text-foreground"
             }`}
             href="#"
             onClick={(e) => {
@@ -153,42 +108,37 @@ export default function HeroUINavbar() {
           >
             Settings
           </Link>
-        </NavbarItem>
+        </div>
 
-        <NavbarActions />
-        
-        <Dropdown placement="bottom-end">
-          <DropdownTrigger>
-            <Avatar
-              isBordered
-              as="button"
-              className="ml-2 transition-transform shrink-0"
-              size="sm"
-              src={`https://ui-avatars.com/api/?name=${user?.email || "User"}&background=random`}
+        {/* Action Icons */}
+        <div className="flex items-center gap-1">
+          <Button isIconOnly variant="light" className="text-default-400 min-w-8 w-8 h-8">
+            <Icon icon="solar:magnifier-linear" width={20} />
+          </Button>
+          
+          {/* Theme Toggle */}
+          <Button 
+            isIconOnly 
+            variant="light" 
+            className="text-default-400 min-w-8 w-8 h-8"
+            onPress={toggleTheme}
+          >
+            <Icon 
+              icon={theme === "dark" ? "solar:sun-bold-duotone" : "solar:moon-bold-duotone"} 
+              className={theme === "dark" ? "text-warning" : "text-default-500"}
+              width={20} 
             />
-          </DropdownTrigger>
-          <DropdownMenu aria-label="Profile Actions" variant="flat">
-            <DropdownItem key="profile" className="h-14 gap-2">
-              <p className="font-semibold">Signed in as</p>
-              <p className="font-semibold">{user?.email || "user@example.com"}</p>
-            </DropdownItem>
-            <DropdownItem
-              key="profile_settings"
-              onClick={() => navigate("/dashboard/profile")}
-            >
-              My Profile
-            </DropdownItem>
-            <DropdownItem
-              key="settings"
-              onClick={() => navigate("/dashboard/settings")}
-            >
-              Settings
-            </DropdownItem>
-            <DropdownItem key="logout" color="danger" onClick={handleLogout}>
-              Log Out
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
+          </Button>
+          
+          <Button isIconOnly variant="light" className="text-default-400 min-w-8 w-8 h-8">
+            <Icon icon="solar:settings-linear" width={20} />
+          </Button>
+          
+          <Avatar
+            className="ml-2 shrink-0 w-9 h-9 border-2 border-white dark:border-default-100 shadow-sm"
+            src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
+          />
+        </div>
       </NavbarContent>
 
       {/* Mobile Menu */}
@@ -203,50 +153,9 @@ export default function HeroUINavbar() {
               navigate("/dashboard");
             }}
           >
-            Dashboard
+            Agents
           </Link>
         </NavbarMenuItem>
-        {/*
-        <NavbarMenuItem isActive={isActive("/dashboard/deployments")}>
-          <Link
-            className="w-full"
-            color={isActive("/dashboard/deployments") ? "primary" : "foreground"}
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/dashboard/deployments");
-            }}
-          >
-            Deployments
-          </Link>
-        </NavbarMenuItem>
-        <NavbarMenuItem isActive={isActive("/dashboard/analytics")}>
-          <Link
-            className="w-full"
-            color={isActive("/dashboard/analytics") ? "primary" : "foreground"}
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/dashboard/analytics");
-            }}
-          >
-            Analytics
-          </Link>
-        </NavbarMenuItem>
-        <NavbarMenuItem isActive={isActive("/dashboard/team")}>
-          <Link
-            className="w-full"
-            color={isActive("/dashboard/team") ? "primary" : "foreground"}
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/dashboard/team");
-            }}
-          >
-            Team
-          </Link>
-        </NavbarMenuItem>
-        */}
         <NavbarMenuItem isActive={isActive("/dashboard/settings")}>
           <Link
             className="w-full"

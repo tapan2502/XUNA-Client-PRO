@@ -5,7 +5,8 @@ import { fetchConversations } from "@/store/callHistorySlice"
 import KpiStatsCard from "@/components/hero-ui/KpiStatsCard"
 import ClientsTable from "../components/ClientsTable"
 
-export default function DashboardHome() {
+
+  export default function DashboardHome() {
   const dispatch = useAppDispatch()
   const { agents } = useAppSelector((state) => state.agents)
   const { conversations } = useAppSelector((state) => state.callHistory)
@@ -25,9 +26,9 @@ export default function DashboardHome() {
   const totalSMS = 943 // Hardcoded as requested
 
   return (
-    <div className="flex flex-col gap-6 p-6 h-full">
+    <div className="flex flex-col gap-4 p-6 h-full overflow-hidden">
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 shrink-0">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 shrink-0">
         <KpiStatsCard
           title="Agents"
           value={totalAgents.toString()}
@@ -45,12 +46,13 @@ export default function DashboardHome() {
         <KpiStatsCard
           title="Total SMS"
           value={totalSMS.toLocaleString()}
-          change="-3.3%"
+          change="3.3%"
           color="danger"
           data={smsData.map((v) => ({ value: v }))}
         />
       </div>
 
+      {/* Clients Table */}
       <div className="flex-1 min-h-0">
         <ClientsTable />
       </div>

@@ -16,18 +16,18 @@ export function ToolsSection({ agent, onChange, agents }: ToolsSectionProps) {
   const [editingToolName, setEditingToolName] = useState<string | null>(null)
   const [editingToolType, setEditingToolType] = useState<"webhook" | "system" | null>(null)
 
-  const toolIds = agent.conversation_config?.agent?.prompt?.tool_ids || []
-  const builtInTools = agent.conversation_config?.agent?.prompt?.built_in_tools || {}
+  const toolIds = agent.conversation_config?.agent?.tool_ids || []
+  const builtInTools = agent.conversation_config?.agent?.built_in_tools || {}
 
   const handleAddTool = (tool: any) => {
     if (tool.type === "system") {
       const newBuiltInTools = { ...builtInTools, [tool.name]: tool }
-      onChange("conversation_config.agent.prompt.built_in_tools", newBuiltInTools)
+      onChange("conversation_config.agent.built_in_tools", newBuiltInTools)
     } else {
       // For custom webhook tools defined in built_in_tools, we DO NOT add them to tool_ids
       // tool_ids is only for referencing shared/library tools by ID
       const newBuiltInTools = { ...builtInTools, [tool.name]: tool }
-      onChange("conversation_config.agent.prompt.built_in_tools", newBuiltInTools)
+      onChange("conversation_config.agent.built_in_tools", newBuiltInTools)
     }
   }
 
@@ -37,17 +37,17 @@ export function ToolsSection({ agent, onChange, agents }: ToolsSectionProps) {
       if (tool.name !== editingToolName) {
         delete newBuiltInTools[editingToolName]
       }
-      onChange("conversation_config.agent.prompt.built_in_tools", newBuiltInTools)
+      onChange("conversation_config.agent.built_in_tools", newBuiltInTools)
     }
   }
 
   const handleDeleteTool = (name: string, type: "webhook" | "system") => {
     const newBuiltInTools = { ...builtInTools }
     delete newBuiltInTools[name]
-    onChange("conversation_config.agent.prompt.built_in_tools", newBuiltInTools)
+    onChange("conversation_config.agent.built_in_tools", newBuiltInTools)
     
     const newToolIds = toolIds.filter((id: string) => id !== name)
-    onChange("conversation_config.agent.prompt.tool_ids", newToolIds)
+    onChange("conversation_config.agent.tool_ids", newToolIds)
   }
 
   const systemTools = Object.entries(builtInTools || {})

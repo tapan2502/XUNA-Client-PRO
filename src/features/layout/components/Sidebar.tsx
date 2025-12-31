@@ -68,27 +68,31 @@ export default function Sidebar() {
         {!isCollapsed && <SidebarWorkspaceSelector />}
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 overflow-y-auto overflow-x-hidden">
+        <nav className="flex-1 px-4 py-6 overflow-y-auto overflow-x-hidden space-y-8">
           <SidebarNavSection isCollapsed={isCollapsed}>
-            {navItems.map((item) => (
-              <SidebarNavItem key={item.to} {...item} isCollapsed={isCollapsed} />
-            ))}
+            <div className="space-y-1">
+              {navItems.map((item) => (
+                <SidebarNavItem key={item.to} {...item} isCollapsed={isCollapsed} />
+              ))}
+            </div>
           </SidebarNavSection>
 
-          <div className="my-4 border-t border-[hsl(var(--divider))]" />
-
           {/* Configuration Section */}
-          <SidebarNavSection title="CONFIGURATION" isCollapsed={isCollapsed}>
-            {configItems.map((item) => (
-              <SidebarNavItem key={item.to} {...item} isCollapsed={isCollapsed} />
-            ))}
+          <SidebarNavSection title="Configuration" isCollapsed={isCollapsed}>
+            <div className="space-y-1">
+              {configItems.map((item) => (
+                <SidebarNavItem key={item.to} {...item} isCollapsed={isCollapsed} />
+              ))}
+            </div>
           </SidebarNavSection>
         </nav>
 
         {/* Bottom Section */}
-        <div className="p-3 border-t border-[hsl(var(--divider))] space-y-3">
+        <div className="mt-auto px-4 py-6 space-y-6">
           {!isCollapsed && <SidebarScheduleCall />}
-          <SidebarUserProfile isCollapsed={isCollapsed} />
+          <div className="pt-2">
+            <SidebarUserProfile isCollapsed={isCollapsed} />
+          </div>
         </div>
       </div>
     </aside>

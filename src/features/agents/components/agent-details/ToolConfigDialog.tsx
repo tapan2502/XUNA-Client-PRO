@@ -451,12 +451,13 @@ export function ToolConfigDialog({ isOpen, onClose, onSave, editingTool, agents 
           )}
         </DrawerBody>
 
-        <DrawerFooter className="px-6 py-4">
-          <Button variant="light" onPress={onClose} className="font-bold">
+        <DrawerFooter className="px-6 py-4 bg-white/80 dark:bg-[#0A0A0A]/80 backdrop-blur-xl border-t border-divider">
+          <Button variant="light" onPress={onClose} className="font-medium">
             Cancel
           </Button>
           <Button 
-            className="bg-blue-600 text-white font-bold"
+            className="font-bold px-4 shadow-lg shadow-primary/20 h-9"
+            color="primary"
             onPress={handleSave}
             isDisabled={toolType === "webhook" ? (!name || !url) : !targetAgentId}
           >

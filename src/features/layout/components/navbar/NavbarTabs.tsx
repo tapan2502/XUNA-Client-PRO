@@ -1,10 +1,7 @@
 import { NavLink } from "react-router-dom"
 
 const tabs = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Deployments", href: "/dashboard/deployments" },
-  { label: "Analytics", href: "/dashboard/analytics" },
-  { label: "Team", href: "/dashboard/team" },
+  { label: "Agents", href: "/dashboard" },
   { label: "Settings", href: "/dashboard/settings" },
 ]
 

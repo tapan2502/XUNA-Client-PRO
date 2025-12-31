@@ -13,16 +13,20 @@ export default function SidebarNavItem({ to, label, icon: Icon, isCollapsed }: S
       to={to}
       end={to === "/dashboard"}
       className={({ isActive }) =>
-        `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+        `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
           isActive
-            ? "bg-[hsl(var(--sidebar-hover))] text-foreground"
-            : "text-muted-foreground hover:bg-[hsl(var(--sidebar-hover))] hover:text-foreground"
+            ? "bg-default-100 text-foreground shadow-sm"
+            : "text-muted-foreground hover:bg-default-50 hover:text-foreground"
         } ${isCollapsed ? "justify-center px-2" : ""}`
       }
       title={isCollapsed ? label : undefined}
     >
-      <Icon className="w-[18px] h-[18px] shrink-0" strokeWidth={2} />
-      {!isCollapsed && <span className="truncate">{label}</span>}
+      {({ isActive }) => (
+        <>
+          <Icon className="w-5 h-5 shrink-0" strokeWidth={isActive ? 2.5 : 2} />
+          {!isCollapsed && <span className="truncate">{label}</span>}
+        </>
+      )}
     </NavLink>
   )
 }

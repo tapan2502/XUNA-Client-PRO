@@ -3,8 +3,17 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { createBatchCall } from "@/store/campaignsSlice"
 import { fetchAgents } from "@/store/agentsSlice"
 import { fetchPhoneNumbers } from "@/store/phoneNumbersSlice"
-import { X, Upload, FileText, Loader2, Calendar } from "lucide-react"
+import { Upload, FileText, Loader2, Calendar } from "lucide-react"
 import { useSnackbar } from "@/components/ui/SnackbarProvider"
+import { Button, Select, SelectItem, Textarea, Tabs, Tab, Input } from "@heroui/react"
+import { PremiumSidePanel } from "@/components/premium/PremiumSidePanel"
+import { PremiumInput } from "@/components/premium/PremiumInput"
+import { PremiumSelect } from "@/components/premium/PremiumSelect"
+import { PremiumTextarea } from "@/components/premium/PremiumTextarea"
+import { PremiumFormSection } from "@/components/premium/PremiumFormComponents"
+import { PremiumPanelContent } from "@/components/premium/PremiumPanelContent"
+import { PremiumPanelFooter } from "@/components/premium/PremiumPanelFooter"
+
 
 interface CreateCampaignModalProps {
   isOpen: boolean
@@ -32,8 +41,6 @@ export default function CreateCampaignModal({ isOpen, onClose }: CreateCampaignM
       dispatch(fetchPhoneNumbers())
     }
   }, [isOpen, dispatch])
-
-  if (!isOpen) return null
 
   const handleCsvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -103,151 +110,139 @@ export default function CreateCampaignModal({ isOpen, onClose }: CreateCampaignM
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/20 dark:bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-h-[90vh]">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-            <div className="p-1.5 bg-brand-gradient rounded-lg">
-              <div className="w-4 h-4 border-2 border-white rounded-full" />
-            </div>
-            <h2 className="font-semibold text-lg">Create Batch Campaign</h2>
-          </div>
-          <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 space-y-6 overflow-y-auto">
-          {/* Campaign Name */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Campaign Name</label>
-            <input
-              type="text"
-              value={campaignName}
-              onChange={(e) => setCampaignName(e.target.value)}
-              placeholder="Enter campaign name"
-              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] transition-all text-gray-900 dark:text-gray-100"
-            />
-          </div>
-
-          {/* Agent Selection */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Agent</label>
-            <select
-              value={selectedAgentId}
-              onChange={(e) => setSelectedAgentId(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] transition-all appearance-none text-gray-900 dark:text-gray-100"
-            >
-              <option value="">Select an agent</option>
-              {agents.map(agent => (
-                <option key={agent.agent_id} value={agent.agent_id}>{agent.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Phone Number Selection */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Phone Number</label>
-            <select
-              value={selectedPhoneNumberId}
-              onChange={(e) => setSelectedPhoneNumberId(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] transition-all appearance-none text-gray-900 dark:text-gray-100"
-            >
-              <option value="">Select a phone number</option>
-              {phoneNumbers.map(phone => (
-                <option key={phone.phone_number_id} value={phone.phone_number_id}>{phone.phone_number}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Recipients */}
-          <div className="space-y-4">
-            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Phone Numbers</label>
-            <div className="flex gap-6">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  checked={recipientInputMethod === "paste"}
-                  onChange={() => setRecipientInputMethod("paste")}
-                  className="w-4 h-4 text-[#3b82f6] focus:ring-[#3b82f6]"
-                />
-                <span className="text-sm">Paste Numbers</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  checked={recipientInputMethod === "csv"}
-                  onChange={() => setRecipientInputMethod("csv")}
-                  className="w-4 h-4 text-[#3b82f6] focus:ring-[#3b82f6]"
-                />
-                <span className="text-sm">Upload CSV File</span>
-              </label>
-            </div>
-
-            {recipientInputMethod === "paste" ? (
-              <textarea
-                value={pastedNumbers}
-                onChange={(e) => setPastedNumbers(e.target.value)}
-                placeholder="Enter phone numbers (one per line or separated by commas)&#10;+1234567890&#10;+1987654321"
-                className="w-full h-32 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] transition-all resize-none font-mono text-sm text-gray-900 dark:text-gray-100"
-              />
-            ) : (
-              <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer relative">
-                <Upload className="w-8 h-8 text-gray-500 dark:text-gray-400" />
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {csvFile ? csvFile.name : "Click to upload CSV"}
-                </span>
-                <span className="text-xs text-gray-600 dark:text-gray-400">Phone Number, Name (optional)</span>
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleCsvChange}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
-                />
-              </div>
-            )}
-            <p className="text-xs text-gray-600 dark:text-gray-400">
-              Enter phone numbers in E.164 format, separated by new lines, commas, or spaces
-            </p>
-          </div>
-
-          {/* Schedule */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Schedule (Optional)</label>
-            <div className="relative">
-              <input
-                type="datetime-local"
-                value={scheduledTime}
-                onChange={(e) => setScheduledTime(e.target.value)}
-                className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] transition-all text-gray-900 dark:text-gray-100"
-              />
-              <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400 pointer-events-none" />
-            </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400">Leave empty to start immediately</p>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="p-6 border-t border-gray-200 dark:border-gray-800 flex justify-end gap-3 bg-gray-50 dark:bg-gray-800/50 rounded-b-xl">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className="px-4 py-2 text-sm font-medium text-white bg-brand-gradient rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {isLoading && <Loader2 size={16} className="animate-spin" />}
-            Create Campaign
-          </button>
-        </div>
+  const footer = (
+    <PremiumPanelFooter>
+      <div className="flex justify-end gap-2 w-full">
+        <Button variant="light" onPress={onClose} className="font-medium">
+          Cancel
+        </Button>
+        <Button
+          color="primary"
+          className="font-bold px-4 shadow-lg shadow-primary/20 h-9"
+          onPress={handleSubmit}
+          isLoading={isLoading}
+          isDisabled={isLoading}
+        >
+          Create Campaign
+        </Button>
       </div>
-    </div>
+    </PremiumPanelFooter>
+  )
+
+  return (
+    <PremiumSidePanel
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Create Batch Campaign"
+      subtitle="Launch a new outbound campaign to multiple recipients."
+      size="lg"
+      footer={footer}
+    >
+      <PremiumPanelContent>
+        <PremiumFormSection title="Campaign Details">
+            <PremiumInput
+                label="Campaign Name"
+                placeholder="e.g., Q4 Sales Outreach"
+                value={campaignName}
+                onValueChange={setCampaignName}
+                labelPlacement="outside"
+                isRequired
+            />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <PremiumSelect
+                    label="Agent"
+                    placeholder="Select an agent"
+                    selectedKeys={selectedAgentId ? [selectedAgentId] : []}
+                    onChange={(e) => setSelectedAgentId(e.target.value)}
+                >
+                    {agents.map(agent => (
+                        <SelectItem key={agent.agent_id} textValue={agent.name}>
+                            {agent.name}
+                        </SelectItem>
+                    ))}
+                </PremiumSelect>
+
+                <PremiumSelect
+                    label="Phone Number"
+                    placeholder="Select a phone number"
+                    selectedKeys={selectedPhoneNumberId ? [selectedPhoneNumberId] : []}
+                    onChange={(e) => setSelectedPhoneNumberId(e.target.value)}
+                >
+                    {phoneNumbers.map(phone => (
+                        <SelectItem key={phone.phone_number_id} textValue={phone.phone_number}>
+                            {phone.phone_number} {phone.label ? `(${phone.label})` : ""}
+                        </SelectItem>
+                    ))}
+                </PremiumSelect>
+            </div>
+        </PremiumFormSection>
+
+        <PremiumFormSection title="Recipients" description="Add phone numbers to call.">
+             <Tabs 
+                selectedKey={recipientInputMethod} 
+                onSelectionChange={(key) => setRecipientInputMethod(key as "paste" | "csv")}
+                variant="underlined"
+                color="primary"
+                classNames={{
+                    tabList: "w-full border-b border-gray-200 dark:border-gray-700",
+                    cursor: "w-full bg-primary",
+                    tab: "max-w-fit px-4 h-10",
+                    tabContent: "group-data-[selected=true]:text-primary"
+                }}
+            >
+                <Tab key="paste" title="Paste Numbers">
+                     <div className="pt-4">
+                        <PremiumTextarea
+                            placeholder="Enter phone numbers (one per line or separated by commas)&#10;+1234567890&#10;+1987654321"
+                            value={pastedNumbers}
+                            onValueChange={setPastedNumbers}
+                            minRows={5}
+                        />
+                         <p className="text-xs text-gray-500 mt-2">
+                            Enter phone numbers in E.164 format, separated by new lines, commas, or spaces
+                        </p>
+                    </div>
+                </Tab>
+                <Tab key="csv" title="Upload CSV">
+                    <div className="pt-4">
+                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer relative bg-gray-50/30">
+                            <Upload className="w-8 h-8 text-gray-500 dark:text-gray-400" />
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                {csvFile ? csvFile.name : "Click to upload CSV"}
+                            </span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Phone Number, Name (optional)</span>
+                            <input
+                                type="file"
+                                accept=".csv"
+                                onChange={handleCsvChange}
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                            />
+                        </div>
+                    </div>
+                </Tab>
+            </Tabs>
+        </PremiumFormSection>
+
+        <PremiumFormSection title="Schedule" description="Optional: Schedule this campaign for later.">
+             <div className="relative">
+                <Input
+                    type="datetime-local"
+                    label="Start Time"
+                    labelPlacement="outside"
+                    placeholder="Select date and time"
+                    value={scheduledTime}
+                    onValueChange={setScheduledTime}
+                    variant="bordered"
+                    classNames={{
+                        inputWrapper: "h-10 bg-white dark:bg-black/20 border-divider shadow-sm group-data-[focus=true]:border-primary transition-all duration-200 rounded-xl",
+                        label: "text-foreground font-semibold text-[13px] mb-1.5"
+                    }}
+                />
+            </div>
+        </PremiumFormSection>
+      </PremiumPanelContent>
+    </PremiumSidePanel>
   )
 }
+

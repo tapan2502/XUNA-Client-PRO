@@ -1,7 +1,5 @@
-"use client"
-
-import { Mic, MicOff } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
+import { Mic, MicOff } from "lucide-react"
 
 interface TestAgentPanelProps {
   agentId: string
@@ -43,6 +41,8 @@ export function TestAgentPanel({ agentId }: TestAgentPanelProps) {
       setMicPermission(null)
     }
   }
+
+
 
   const requestMicrophoneAccess = async () => {
     setIsRequesting(true)

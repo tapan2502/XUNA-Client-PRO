@@ -10,7 +10,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
-    "@11labs/client": "0.2.0",
+    "@11labs/client": "^0.0.7",
     "@heroui/react": "2.8.5",
     "@heroui/theme": "2.4.23",
     "@iconify/react": "^6.0.2",

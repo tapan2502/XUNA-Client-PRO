@@ -80,32 +80,33 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
 
     const renderItem = React.useCallback(
       (item: SidebarItem): React.ReactElement => {
+        const { items, type, icon, href, title, startContent, endContent, ...itemProps } = item;
         const isNestType =
-          item.items && item.items?.length > 0 && item?.type === SidebarItemType.Nest;
+          items && items?.length > 0 && type === SidebarItemType.Nest;
 
         if (isCompact) {
           return (
             <ListboxItem
-              {...item}
+              {...itemProps}
               key={item.key}
               endContent={null}
               startContent={null}
-              textValue={item.title}
+              textValue={title}
               title={null}
             >
-              <Tooltip content={item.title} placement="right">
+              <Tooltip content={title} placement="right">
                 <div className="flex w-full items-center justify-center">
-                  {item.icon ? (
+                  {icon ? (
                     <Icon
                       className={cn(
                         "text-default-500 group-data-[selected=true]:text-foreground",
                         iconClassName,
                       )}
-                      icon={item.icon}
+                      icon={icon}
                       width={24}
                     />
                   ) : (
-                    (item.startContent ?? null)
+                    (startContent ?? null)
                   )}
                 </div>
               </Tooltip>
@@ -114,10 +115,9 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
         }
 
         if (isNestType) {
-          const { href, ...itemWithoutHref } = item;
           return (
             <ListboxItem
-              {...(itemWithoutHref as any)}
+              {...(itemProps as any)}
               key={item.key}
               classNames={{
                 base: "h-auto p-0",
@@ -129,42 +129,42 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
               <Accordion className="p-0">
                 <AccordionItem
                   key={item.key}
-                  aria-label={item.title}
+                  aria-label={title}
                   classNames={{
                     heading: "pr-3",
                     trigger: "p-0",
                     content: "py-0 pl-4",
                   }}
                   title={
-                    item.icon ? (
+                    icon ? (
                       <div className="flex h-11 items-center gap-2 px-2 py-1.5">
                         <Icon
                           className={cn(
                             "text-default-500 group-data-[selected=true]:text-foreground",
                             iconClassName,
                           )}
-                          icon={item.icon}
+                          icon={icon}
                           width={24}
                         />
                         <span className="text-small text-default-500 group-data-[selected=true]:text-foreground font-medium">
-                          {item.title}
+                          {title}
                         </span>
                       </div>
                     ) : (
-                      (item.startContent ?? null)
+                      (startContent ?? null)
                     )
                   }
                 >
-                  {item.items && item.items?.length > 0 ? (
+                  {items && items?.length > 0 ? (
                     <Listbox
                       className="mt-0.5"
                       classNames={{
                         list: "border-l border-default-200 pl-4",
                       }}
-                      items={item.items}
+                      items={items}
                       variant="flat"
                     >
-                      {item.items.map((subItem) => renderItem(subItem))}
+                      {items.map((subItem) => renderItem(subItem))}
                     </Listbox>
                   ) : null}
                 </AccordionItem>
@@ -175,25 +175,25 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
 
         return (
           <ListboxItem
-            {...item}
+            {...itemProps}
             key={item.key}
-            endContent={hideEndContent ? null : (item.endContent ?? null)}
+            endContent={hideEndContent ? null : (endContent ?? null)}
             startContent={
-              item.icon ? (
+              icon ? (
                 <Icon
                   className={cn(
                     "text-default-500 group-data-[selected=true]:text-foreground",
                     iconClassName,
                   )}
-                  icon={item.icon}
+                  icon={icon}
                   width={24}
                 />
               ) : (
-                (item.startContent ?? null)
+                (startContent ?? null)
               )
             }
-            textValue={item.title}
-            title={item.title}
+            textValue={title}
+            title={title}
           />
         );
       },

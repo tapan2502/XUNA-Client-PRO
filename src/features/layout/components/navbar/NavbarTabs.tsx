@@ -1,8 +1,8 @@
 import { NavLink } from "react-router-dom"
 
 const tabs = [
-  { label: "Agents", href: "/dashboard" },
-  { label: "Settings", href: "/dashboard/settings" },
+  { label: "Agents", href: "/agents" },
+  { label: "Settings", href: "/settings" },
 ]
 
 export default function NavbarTabs() {

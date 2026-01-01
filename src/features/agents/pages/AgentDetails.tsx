@@ -278,7 +278,7 @@ export default function AgentDetails() {
       <div className="flex flex-col items-center justify-center h-full gap-4 p-8 min-h-[400px]">
         <p className="text-lg text-red-500">{error}</p>
         <button
-          onClick={() => navigate("/dashboard/assistants")}
+          onClick={() => navigate("/agents")}
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
         >
           <ArrowLeft size={18} />
@@ -308,7 +308,7 @@ export default function AgentDetails() {
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-5xl mx-auto p-6 space-y-8">
-            <AgentDetailsHeader agent={editedAgent} onBack={() => navigate("/dashboard/assistants")} />
+            <AgentDetailsHeader agent={editedAgent} onBack={() => navigate("/agents")} />
 
             {(error || saveError) && (
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">{saveError || error}</div>

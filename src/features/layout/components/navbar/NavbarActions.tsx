@@ -16,7 +16,7 @@ export default function NavbarActions() {
         size="sm" 
         className="text-default-500 hover:text-foreground transition-colors" 
         aria-label="Settings"
-        onPress={() => navigate("/dashboard/settings")}
+        onPress={() => navigate("/settings")}
       >
         <SettingsIcon className="size-[18px]" strokeWidth={2} />
       </Button>

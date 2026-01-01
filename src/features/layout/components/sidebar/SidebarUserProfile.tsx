@@ -50,7 +50,7 @@ export default function SidebarUserProfile({ isCollapsed }: { isCollapsed?: bool
   const menuItems = [
     { icon: Sparkles, label: "Upgrade plan", onClick: () => console.log("Upgrade clicked") },
     { icon: Zap, label: "Personalization", onClick: () => console.log("Personalization clicked") },
-    { icon: Settings, label: "Settings", onClick: () => navigate("/dashboard/settings") },
+    { icon: Settings, label: "Settings", onClick: () => navigate("/settings") },
   ]
 
   const handleLogout = async () => {

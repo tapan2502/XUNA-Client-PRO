@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchConversations, fetchConversationDetails, clearSelectedConversation } from "@/store/callHistorySlice"
-import { Phone, Clock, MessageSquare, Copy, Check } from "lucide-react"
-import { Chip, Button } from "@heroui/react"
+import { Phone, Clock, MessageSquare, Copy, Check, MoreVertical, Eye } from "lucide-react"
+import { Chip, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react"
 import DataTable from "@/components/hero-ui/DataTable"
 import CallHistoryDetails from "../components/CallHistoryDetails"
 import CallHistoryFilters from "../components/CallHistoryFilters"
@@ -171,10 +171,23 @@ export default function CallHistory() {
         )
       case "actions":
         return (
-          <div className="flex items-center justify-center">
-            <Button size="sm" variant="flat" onPress={() => setSelectedConversationId(item.conversation_id)}>
-              View Details
-            </Button>
+          <div className="flex justify-end pr-2">
+            <Dropdown>
+              <DropdownTrigger>
+                <Button isIconOnly size="sm" variant="light" className="text-default-500 hover:text-foreground">
+                  <MoreVertical size={18} />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Call Activity Actions">
+                <DropdownItem 
+                  key="view" 
+                  startContent={<Eye size={18} />}
+                  onPress={() => setSelectedConversationId(item.conversation_id)}
+                >
+                  View Details
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
           </div>
         )
       default:
@@ -202,6 +215,23 @@ export default function CallHistory() {
         topBarTitle="Call History"
         topBarCount={tableData.length}
         emptyContent="No call history found. Start making calls to see them here."
+        filterContent={
+          <CallHistoryFilters
+            conversations={conversations}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            dateAfter={dateAfter}
+            setDateAfter={setDateAfter}
+            dateBefore={dateBefore}
+            setDateBefore={setDateBefore}
+            selectedAgent={selectedAgent}
+            setSelectedAgent={setSelectedAgent}
+            selectedEvaluation={selectedEvaluation}
+            setSelectedEvaluation={setSelectedEvaluation}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        }
       />
 
       {/* Details Sidebar */}

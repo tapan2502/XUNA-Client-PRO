@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react"
 import { useAppSelector, useAppDispatch } from "@/app/hooks"
 import { selectCurrentUserData, fetchUserDetails } from "@/store/authSlice"
-import { Users, Eye, CheckCircle2, Clock } from "lucide-react"
+import { Users, Eye, CheckCircle2, Clock, MoreVertical } from "lucide-react"
 import { Icon } from "@iconify/react"
 import DataTable from "@/components/hero-ui/DataTable"
-import { Button, Chip, Select, SelectItem } from "@heroui/react"
+import { Button, Chip, Select, SelectItem, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react"
 import CreateCampaignModal from "../components/CreateCampaignModal"
 import CampaignDetailsModal from "../components/CampaignDetailsModal"
 
@@ -78,14 +78,24 @@ export default function Campaigns() {
         )
       case "actions":
         return (
-          <Button
-            size="sm"
-            variant="light"
-            onPress={() => setSelectedCampaignId(item.batch_call_id)}
-            startContent={<Eye size={16} />}
-          >
-            View Details
-          </Button>
+          <div className="flex justify-end pr-2">
+            <Dropdown>
+              <DropdownTrigger>
+                <Button isIconOnly size="sm" variant="light" className="text-default-500 hover:text-foreground">
+                  <MoreVertical size={18} />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Campaign Actions">
+                <DropdownItem 
+                  key="view" 
+                  startContent={<Eye size={18} />}
+                  onPress={() => setSelectedCampaignId(item.batch_call_id)}
+                >
+                  View Details
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
         )
       default:
         return null

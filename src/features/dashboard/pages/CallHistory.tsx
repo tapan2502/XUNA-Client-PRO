@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react"
 import { useAppSelector, useAppDispatch } from "@/app/hooks"
 import { selectCurrentUserData, fetchUserDetails } from "@/store/authSlice"
-import { Phone, Clock, CheckCircle2, XCircle, AlertCircle } from "lucide-react"
+import { Phone, Clock, CheckCircle2, XCircle, AlertCircle, MoreVertical, Eye, Trash2 } from "lucide-react"
 import DataTable from "@/components/hero-ui/DataTable"
-import { Chip } from "@heroui/react"
+import { Chip, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react"
+import { Icon } from "@iconify/react"
 
 interface Column {
   uid: string
@@ -30,6 +31,7 @@ export default function CallHistory() {
     { uid: "duration", name: "Duration", sortable: true },
     { uid: "status", name: "Status", sortable: true },
     { uid: "timestamp", name: "Time", sortable: true },
+    { uid: "actions", name: "" },
   ]
 
   const renderCell = (item: any, columnKey: string) => {
@@ -76,18 +78,46 @@ export default function CallHistory() {
             {new Date(item.timestamp).toLocaleString()}
           </span>
         )
+      case "actions":
+        return (
+          <div className="flex justify-end pr-2">
+            <Dropdown>
+              <DropdownTrigger>
+                <Button isIconOnly size="sm" variant="light" className="text-default-500 hover:text-foreground">
+                  <MoreVertical size={18} />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Call Activity Actions">
+                <DropdownItem 
+                  key="view" 
+                  startContent={<Eye size={18} />}
+                >
+                  View Details
+                </DropdownItem>
+                <DropdownItem 
+                  key="delete" 
+                  className="text-danger" 
+                  color="danger" 
+                  startContent={<Trash2 size={18} />}
+                >
+                  Delete Log
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+        )
       default:
         return null
     }
   }
 
   return (
-    <div className="h-full p-4 w-full max-w-[95rem] mx-auto flex flex-col gap-4">
+    <div className="flex flex-col gap-4 p-6 h-full overflow-hidden">
       <DataTable
         columns={columns}
         data={callHistory}
         renderCell={renderCell}
-        initialVisibleColumns={["phone_number", "agent", "duration", "status", "timestamp"]}
+        initialVisibleColumns={["phone_number", "agent", "duration", "status", "timestamp", "actions"]}
         searchKeys={["phone_number", "agent_name", "agent_id"]}
         searchPlaceholder="Search call history..."
         topBarTitle="Call History"

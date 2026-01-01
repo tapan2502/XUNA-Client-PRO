@@ -8,10 +8,13 @@ import { getLanguageFlag } from "@/lib/constants/languages";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import DataTable, { DataTableColumn, useMemoizedCallback } from "@/components/hero-ui/DataTable";
 import { User, Chip, Button, RadioGroup, Radio, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, useButton, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, cn } from "@heroui/react";
+import { MoreVertical, Copy, Check, Eye, Trash2 } from "lucide-react";
 import { Icon } from "@iconify/react";
 import React from "react";
-import { deleteAgent } from "@/store/agentsSlice";
+import { deleteAgent, updateAgentStatus } from "@/store/agentsSlice";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import { CreateAgentModal } from "@/features/agents/components/CreateAgentModal";
+import { useSearchParams } from "react-router-dom";
 
 // Data enrichment utilities
 const getRandomPhone = () =>
@@ -61,7 +64,7 @@ const columns: DataTableColumn[] = [
   { uid: "billing", name: "Billing" },
   { uid: "phoneNumber", name: "Phone Number" },
   { uid: "services", name: "Services" },
-  { uid: "usageLang", name: "Phone Number" },
+  { uid: "usageLang", name: "Language" },
   { uid: "usage", name: "Usage", sortable: true },
   { uid: "actions", name: "" },
 ];
@@ -86,12 +89,12 @@ function CopyText({ children }: { children: string }) {
       </span>
       <button
         onClick={handleCopy}
-        className="text-default-300 hover:text-primary transition-colors"
+        className="text-default-400 hover:text-primary transition-colors pr-1"
       >
         {copied ? (
-          <Icon icon="solar:check-circle-bold" className="text-success" width={14} />
+          <Check className="text-success" size={14} />
         ) : (
-          <Icon icon="solar:copy-linear" width={14} />
+          <Copy size={14} />
         )}
       </button>
     </div>
@@ -121,7 +124,7 @@ function Status({ status }: { status: string }) {
 
 // Icons
 const EyeFilledIcon = (props: any) => (
-  <Icon {...props} icon="solar:eye-bold" />
+  <Eye {...props} size={18} />
 );
 
 const EditLinearIcon = (props: any) => (
@@ -129,17 +132,33 @@ const EditLinearIcon = (props: any) => (
 );
 
 const DeleteFilledIcon = (props: any) => (
-  <Icon {...props} icon="solar:trash-bin-trash-bold" />
+  <Trash2 {...props} size={18} />
 );
 
 export default function ClientsTable() {
   const [statusFilter, setStatusFilter] = React.useState("all");
+  const [languageFilter, setLanguageFilter] = React.useState("all");
   const [agentToDelete, setAgentToDelete] = React.useState<EnrichedAgent | null>(null);
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { agents, loading } = useAppSelector((s) => s.agents);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { 
+    isOpen: isCreateModalOpen, 
+    onOpen: onCreateModalOpen, 
+    onClose: onCreateModalClose 
+  } = useDisclosure();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('create') === 'true') {
+      onCreateModalOpen();
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('create');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, onCreateModalOpen, setSearchParams]);
 
   useEffect(() => {
     dispatch(fetchAgents());
@@ -180,10 +199,11 @@ export default function ClientsTable() {
 
   const itemFilter = useCallback(
     (col: EnrichedAgent) => {
-      let allStatus = statusFilter === "all";
-      return allStatus || statusFilter === col.status.toLowerCase();
+      const statusMatch = statusFilter === "all" || col.status.toLowerCase() === statusFilter;
+      const languageMatch = languageFilter === "all" || col.language.code === languageFilter;
+      return statusMatch && languageMatch;
     },
-    [statusFilter],
+    [statusFilter, languageFilter],
   );
 
   const renderCell = useMemoizedCallback((user: EnrichedAgent, columnKey: React.Key) => {
@@ -259,25 +279,37 @@ export default function ClientsTable() {
       case "services":
         return (
           <div className="flex items-center gap-1">
-            <Chip size="sm" variant="flat" className="h-5 text-[9px] bg-default-100/50 text-default-600 px-2 font-medium">
+            <div className="text-[10px] bg-default-100 dark:bg-black/40 text-default-500 px-2 py-0.5 rounded-md font-bold uppercase tracking-tight border border-divider">
               Voice
-            </Chip>
+            </div>
           </div>
         );
       case "usageLang":
         return (
           <div className="flex items-center gap-2">
-            <img src="https://flagcdn.com/w20/us.png" className="w-4 h-3 object-cover rounded-[2px]" alt="US" />
-            <span className="text-[12px] text-foreground font-medium">{user.language.name}</span>
+            <img src={`https://flagcdn.com/w20/${user.language.code}.png`} className="w-4 h-3 object-cover rounded-[2px] opacity-80" alt={user.language.name} />
+            <span className="text-[12px] text-foreground font-bold tracking-tight">{user.language.name}</span>
           </div>
         );
       case "usage":
+        const usagePercent = Math.min((user.usage / user.usageMax) * 100, 100);
         return (
-          <div className="flex flex-col gap-1 w-[100px]">
-            <div className="w-full h-1.5 bg-default-100 rounded-full overflow-hidden">
-               <div className="h-full bg-success rounded-full" style={{ width: "40%" }} />
+          <div className="flex flex-col gap-1.5 w-[110px]">
+            <div className="w-full h-1 bg-default-100 dark:bg-black/40 rounded-full overflow-hidden border border-divider">
+               <div 
+                 className={cn(
+                   "h-full rounded-full transition-all duration-500",
+                   usagePercent > 80 ? "bg-danger" : usagePercent > 50 ? "bg-warning" : "bg-success"
+                 )} 
+                 style={{ width: `${usagePercent}%` }} 
+               />
             </div>
-            <span className="text-[8px] text-default-400 font-medium">{user.usage.toLocaleString()} of {user.usageMax.toLocaleString()} minutes</span>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[9px] text-default-400 font-bold tracking-tight">
+                {user.usage.toLocaleString()} / {user.usageMax.toLocaleString()}
+              </span>
+              <span className="text-[8px] text-default-500 font-medium">min</span>
+            </div>
           </div>
         );
       case "actions":
@@ -285,13 +317,27 @@ export default function ClientsTable() {
           <div className="flex justify-end pr-2">
             <Dropdown>
               <DropdownTrigger>
-                <Button isIconOnly size="sm" variant="light" className="text-default-400">
-                  <Icon icon="solar:menu-dots-vertical-linear" width={18} />
+                <Button isIconOnly size="sm" variant="light" className="text-default-500 hover:text-foreground">
+                  <MoreVertical size={18} />
                 </Button>
               </DropdownTrigger>
-              <DropdownMenu>
-                <DropdownItem key="edit" startContent={<Icon icon="solar:pen-linear" />}>Edit</DropdownItem>
-                <DropdownItem key="delete" className="text-danger" color="danger" startContent={<Icon icon="solar:trash-bin-trash-linear" />} onPress={() => handleDeletePress(user)}>Delete</DropdownItem>
+              <DropdownMenu aria-label="Agent Actions">
+                <DropdownItem 
+                  key="view" 
+                  startContent={<Eye size={18} />}
+                  onPress={() => navigate(`/agents/${user.id}`)}
+                >
+                  View Details
+                </DropdownItem>
+                <DropdownItem 
+                  key="delete" 
+                  className="text-danger" 
+                  color="danger" 
+                  startContent={<Trash2 size={18} />} 
+                  onPress={() => handleDeletePress(user)}
+                >
+                  Delete
+                </DropdownItem>
               </DropdownMenu>
             </Dropdown>
           </div>
@@ -325,19 +371,28 @@ export default function ClientsTable() {
             color="primary" 
             endContent={<Icon icon="solar:add-circle-bold" width={20} />}
             className="font-bold px-4 shadow-lg shadow-primary/20 h-9"
-            onPress={() => navigate('/dashboard/assistants?create=true')}
+            onPress={onCreateModalOpen}
           >
             Add Agent
           </Button>
         }
         emptyContent="No agents found"
         filterContent={
-          <RadioGroup label="Status" value={statusFilter} onValueChange={setStatusFilter}>
-            <Radio value="all">All</Radio>
-            <Radio value="active">Active</Radio>
-            <Radio value="inactive">Inactive</Radio>
-            <Radio value="paused">Paused</Radio>
-          </RadioGroup>
+          <div className="flex flex-col gap-6">
+            <RadioGroup label="Status" value={statusFilter} onValueChange={setStatusFilter} size="sm">
+              <Radio value="all">All</Radio>
+              <Radio value="active">Active</Radio>
+              <Radio value="inactive">Inactive</Radio>
+              <Radio value="paused">Paused</Radio>
+            </RadioGroup>
+            <RadioGroup label="Language" value={languageFilter} onValueChange={setLanguageFilter} size="sm">
+              <Radio value="all">All Languages</Radio>
+              <Radio value="us">English</Radio>
+              <Radio value="da">Danish</Radio>
+              <Radio value="de">German</Radio>
+              <Radio value="es">Spanish</Radio>
+            </RadioGroup>
+          </div>
         }
         onItemFilter={itemFilter}
         sortableColumnKey="name"
@@ -353,6 +408,15 @@ export default function ClientsTable() {
         confirmLabel="Delete"
         isDangerous={true}
         isLoading={false}
+      />
+
+      <CreateAgentModal
+        isOpen={isCreateModalOpen}
+        onClose={onCreateModalClose}
+        onSuccess={() => {
+          onCreateModalClose();
+          dispatch(fetchAgents());
+        }}
       />
     </div>
   );

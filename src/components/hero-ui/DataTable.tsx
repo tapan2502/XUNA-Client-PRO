@@ -30,6 +30,7 @@ import {
 import { SearchIcon } from "@heroui/shared-icons";
 import React, { useMemo, useRef, useCallback, useState } from "react";
 import { Icon } from "@iconify/react";
+import { Search, Filter, SortAsc, LayoutGrid, ChevronDown, ChevronUp, Info, MoreHorizontal } from "lucide-react";
 import { cn } from "@heroui/react";
 
 // Utility hook for memoized callbacks (safe version)
@@ -92,7 +93,7 @@ export default function DataTable<T extends { id: string | number }>({
   const [filterValue, setFilterValue] = useState("");
   const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
   const [visibleColumns, setVisibleColumns] = useState<Selection>(new Set(initialVisibleColumns));
-  const [rowsPerPage] = useState(8);
+  const [rowsPerPage] = useState(7);
   const [page, setPage] = useState(1);
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
     column: sortableColumnKey || columns[0]?.uid,
@@ -157,29 +158,36 @@ export default function DataTable<T extends { id: string | number }>({
     return sortableData.sort((a: T, b: T) => {
       const col = sortDescriptor.column as string;
       
-      // Handle special column keys where the UID doesn't match the data field
       let first: any;
       let second: any;
       
-      if (col === "timestamp") {
-        first = (a as any).start_time_unix_secs || 0;
-        second = (b as any).start_time_unix_secs || 0;
-      } else if (col === "agent") {
-        first = (a as any).agent_name || "";
-        second = (b as any).agent_name || "";
+      // Handle special column mappings or nested objects
+      if (col === "timestamp" || col === "created_at") {
+        first = (a as any).start_time_unix_secs || (a as any).created_at_unix_secs || 0;
+        second = (b as any).start_time_unix_secs || (b as any).created_at_unix_secs || 0;
+      } else if (col === "agent" || col === "name") {
+        first = (a as any).agent_name || (a as any).name || "";
+        second = (b as any).agent_name || (b as any).name || "";
       } else if (col === "duration") {
         first = (a as any).call_duration_secs || 0;
         second = (b as any).call_duration_secs || 0;
       } else if (col === "messages") {
         first = (a as any).message_count || 0;
         second = (b as any).message_count || 0;
+      } else if (col === "language") {
+        first = (a as any).language?.name || "";
+        second = (b as any).language?.name || "";
       } else {
         first = a[col as keyof T];
         second = b[col as keyof T];
       }
 
-      const cmp = first < second ? -1 : first > second ? 1 : 0;
+      if (typeof first === 'string' && typeof second === 'string') {
+        const cmp = first.localeCompare(second);
+        return sortDescriptor.direction === "descending" ? -cmp : cmp;
+      }
 
+      const cmp = first < second ? -1 : first > second ? 1 : 0;
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
     });
   }, [sortDescriptor, filteredItems]);
@@ -289,38 +297,76 @@ export default function DataTable<T extends { id: string | number }>({
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 max-w-sm">
             <Input
-              isClearable
               className="w-full"
               placeholder={searchPlaceholder}
-              startContent={<Icon icon="solar:magnifier-linear" className="text-default-300" width={18} />}
+              endContent={<Search className="text-default-500" size={18} />}
               value={filterValue}
-              onClear={() => onSearchChange("")}
               onValueChange={onSearchChange}
               size="sm"
               variant="flat"
               classNames={{
-                inputWrapper: "bg-white dark:bg-default-100 border border-default-200 shadow-sm transition-all hover:border-default-400 focus-within:!border-primary h-9",
+                inputWrapper: "bg-white dark:bg-default-100 border border-default-200 shadow-sm transition-all hover:border-default-400 focus-within:!border-primary h-9 rounded-xl",
               }}
             />
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="flat" 
-              size="sm" 
-              className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 min-w-0 shadow-sm text-[12px]"
-              startContent={<Icon icon="solar:filter-linear" width={16} />}
-            >
-              Filter
-            </Button>
+            {filterContent && (
+              <Popover placement="bottom-end">
+                <PopoverTrigger>
+                  <Button 
+                    variant="flat" 
+                    size="sm" 
+                    className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 min-w-0 shadow-sm text-[12px]"
+                    startContent={<Filter size={16} />}
+                  >
+                    Filter
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-4 w-60">
+                  {filterContent}
+                </PopoverContent>
+              </Popover>
+            )}
+            {!filterContent && (
+              <Button 
+                variant="flat" 
+                size="sm" 
+                className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 min-w-0 shadow-sm text-[12px]"
+                startContent={<Filter size={16} />}
+              >
+                Filter
+              </Button>
+            )}
 
-            <Button 
-              variant="flat" 
-              size="sm" 
-              className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 min-w-0 shadow-sm text-[12px]"
-              startContent={<Icon icon="solar:sort-linear" width={16} />}
-            >
-              Sort
-            </Button>
+            <Dropdown>
+              <DropdownTrigger>
+                <Button 
+                  variant="flat" 
+                  size="sm" 
+                  className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 min-w-0 shadow-sm text-[12px]"
+                  startContent={<SortAsc size={16} />}
+                  endContent={<ChevronDown size={14} />}
+                >
+                  Sort
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="Sort Columns"
+                onAction={(key) => {
+                  const column = columns.find(c => c.uid === key);
+                  if (column?.sortable) {
+                    setSortDescriptor({
+                      column: key as string,
+                      direction: sortDescriptor.column === key && sortDescriptor.direction === "ascending" ? "descending" : "ascending",
+                    });
+                  }
+                }}
+              >
+                {columns.filter(c => c.sortable).map((column) => (
+                  <DropdownItem key={column.uid} className="capitalize">{column.name}</DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
 
             <Dropdown closeOnSelect={false}>
               <DropdownTrigger>
@@ -328,7 +374,7 @@ export default function DataTable<T extends { id: string | number }>({
                   variant="flat" 
                   size="sm" 
                   className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 min-w-0 shadow-sm text-[12px]"
-                  startContent={<Icon icon="solar:menu-dots-square-linear" width={16} />}
+                  startContent={<LayoutGrid size={16} />}
                 >
                   Columns
                 </Button>
@@ -360,7 +406,7 @@ export default function DataTable<T extends { id: string | number }>({
                       variant="flat" 
                       size="sm" 
                       className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 shadow-sm text-[12px]"
-                      endContent={<Icon icon="solar:alt-arrow-down-linear" width={12} />}
+                      endContent={<ChevronDown size={14} />}
                     >
                       Actions
                     </Button>
@@ -441,11 +487,11 @@ export default function DataTable<T extends { id: string | number }>({
 
   // Arrow icons for sorting
   const ArrowUpIcon = ({ className }: { className?: string }) => (
-    <Icon className={className} icon="solar:alt-arrow-up-linear" width={16} />
+    <ChevronUp className={className} size={16} />
   );
 
   const ArrowDownIcon = ({ className }: { className?: string }) => (
-    <Icon className={className} icon="solar:alt-arrow-down-linear" width={16} />
+    <ChevronDown className={className} size={16} />
   );
 
   return (
@@ -474,39 +520,20 @@ export default function DataTable<T extends { id: string | number }>({
               <TableColumn
                 key={column.uid}
                 align={column.uid === "actions" ? "end" : "start"}
+                allowsSorting={column.sortable}
                 className={cn([
                   column.uid === "actions" ? "flex items-center justify-end px-[20px]" : "",
                 ])}
               >
-                {column.uid === sortDescriptor.column && column.sortable ? (
-                  <div
-                    {...getMemberInfoProps()}
-                    className="flex w-full cursor-pointer items-center justify-between"
-                    onClick={() => {
-                      setSortDescriptor({
-                        column: column.uid,
-                        direction: sortDescriptor.direction === "ascending" ? "descending" : "ascending",
-                      });
-                    }}
-                  >
-                    {column.name}
-                    {column.sortDirection === "ascending" ? (
-                      <ArrowUpIcon className="text-default-400" />
-                    ) : (
-                      <ArrowDownIcon className="text-default-400" />
-                    )}
-                  </div>
-                ) : column.info ? (
-                  <div className="flex min-w-[108px] items-center justify-between">
+                {column.info ? (
+                  <div className="flex min-w-[108px] items-center justify-between pointer-events-none">
                      {column.name}
-                     <Tooltip content={column.info}>
-                       <Icon
-                         className="text-default-300"
-                         height={16}
-                         icon="solar:info-circle-linear"
-                         width={16}
-                       />
-                     </Tooltip>
+                      <Tooltip content={column.info}>
+                        <Info
+                          className="text-default-400 pointer-events-auto"
+                          size={16}
+                        />
+                      </Tooltip>
                   </div>
                 ) : (
                   column.name

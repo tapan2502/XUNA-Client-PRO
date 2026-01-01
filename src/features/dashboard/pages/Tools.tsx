@@ -2,7 +2,7 @@ import { Wrench } from "lucide-react"
 
 export default function Tools() {
   return (
-    <div className="flex flex-col gap-6 h-full p-6 max-w-7xl mx-auto w-full text-foreground">
+    <div className="flex flex-col gap-6 h-full p-6 w-full text-foreground">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2">

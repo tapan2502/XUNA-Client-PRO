@@ -139,7 +139,7 @@ export default function Agents() {
               size="sm"
               variant="light"
               isIconOnly
-              onPress={() => navigate(`/dashboard/assistants/${item.agent_id}`)}
+              onPress={() => navigate(`/agents/${item.agent_id}`)}
               className="text-default-400 hover:text-primary transition-colors"
             >
               <Eye size={18} />

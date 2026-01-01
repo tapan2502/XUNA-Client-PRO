@@ -17,9 +17,9 @@ export default function NavbarUserMenu() {
 
   const handleAction = async (key: React.Key) => {
     if (key === "profile") {
-      navigate("/dashboard/profile")
+      navigate("/profile")
     } else if (key === "settings") {
-      navigate("/dashboard/settings")
+      navigate("/settings")
     } else if (key === "logout") {
       try {
         await dispatch(logout()).unwrap()

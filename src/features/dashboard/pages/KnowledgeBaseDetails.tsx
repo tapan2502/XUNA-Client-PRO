@@ -38,10 +38,10 @@ export default function KnowledgeBaseDetails() {
   }
 
   return (
-    <div className="flex flex-col h-full p-6 max-w-7xl mx-auto w-full text-foreground gap-6">
+    <div className="flex flex-col h-full p-6 w-full text-foreground gap-6">
       {/* Back Button */}
       <button 
-        onClick={() => navigate("/dashboard/knowledge-base")}
+        onClick={() => navigate("/knowledge-base")}
         className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit"
       >
         <ArrowLeft size={16} />

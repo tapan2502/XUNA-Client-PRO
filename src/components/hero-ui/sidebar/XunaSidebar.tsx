@@ -125,15 +125,6 @@ export default function XunaSidebar() {
             <span className="text-sm font-bold text-foreground truncate leading-none">{userEmail}</span>
             <span className="text-[10px] text-default-400 font-medium mt-1 uppercase tracking-wider">{userRole}</span>
           </div>
-          <Button 
-            isIconOnly 
-            variant="light" 
-            size="sm" 
-            className="text-default-400 hover:bg-default-100"
-            onPress={handleLogout}
-          >
-            <Icon icon="solar:logout-3-bold-duotone" width={18} />
-          </Button>
         </div>
       </div>
     </div>

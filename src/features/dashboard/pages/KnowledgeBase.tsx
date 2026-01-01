@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchKnowledgeBase, deleteKnowledgeBaseDocument } from "@/store/agentsSlice"
 import { useNavigate } from "react-router-dom"
-import { FileText, ExternalLink, Trash2, Eye, Plus } from "lucide-react"
+import { FileText, ExternalLink, Trash2, Eye, Plus, MoreVertical } from "lucide-react"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import DataTable from "@/components/hero-ui/DataTable"
-import { Button, Chip } from "@heroui/react"
+import { Button, Chip, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, RadioGroup, Radio } from "@heroui/react"
 import AddDocumentModal from "../components/AddDocumentModal"
 import ConfirmationModal from "@/components/ConfirmationModal"
 import { useSnackbar } from "@/components/ui/SnackbarProvider"
+import { Icon } from "@iconify/react"
 
 interface Column {
   uid: string
@@ -25,6 +26,15 @@ export default function KnowledgeBase() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [typeFilter, setTypeFilter] = useState("all")
+
+  const handleItemFilter = useCallback(
+    (item: any) => {
+      if (typeFilter === "all") return true
+      return item.type === typeFilter
+    },
+    [typeFilter]
+  )
 
   useEffect(() => {
     dispatch(fetchKnowledgeBase())
@@ -95,24 +105,32 @@ export default function KnowledgeBase() {
         )
       case "actions":
         return (
-          <div className="flex items-center justify-center gap-2">
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              onPress={() => navigate(`/dashboard/knowledge-base/${item.id}`)}
-            >
-              <Eye size={18} />
-            </Button>
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              color="danger"
-              onPress={() => handleDeleteClick(item.id)}
-            >
-              <Trash2 size={18} />
-            </Button>
+          <div className="flex justify-end pr-2">
+            <Dropdown>
+              <DropdownTrigger>
+                <Button isIconOnly size="sm" variant="light" className="text-default-500 hover:text-foreground">
+                  <MoreVertical size={18} />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Knowledge Base Actions">
+                <DropdownItem 
+                  key="view" 
+                  startContent={<Eye size={18} />}
+                  onPress={() => navigate(`/knowledge-base/${item.id}`)}
+                >
+                  View Details
+                </DropdownItem>
+                <DropdownItem 
+                  key="delete" 
+                  className="text-danger" 
+                  color="danger" 
+                  startContent={<Trash2 size={18} />} 
+                  onPress={() => handleDeleteClick(item.id)}
+                >
+                  Delete
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
           </div>
         )
       default:
@@ -140,7 +158,7 @@ export default function KnowledgeBase() {
         </div>
       )}
 
-      <div className="h-full p-4 w-full max-w-[95rem] mx-auto flex flex-col gap-4">
+      <div className="flex flex-col gap-4 p-6 h-full overflow-hidden">
         <DataTable
           columns={columns}
           data={tableData}
@@ -151,6 +169,18 @@ export default function KnowledgeBase() {
           topBarTitle="Knowledge Base"
           topBarCount={knowledgeBase.length}
           topBarAction={topBarAction}
+          onItemFilter={handleItemFilter}
+          filterContent={
+            <RadioGroup
+              label="Document Type"
+              value={typeFilter}
+              onValueChange={setTypeFilter}
+            >
+              <Radio value="all">All Types</Radio>
+              <Radio value="file">Files</Radio>
+              <Radio value="url">URLs</Radio>
+            </RadioGroup>
+          }
           emptyContent="No documents found. Add one to get started."
         />
 

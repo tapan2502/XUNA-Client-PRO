@@ -82,28 +82,28 @@ export default function HeroUINavbar() {
         <div className="flex items-center gap-6 mr-4">
           <Link
             className={`text-[14px] font-medium transition-colors ${
-              isActive("/dashboard") 
+                isActive("/agents") 
                 ? "text-foreground font-semibold" 
                 : "text-default-500 hover:text-foreground"
             }`}
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              navigate("/dashboard");
+              navigate("/agents");
             }}
           >
             Agents
           </Link>
           <Link
             className={`text-[14px] font-medium transition-colors ${
-              isActive("/dashboard/settings") 
+              isActive("/settings") 
                 ? "text-foreground font-semibold" 
                 : "text-default-500 hover:text-foreground"
             }`}
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              navigate("/dashboard/settings");
+              navigate("/settings");
             }}
           >
             Settings
@@ -143,27 +143,27 @@ export default function HeroUINavbar() {
 
       {/* Mobile Menu */}
       <NavbarMenu>
-        <NavbarMenuItem isActive={isActive("/dashboard")}>
+        <NavbarMenuItem isActive={isActive("/agents")}>
           <Link
             className="w-full"
-            color={isActive("/dashboard") ? "primary" : "foreground"}
+            color={isActive("/agents") ? "primary" : "foreground"}
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              navigate("/dashboard");
+              navigate("/agents");
             }}
           >
             Agents
           </Link>
         </NavbarMenuItem>
-        <NavbarMenuItem isActive={isActive("/dashboard/settings")}>
+        <NavbarMenuItem isActive={isActive("/settings")}>
           <Link
             className="w-full"
-            color={isActive("/dashboard/settings") ? "primary" : "foreground"}
+            color={isActive("/settings") ? "primary" : "foreground"}
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              navigate("/dashboard/settings");
+              navigate("/settings");
             }}
           >
             Settings

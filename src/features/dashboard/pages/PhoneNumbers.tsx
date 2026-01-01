@@ -10,6 +10,7 @@ import {
   PhoneOutgoing,
   AlertCircle,
   Plus,
+  MoreVertical,
 } from "lucide-react"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import ImportTwilioModal from "../components/ImportTwilioModal"
@@ -18,7 +19,7 @@ import AssignAgentModal from "../components/AssignAgentModal"
 import ConfirmationModal from "@/components/ConfirmationModal"
 import { useSnackbar } from "@/components/ui/SnackbarProvider"
 import DataTable, { DataTableColumn, useMemoizedCallback } from "@/components/hero-ui/DataTable"
-import { Button, Chip, DropdownItem, User, RadioGroup, Radio } from "@heroui/react"
+import { Button, Chip, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, User, RadioGroup, Radio } from "@heroui/react"
 import { Icon } from "@iconify/react"
 import React from "react"
 
@@ -160,39 +161,32 @@ export default function PhoneNumbers() {
         )
       case "actions":
         return (
-          <div className="flex items-center justify-end gap-1">
-            <Button
-              size="sm"
-              variant={item.assigned_agent ? "light" : "solid"}
-              color={item.assigned_agent ? "default" : "primary"}
-              onPress={() => handleAssignAgent(item.id, item.assigned_agent?.agent_id)}
-              startContent={!item.assigned_agent && <UserPlus size={16} />}
-              className={!item.assigned_agent ? "shadow-sm" : ""}
-            >
-              {item.assigned_agent ? "Change" : "Assign"}
-            </Button>
-            
-            {item.assigned_agent && (
-              <Button
-                size="sm"
-                variant="light"
-                color="primary"
-                startContent={<PhoneOutgoing size={16} />}
-              >
-                Call
-              </Button>
-            )}
-
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              color="danger"
-              onPress={() => confirmDelete(item.id)}
-              className="opacity-70 hover:opacity-100"
-            >
-              <Trash2 size={18} />
-            </Button>
+          <div className="flex justify-end pr-2">
+            <Dropdown>
+              <DropdownTrigger>
+                <Button isIconOnly size="sm" variant="light" className="text-default-500 hover:text-foreground">
+                  <MoreVertical size={18} />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Phone Number Actions">
+                <DropdownItem 
+                  key="assign" 
+                  startContent={<UserPlus size={18} />}
+                  onPress={() => handleAssignAgent(item.id, item.assigned_agent?.agent_id)}
+                >
+                  {item.assigned_agent ? "Change Agent" : "Assign Agent"}
+                </DropdownItem>
+                <DropdownItem 
+                  key="delete" 
+                  className="text-danger" 
+                  color="danger" 
+                  startContent={<Trash2 size={18} />} 
+                  onPress={() => confirmDelete(item.id)}
+                >
+                  Delete
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
           </div>
         )
       default:

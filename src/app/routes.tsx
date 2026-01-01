@@ -28,7 +28,7 @@ const Protected: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 }
 const PublicOnly: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const user = useAppSelector(selectEffectiveUser)
-  return user ? <Navigate to="/dashboard" replace /> : <>{children}</>
+  return user ? <Navigate to="/agents" replace /> : <>{children}</>
 }
 
 export default function AppRoutes() {
@@ -59,16 +59,20 @@ export default function AppRoutes() {
           }
         />
         <Route
-          path="/dashboard"
-          element={<DashboardShell />}
+          path="/"
+          element={
+            <Protected>
+              <DashboardShell />
+            </Protected>
+          }
         >
-          <Route index element={<DashboardHome />} />
+          <Route index element={<Navigate to="/agents" replace />} />
           <Route path="profile" element={<Profile />} />
           <Route path="call-history" element={<CallHistory />} />
 
           <Route path="phone-numbers" element={<PhoneNumbers />} />
-          <Route path="assistants" element={<Agents />} />
-          <Route path="assistants/:agentId" element={<AgentDetails />} />
+          <Route path="agents" element={<DashboardHome />} />
+          <Route path="agents/:agentId" element={<AgentDetails />} />
           <Route path="knowledge-base" element={<KnowledgeBase />} />
           <Route path="knowledge-base/:documentId" element={<KnowledgeBaseDetails />} />
           <Route path="campaigns" element={<Campaigns />} />

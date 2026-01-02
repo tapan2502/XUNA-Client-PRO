@@ -162,7 +162,6 @@ export default function Settings() {
         </CardBody>
       </Card>
 
-      <KPICards/>
     </div>
   );
 }

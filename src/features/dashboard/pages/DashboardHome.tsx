@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchAgents } from "@/store/agentsSlice"
 import { fetchConversations } from "@/store/callHistorySlice"
-import KpiStatsCard from "@/components/hero-ui/KpiStatsCard"
+import KPICards from "@/components/hero-ui/statsKPI/KPICards"
 import ClientsTable from "../components/ClientsTable"
 
 
@@ -25,32 +25,40 @@ import ClientsTable from "../components/ClientsTable"
   const totalCalls = conversations?.length || 0
   const totalSMS = 943 // Hardcoded as requested
 
+  const kpiItems = [
+    {
+      title: "Agents",
+      subtitle: "Active Agents",
+      value: totalAgents.toString(),
+      change: "3.3%",
+      color: "success" as const,
+      chartData: agentsData.map((v, i) => ({ month: i.toString(), value: v })),
+      xaxis: "month"
+    },
+    {
+      title: "Total Calls",
+      subtitle: "Lifetime Calls",
+      value: totalCalls.toLocaleString(),
+      change: "0.0%",
+      color: "warning" as const,
+      chartData: callsData.map((v, i) => ({ month: i.toString(), value: v })),
+      xaxis: "month"
+    },
+    {
+      title: "Total SMS",
+      subtitle: "Lifetime SMS",
+      value: totalSMS.toLocaleString(),
+      change: "3.3%",
+      color: "danger" as const,
+      chartData: smsData.map((v, i) => ({ month: i.toString(), value: v })),
+      xaxis: "month"
+    }
+  ]
+
   return (
     <div className="flex flex-col gap-4 p-6 h-full overflow-hidden">
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 shrink-0">
-        <KpiStatsCard
-          title="Agents"
-          value={totalAgents.toString()}
-          change="3.3%"
-          color="success"
-          data={agentsData.map((v) => ({ value: v }))}
-        />
-        <KpiStatsCard
-          title="Total Calls"
-          value={totalCalls.toLocaleString()}
-          change="0.0%"
-          color="warning"
-          data={callsData.map((v) => ({ value: v }))}
-        />
-        <KpiStatsCard
-          title="Total SMS"
-          value={totalSMS.toLocaleString()}
-          change="3.3%"
-          color="danger"
-          data={smsData.map((v) => ({ value: v }))}
-        />
-      </div>
+      <KPICards items={kpiItems} limit={3} />
 
       {/* Clients Table */}
       <div className="flex-1 min-h-0">

@@ -39,8 +39,7 @@ export default function KpiStatsCard({
   const chartColor = getChartColor(color);
 
   return (
-    <Card 
-      className="bg-white dark:bg-default-50/5 border border-default-200 shadow-sm rounded-none p-6 flex flex-col justify-start relative overflow-hidden h-[150px]"
+      className="bg-white dark:bg-default-50/5 border border-default-200 shadow-sm rounded-none p-6 flex flex-col justify-start relative overflow-hidden h-[178px]"
     >
       <div className="flex justify-between items-start z-10 w-full mb-2">
         <div className="flex flex-col gap-1">

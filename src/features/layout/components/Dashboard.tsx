@@ -36,7 +36,7 @@ class SimpleErrorBoundary extends Component<{children: ReactNode}, {hasError: bo
   }
 }
 
-import NavigationRail from "./NavigationRail"
+import CompactSidebar from "@/components/hero-ui/sidebar/CompactSidebar"
 import XunaSidebar from "@/components/hero-ui/sidebar/XunaSidebar"
 
 export default function Dashboard() {
@@ -47,7 +47,7 @@ export default function Dashboard() {
     <div className="h-screen flex flex-col bg-background overflow-hidden relative">
       <HeroUINavbar />
       <div className="flex-1 flex overflow-hidden relative">
-        <NavigationRail />
+        <CompactSidebar />
         <XunaSidebar />
         <main className="flex-1 overflow-y-auto bg-default-50/50 dark:bg-background relative p-0">
           {initializing ? (

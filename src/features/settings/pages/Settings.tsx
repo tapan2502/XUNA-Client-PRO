@@ -3,6 +3,7 @@ import { http } from "@/lib/http";
 import { Lock, Save, Eye, EyeOff } from "lucide-react";
 import { useSnackbar } from "@/components/ui/SnackbarProvider";
 import { Button, Card, CardBody, CardHeader, Input, Spacer } from "@heroui/react";
+import KPICards from "@/components/hero-ui/statsKPI/KPICards";
 
 export default function Settings() {
   const [password, setPassword] = useState("");
@@ -160,6 +161,8 @@ export default function Settings() {
           </form>
         </CardBody>
       </Card>
+
+      <KPICards/>
     </div>
   );
 }

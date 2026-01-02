@@ -1,6 +1,7 @@
 "use client";
 
 import type {AvatarProps} from "@heroui/react";
+
 import React from "react";
 import {Avatar} from "@heroui/react";
 import {cn} from "@heroui/react";

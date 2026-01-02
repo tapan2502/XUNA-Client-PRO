@@ -1,42 +1,25 @@
-"use client";
-
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { fetchAgents } from "@/store/agentsSlice";
 import { useNavigate } from "react-router-dom";
 import { getLanguageFlag } from "@/lib/constants/languages";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import DataTable, { DataTableColumn, useMemoizedCallback } from "@/components/hero-ui/DataTable";
-import { User, Chip, Button, RadioGroup, Radio, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, useButton, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, cn } from "@heroui/react";
-import { MoreVertical, Copy, Check, Eye, Trash2 } from "lucide-react";
+import PremiumTable, { PremiumTableColumn } from "@/components/hero-ui/premium-table/PremiumTable";
+import { useMemoizedCallback } from "@/components/hero-ui/premium-table/use-memoized-callback";
+import { User, Button, RadioGroup, Radio, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, useDisclosure, cn, Tooltip } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import React from "react";
-import { deleteAgent, updateAgentStatus } from "@/store/agentsSlice";
+import { deleteAgent } from "@/store/agentsSlice";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import { CreateAgentModal } from "@/features/agents/components/CreateAgentModal";
 import { useSearchParams } from "react-router-dom";
+import { CopyText } from "@/components/hero-ui/premium-table/copy-text";
+import { Status } from "@/components/hero-ui/premium-table/status";
+import { EyeFilledIcon, EditLinearIcon, DeleteFilledIcon } from "@/components/hero-ui/premium-table/icons";
 
 // Data enrichment utilities
 const getRandomPhone = () =>
   `+1 (${Math.floor(Math.random() * 900) + 100}) ${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`;
-
-const getRandomLanguage = () => {
-  const langs = [
-    { name: "English", code: "us" },
-    { name: "German", code: "de" },
-    { name: "Spanish", code: "es" },
-    { name: "Mandarin", code: "cn" },
-    { name: "Portuguese", code: "pt" },
-  ];
-  return langs[Math.floor(Math.random() * langs.length)];
-};
-
-const getRandomUsage = () => Math.floor(Math.random() * 6000);
-
-const getRandomModelUser = () => {
-  const models = ["Tony Reichert", "Zoe Lang", "Jane Fisher", "William Howard", "Kristen Copper"];
-  return models[Math.floor(Math.random() * models.length)];
-};
 
 // Types
 interface EnrichedAgent {
@@ -53,11 +36,19 @@ interface EnrichedAgent {
 }
 
 type ColumnsKey = "name" | "assistantId" | "model" | "status" | "billing" | "phoneNumber" | "services" | "usageLang" | "usage" | "actions";
-type StatusOptions = "active" | "paused" | "inactive";
 
 // Table columns configuration
-const columns: DataTableColumn[] = [
-  { uid: "name", name: "Client", sortable: true },
+const columns: PremiumTableColumn[] = [
+  { 
+    uid: "statusDot", 
+    name: (
+      <div className="flex items-center justify-center w-full">
+         <div className="w-2 h-2 rounded-full bg-success" />
+      </div>
+    ),
+    sortable: true 
+  },
+  { uid: "name", name: "Agent", sortable: true },
   { uid: "assistantId", name: "Assistant ID" },
   { uid: "model", name: "Model" },
   { uid: "status", name: "Status", sortable: true },
@@ -66,74 +57,10 @@ const columns: DataTableColumn[] = [
   { uid: "services", name: "Services" },
   { uid: "usageLang", name: "Language" },
   { uid: "usage", name: "Usage", sortable: true },
-  { uid: "actions", name: "" },
+  { uid: "actions", name: "Actions" },
 ];
 
-const INITIAL_VISIBLE_COLUMNS = ["name", "assistantId", "model", "status", "billing", "phoneNumber", "services", "usageLang", "usage", "actions"];
-
-// CopyText Component
-function CopyText({ children }: { children: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    await navigator.clipboard.writeText(children);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="flex items-center gap-2">
-      <span className="font-medium text-[11px] text-default-500 bg-default-50 px-2 py-0.5 rounded-lg border border-default-100 flex items-center min-w-[100px]">
-        {children.length > 10 ? `${children.substring(0, 10)}...` : children}
-      </span>
-      <button
-        onClick={handleCopy}
-        className="text-default-400 hover:text-primary transition-colors pr-1"
-      >
-        {copied ? (
-          <Check className="text-success" size={14} />
-        ) : (
-          <Copy size={14} />
-        )}
-      </button>
-    </div>
-  );
-}
-
-// Status Component
-function Status({ status }: { status: string }) {
-  const config: Record<string, { bg: string, dot: string, label: string }> = {
-    active: { bg: "bg-success-50", dot: "bg-success", label: "Active" },
-    paused: { bg: "bg-danger-50", dot: "bg-danger", label: "Paused" },
-    inactive: { bg: "bg-default-100", dot: "bg-default-400", label: "Inactive" },
-    "needs work": { bg: "bg-warning-50", dot: "bg-warning", label: "Needs Work" },
-  };
-
-  const item = config[status.toLowerCase()] || config.inactive;
-
-  return (
-    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg ${item.bg} border border-white dark:border-default-100`}>
-      <div className={`w-1.5 h-1.5 rounded-full ${item.dot}`} />
-      <span className="text-[11px] text-foreground font-bold whitespace-nowrap">
-        {item.label}
-      </span>
-    </div>
-  );
-}
-
-// Icons
-const EyeFilledIcon = (props: any) => (
-  <Eye {...props} size={18} />
-);
-
-const EditLinearIcon = (props: any) => (
-  <Icon {...props} icon="solar:pen-linear" />
-);
-
-const DeleteFilledIcon = (props: any) => (
-  <Trash2 {...props} size={18} />
-);
+const INITIAL_VISIBLE_COLUMNS = ["statusDot", "name", "assistantId", "model", "status", "billing", "phoneNumber", "services", "usageLang", "usage", "actions"];
 
 export default function ClientsTable() {
   const [statusFilter, setStatusFilter] = React.useState("all");
@@ -161,8 +88,10 @@ export default function ClientsTable() {
   }, [searchParams, onCreateModalOpen, setSearchParams]);
 
   useEffect(() => {
-    dispatch(fetchAgents());
-  }, [dispatch]);
+    if (agents.length === 0) {
+      dispatch(fetchAgents());
+    }
+  }, [dispatch, agents.length]);
 
   const handleDeletePress = (agent: EnrichedAgent) => {
     setAgentToDelete(agent);
@@ -185,6 +114,7 @@ export default function ClientsTable() {
         assistantId: agent.agent_id,
         model: agent.modelName || "ChatGPT 4o",
         status: agent.status || "inactive",
+        statusDot: agent.status || "inactive",
         billing: "stripe",
         phoneNumber: agent.phoneNumber || "None",
         language: { 
@@ -208,21 +138,21 @@ export default function ClientsTable() {
 
   const renderCell = useMemoizedCallback((user: EnrichedAgent, columnKey: React.Key) => {
     const userKey = columnKey as ColumnsKey;
-    const cellValue = user[userKey as unknown as keyof EnrichedAgent];
 
     switch (userKey) {
       case "assistantId":
-        return <CopyText>{String(cellValue)}</CopyText>;
+        return <CopyText>{user.assistantId}</CopyText>;
+      case "statusDot":
+        return (
+          <div className={cn(
+            "w-2 h-2 rounded-full",
+            user.status === "active" ? "bg-success shadow-[0_0_8px_rgba(34,197,94,0.4)]" : 
+            user.status === "paused" ? "bg-danger shadow-[0_0_8px_rgba(243,18,96,0.4)]" : "bg-warning shadow-[0_0_8px_rgba(245,165,36,0.4)]"
+          )} />
+        );
       case "name":
         return (
-          <div className="flex items-center gap-6">
-            <div className={cn(
-              "w-2 h-2 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.4)]",
-              user.status === "active" ? "bg-success" : 
-              user.status === "paused" ? "bg-danger" : "bg-warning"
-            )} />
-            <span className="text-[13px] font-bold text-foreground">{user.name}</span>
-          </div>
+          <span className="text-[13px] font-bold text-foreground">{user.name}</span>
         );
       case "model":
         return (
@@ -234,11 +164,11 @@ export default function ClientsTable() {
               className: "w-8 h-8 rounded-xl"
             }}
             description={
-              <span className="text-[10px] text-default-400">ChatGPT 4o</span>
+              <span className="text-[10px] text-default-400">{user.model}</span>
             }
             name={
               <span className="text-[12px] font-bold text-foreground">
-                {String(user.model)}
+                {user.name}
               </span>
             }
             classNames={{
@@ -249,22 +179,13 @@ export default function ClientsTable() {
           />
         );
       case "status":
-        return (
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-default-50 border border-default-100 w-fit">
-             <div className={cn(
-               "w-1.5 h-1.5 rounded-full",
-               user.status === "active" ? "bg-success" : 
-               user.status === "paused" ? "bg-danger" : "bg-warning"
-             )} />
-             <span className={cn(
-               "text-[11px] font-bold capitalize",
-               user.status === "active" ? "text-success" : 
-               user.status === "paused" ? "text-danger" : "text-warning"
-             )}>
-               {user.status === "active" ? "Active" : user.status === "paused" ? "Paused" : "Needs Work"}
-             </span>
-          </div>
-        );
+        const statusMap: Record<string, "Active" | "Paused" | "Inactive"> = {
+          active: "Active",
+          paused: "Paused",
+          inactive: "Inactive",
+          "needs work": "Inactive"
+        };
+        return <Status status={statusMap[user.status.toLowerCase()] || "Inactive"} />;
       case "billing":
         return (
           <span className="text-primary font-bold text-[12px]">stripe</span>
@@ -314,36 +235,42 @@ export default function ClientsTable() {
         );
       case "actions":
         return (
-          <div className="flex justify-end pr-2">
-            <Dropdown>
+          <div className="flex items-center justify-end">
+            <Dropdown placement="bottom-end">
               <DropdownTrigger>
-                <Button isIconOnly size="sm" variant="light" className="text-default-500 hover:text-foreground">
-                  <MoreVertical size={18} />
+                <Button isIconOnly size="sm" variant="light" className="text-default-400 w-8 h-8">
+                  <Icon icon="solar:menu-dots-bold" className="rotate-90" width={18} />
                 </Button>
               </DropdownTrigger>
               <DropdownMenu aria-label="Agent Actions">
                 <DropdownItem 
                   key="view" 
-                  startContent={<Eye size={18} />}
+                  startContent={<EyeFilledIcon size={16} />}
                   onPress={() => navigate(`/agents/${user.id}`)}
                 >
                   View Details
                 </DropdownItem>
                 <DropdownItem 
+                  key="edit" 
+                  startContent={<EditLinearIcon size={16} />}
+                >
+                  Edit Agent
+                </DropdownItem>
+                <DropdownItem 
                   key="delete" 
                   className="text-danger" 
-                  color="danger" 
-                  startContent={<Trash2 size={18} />} 
+                  color="danger"
+                  startContent={<DeleteFilledIcon size={16} />}
                   onPress={() => handleDeletePress(user)}
                 >
-                  Delete
+                  Delete Agent
                 </DropdownItem>
               </DropdownMenu>
             </Dropdown>
           </div>
         );
       default:
-        return String(cellValue);
+        return String(user[userKey as keyof EnrichedAgent]);
     }
   });
 
@@ -357,20 +284,28 @@ export default function ClientsTable() {
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <DataTable<EnrichedAgent>
+      <PremiumTable<EnrichedAgent>
         columns={columns}
         data={enrichedAgents}
         renderCell={renderCell}
         initialVisibleColumns={INITIAL_VISIBLE_COLUMNS}
-        searchPlaceholder="Search"
-        searchKeys={["name", "assistantId", "model"]}
+        searchPlaceholder="Search agents"
+        searchKeys={["name", "assistantId", "model", "phoneNumber"]}
         topBarTitle="Agents"
         topBarCount={enrichedAgents.length}
         topBarAction={
           <Button 
             color="primary" 
-            endContent={<Icon icon="solar:add-circle-bold" width={20} />}
-            className="font-bold px-4 shadow-lg shadow-primary/20 h-9"
+            size="md"
+            radius="md"
+            endContent={
+              <div className="bg-white rounded-full w-5 h-5 flex items-center justify-center">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="text-primary"/>
+                </svg>
+              </div>
+            }
+            className="px-4 shadow-lg shadow-primary/20 font-normal"
             onPress={onCreateModalOpen}
           >
             Add Agent
@@ -395,7 +330,6 @@ export default function ClientsTable() {
           </div>
         }
         onItemFilter={itemFilter}
-        sortableColumnKey="name"
         ariaLabel="Agents table with custom cells, pagination and sorting"
       />
 

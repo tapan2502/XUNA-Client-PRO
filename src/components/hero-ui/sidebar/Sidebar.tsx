@@ -36,7 +36,7 @@ export type SidebarProps = Omit<ListboxProps<SidebarItem>, "children"> & {
   sectionClasses?: ListboxSectionProps["classNames"];
   classNames?: ListboxProps["classNames"];
   defaultSelectedKey: string;
-  onItemSelect?: (key: string) => void;
+  onSelect?: (key: string) => void;
 };
 
 const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
@@ -45,7 +45,7 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
       items,
       isCompact,
       defaultSelectedKey,
-      onItemSelect,
+      onSelect,
       hideEndContent,
       sectionClasses: sectionClassesProp = {},
       itemClasses: itemClassesProp = {},
@@ -57,6 +57,12 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
     ref,
   ) => {
     const [selected, setSelected] = React.useState<React.Key>(defaultSelectedKey);
+
+    React.useEffect(() => {
+      if (defaultSelectedKey) {
+        setSelected(defaultSelectedKey);
+      }
+    }, [defaultSelectedKey]);
 
     const sectionClasses = {
       ...sectionClassesProp,
@@ -74,132 +80,182 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
     const itemClasses = {
       ...itemClassesProp,
       base: cn(itemClassesProp?.base, {
-        "w-10 h-10 gap-0 p-0": isCompact,
+        "w-11 h-11 gap-0 p-0": isCompact,
       }),
     };
 
-    const renderItem = React.useCallback(
-      (item: SidebarItem): React.ReactElement => {
-        const { items, type, icon, href, title, startContent, endContent, ...itemProps } = item;
+    const renderNestItem = React.useCallback(
+      (item: SidebarItem) => {
         const isNestType =
-          items && items?.length > 0 && type === SidebarItemType.Nest;
+          item.items && item.items?.length > 0 && item?.type === SidebarItemType.Nest;
 
-        if (isCompact) {
-          return (
-            <ListboxItem
-              {...itemProps}
-              key={item.key}
-              endContent={null}
-              startContent={null}
-              textValue={title}
-              title={null}
-            >
-              <Tooltip content={title} placement="right">
+        if (isNestType) {
+          // Is a nest type item , so we need to remove the href
+          delete item.href;
+        }
+
+        return (
+          <ListboxItem
+            {...item}
+            key={item.key}
+            classNames={{
+              base: cn(
+                {
+                  "h-auto p-0": !isCompact && isNestType,
+                },
+                {
+                  "inline-block w-11": isCompact && isNestType,
+                },
+              ),
+            }}
+            endContent={
+              isCompact || isNestType || hideEndContent ? null : (item.endContent ?? null)
+            }
+            startContent={
+              isCompact || isNestType ? null : item.icon ? (
+                <Icon
+                  className={cn(
+                    "text-default-500 group-data-[selected=true]:text-foreground",
+                    iconClassName,
+                  )}
+                  icon={item.icon}
+                  width={24}
+                />
+              ) : (
+                (item.startContent ?? null)
+              )
+            }
+            title={isCompact || isNestType ? null : item.title}
+          >
+            {isCompact ? (
+              <Tooltip content={item.title} placement="right">
                 <div className="flex w-full items-center justify-center">
-                  {icon ? (
+                  {item.icon ? (
                     <Icon
                       className={cn(
                         "text-default-500 group-data-[selected=true]:text-foreground",
                         iconClassName,
                       )}
-                      icon={icon}
+                      icon={item.icon}
                       width={24}
                     />
                   ) : (
-                    (startContent ?? null)
+                    (item.startContent ?? null)
                   )}
                 </div>
               </Tooltip>
-            </ListboxItem>
-          );
-        }
-
-        if (isNestType) {
-          return (
-            <ListboxItem
-              {...(itemProps as any)}
-              key={item.key}
-              classNames={{
-                base: "h-auto p-0",
-              }}
-              endContent={null}
-              startContent={null}
-              title={null}
-            >
-              <Accordion className="p-0">
+            ) : null}
+            {!isCompact && isNestType ? (
+              <Accordion className={"p-0"}>
                 <AccordionItem
                   key={item.key}
-                  aria-label={title}
+                  aria-label={item.title}
                   classNames={{
                     heading: "pr-3",
                     trigger: "p-0",
                     content: "py-0 pl-4",
                   }}
                   title={
-                    icon ? (
-                      <div className="flex h-11 items-center gap-2 px-2 py-1.5">
+                    item.icon ? (
+                      <div className={"flex h-11 items-center gap-2 px-2 py-1.5"}>
                         <Icon
                           className={cn(
                             "text-default-500 group-data-[selected=true]:text-foreground",
                             iconClassName,
                           )}
-                          icon={icon}
+                          icon={item.icon}
                           width={24}
                         />
                         <span className="text-small text-default-500 group-data-[selected=true]:text-foreground font-medium">
-                          {title}
+                          {item.title}
                         </span>
                       </div>
                     ) : (
-                      (startContent ?? null)
+                      (item.startContent ?? null)
                     )
                   }
                 >
-                  {items && items?.length > 0 ? (
+                  {item.items && item.items?.length > 0 ? (
                     <Listbox
-                      className="mt-0.5"
+                      className={"mt-0.5"}
                       classNames={{
-                        list: "border-l border-default-200 pl-4",
+                        list: cn("border-l border-default-200 pl-4"),
                       }}
-                      items={items}
+                      items={item.items}
                       variant="flat"
                     >
-                      {items.map((subItem) => renderItem(subItem))}
+                      {item.items.map(renderItem)}
                     </Listbox>
-                  ) : null}
+                  ) : (
+                    renderItem(item)
+                  )}
                 </AccordionItem>
               </Accordion>
-            </ListboxItem>
-          );
+            ) : null}
+          </ListboxItem>
+        );
+      },
+
+      [isCompact, hideEndContent, iconClassName, items],
+    );
+
+    const renderItem = React.useCallback(
+      (item: SidebarItem) => {
+        const isNestType =
+          item.items && item.items?.length > 0 && item?.type === SidebarItemType.Nest;
+
+        if (isNestType) {
+          return renderNestItem(item);
         }
+
+        const { href, ...itemWithoutHref } = item;
 
         return (
           <ListboxItem
-            {...itemProps}
+            {...itemWithoutHref}
             key={item.key}
-            endContent={hideEndContent ? null : (endContent ?? null)}
+            endContent={isCompact || hideEndContent ? null : (item.endContent ?? null)}
             startContent={
-              icon ? (
+              isCompact ? null : item.icon ? (
                 <Icon
                   className={cn(
                     "text-default-500 group-data-[selected=true]:text-foreground",
                     iconClassName,
                   )}
-                  icon={icon}
+                  icon={item.icon}
                   width={24}
                 />
               ) : (
-                (startContent ?? null)
+                (item.startContent ?? null)
               )
             }
-            textValue={title}
-            title={title}
-          />
+            textValue={item.title}
+            title={isCompact ? null : item.title}
+          >
+            {isCompact ? (
+              <Tooltip content={item.title} placement="right">
+                <div className="flex w-full items-center justify-center">
+                  {item.icon ? (
+                    <Icon
+                      className={cn(
+                        "text-default-500 group-data-[selected=true]:text-foreground",
+                        iconClassName,
+                      )}
+                      icon={item.icon}
+                      width={24}
+                    />
+                  ) : (
+                    (item.startContent ?? null)
+                  )}
+                </div>
+              </Tooltip>
+            ) : null}
+          </ListboxItem>
         );
       },
-      [isCompact, hideEndContent, iconClassName],
-    );
 
+      [isCompact, hideEndContent, iconClassName, itemClasses?.base],
+    );
 
     return (
       <Listbox
@@ -216,7 +272,7 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
         itemClasses={{
           ...itemClasses,
           base: cn(
-            "px-2 min-h-8 rounded-lg h-[32px] data-[selected=true]:bg-default-100",
+            "px-3 min-h-11 rounded-large h-[44px] data-[selected=true]:bg-default-100",
             itemClasses?.base,
           ),
           title: cn(
@@ -232,13 +288,13 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
           const key = Array.from(keys)[0];
 
           setSelected(key as React.Key);
-          onItemSelect?.(key as string);
+          onSelect?.(key as string);
         }}
         {...props}
       >
         {(item) => {
           return item.items && item.items?.length > 0 && item?.type === SidebarItemType.Nest ? (
-            renderItem(item)
+            renderNestItem(item)
           ) : item.items && item.items?.length > 0 ? (
             <ListboxSection
               key={item.key}

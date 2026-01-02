@@ -21,30 +21,17 @@ import {
   Avatar,
   Badge,
 } from "@heroui/react";
-import { Icon } from "@iconify/react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { selectEffectiveUser, logout } from "@/store/authSlice";
-import NotificationsCard from "./NotificationsCard";
-import NavbarActions from "./navbar/NavbarActions";
+import {Icon} from "@iconify/react";
+
+import NotificationsCard from "@/components/hero-ui/navbar/notifications-card";
 import logoImage from "@/assets/logo.png";
 
-
-
 export default function HeroUINavbar() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const dispatch = useAppDispatch();
-  const user = useAppSelector(selectEffectiveUser);
+  const [theme, setTheme] = React.useState<"light" | "dark" | null>(null);
 
-  const [theme, setTheme] = React.useState<"light" | "dark">(() => {
-    return document.documentElement.classList.contains("dark") ? "dark" : "light";
-  });
-
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/login");
-  };
+  React.useEffect(() => {
+    setTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
+  }, []);
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
@@ -55,117 +42,155 @@ export default function HeroUINavbar() {
     });
   };
 
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
-
   return (
     <Navbar
       classNames={{
-        base: "bg-white dark:bg-background border-b border-divider/50 h-[64px]",
-        wrapper: "px-6 pl-2 max-w-full",
+        base: "bg-white dark:bg-background border-b border-divider/50",
+        item: "data-[active=true]:text-primary",
+        wrapper: "px-4 sm:px-6 max-w-full",
       }}
-      height="64px"
-      maxWidth="full"
+      height="72px"
     >
-      <NavbarBrand className="flex-grow-0 min-w-fit p-0">
+      <NavbarBrand className="gap-0 pl-0 max-w-fit ml-[-16px]">
+        <NavbarMenuToggle className="mr-2 h-6 sm:hidden" />
         <img 
           src={logoImage} 
           alt="XUNA" 
-          className="h-12 w-auto object-contain brightness-0 dark:brightness-0 dark:invert"
+          className="h-16 w-auto object-contain brightness-0 dark:brightness-0 dark:invert"
         />
       </NavbarBrand>
-
-      {/* Right: Navigation Links & Actions */}
-      <NavbarContent className="gap-6" justify="end">
-        {/* Navigation Links */}
-        <div className="flex items-center gap-6 mr-4">
-          <Link
-            className={`text-[14px] font-medium transition-colors ${
-                isActive("/agents") 
-                ? "text-foreground font-semibold" 
-                : "text-default-500 hover:text-foreground"
-            }`}
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/agents");
-            }}
-          >
-            Agents
+      <NavbarContent
+        className="bg-content2 dark:bg-content1 ml-auto hidden h-12 w-full max-w-fit gap-4 rounded-full px-6 sm:flex"
+        justify="end"
+      >
+        <NavbarItem>
+          <Link className="flex gap-2 text-inherit" href="/agents">
+            Dashboard
           </Link>
-          <Link
-            className={`text-[14px] font-medium transition-colors ${
-              isActive("/settings") 
-                ? "text-foreground font-semibold" 
-                : "text-default-500 hover:text-foreground"
-            }`}
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/settings");
-            }}
-          >
+        </NavbarItem>
+        <NavbarItem isActive>
+          <Link aria-current="page" className="flex gap-2 text-inherit" href="#">
+            Deployments
+          </Link>
+        </NavbarItem>
+        <NavbarItem>
+          <Link className="flex gap-2 text-inherit" href="#">
+            Analytics
+          </Link>
+        </NavbarItem>
+        <NavbarItem>
+          <Link className="flex gap-2 text-inherit" href="#">
+            Team
+          </Link>
+        </NavbarItem>
+        <NavbarItem>
+          <Link className="flex gap-2 text-inherit" href="/settings">
             Settings
           </Link>
-        </div>
-
-        {/* Action Icons */}
-        <div className="flex items-center gap-1">
-          <Button isIconOnly variant="light" className="text-default-400 min-w-8 w-8 h-8">
-            <Icon icon="solar:magnifier-linear" width={20} />
+        </NavbarItem>
+      </NavbarContent>
+      <NavbarContent
+        className="lg:bg-content2 lg:dark:bg-content1 ml-2 flex h-12 max-w-fit items-center gap-0 rounded-full p-0 lg:px-1"
+        justify="end"
+      >
+        <NavbarItem className="hidden sm:flex">
+          <Button isIconOnly radius="full" variant="light">
+            <Icon className="text-default-500" icon="solar:magnifer-linear" width={22} />
           </Button>
-          
-          {/* Theme Toggle */}
-          <Button 
-            isIconOnly 
-            variant="light" 
-            className="text-default-400 min-w-8 w-8 h-8"
-            onPress={toggleTheme}
-          >
+        </NavbarItem>
+        <NavbarItem className="hidden sm:flex">
+          <Button isIconOnly radius="full" variant="light" onPress={toggleTheme}>
             <Icon 
-              icon={theme === "dark" ? "solar:sun-bold-duotone" : "solar:moon-bold-duotone"} 
-              className={theme === "dark" ? "text-warning" : "text-default-500"}
-              width={20} 
+              className={theme === "dark" ? "text-warning" : "text-default-500"} 
+              icon={theme === "dark" ? "solar:sun-linear" : "solar:moon-linear"} 
+              width={24} 
             />
           </Button>
-          
-          <Button isIconOnly variant="light" className="text-default-400 min-w-8 w-8 h-8">
-            <Icon icon="solar:settings-linear" width={20} />
+        </NavbarItem>
+        <NavbarItem className="hidden sm:flex">
+          <Button isIconOnly radius="full" variant="light">
+            <Icon className="text-default-500" icon="solar:settings-linear" width={24} />
           </Button>
-          
-          <Avatar
-            className="ml-2 shrink-0 w-9 h-9 border-2 border-white dark:border-default-100 shadow-sm"
-            src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-          />
-        </div>
+        </NavbarItem>
+        <NavbarItem className="flex">
+          <Popover offset={12} placement="bottom-end">
+            <PopoverTrigger>
+              <Button
+                disableRipple
+                isIconOnly
+                className="overflow-visible"
+                radius="full"
+                variant="light"
+              >
+                <Badge color="danger" content="5" showOutline={false} size="md">
+                  <Icon className="text-default-500" icon="solar:bell-linear" width={22} />
+                </Badge>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="max-w-[90vw] p-0 sm:max-w-[380px]">
+              <NotificationsCard className="w-full shadow-none" />
+            </PopoverContent>
+          </Popover>
+        </NavbarItem>
+        <NavbarItem className="px-2">
+          <Dropdown placement="bottom-end">
+            <DropdownTrigger>
+              <button className="mt-1 h-8 w-8 outline-hidden transition-transform">
+                <Badge
+                  className="border-transparent"
+                  color="success"
+                  content=""
+                  placement="bottom-right"
+                  shape="circle"
+                  size="sm"
+                >
+                  <Avatar size="sm" src="https://i.pravatar.cc/150?u=a04258114e29526708c" />
+                </Badge>
+              </button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Profile Actions" variant="flat">
+              <DropdownItem key="profile" className="h-14 gap-2">
+                <p className="font-semibold">Signed in as</p>
+                <p className="font-semibold">johndoe@example.com</p>
+              </DropdownItem>
+              <DropdownItem key="settings">My Settings</DropdownItem>
+              <DropdownItem key="team_settings">Team Settings</DropdownItem>
+              <DropdownItem key="analytics">Analytics</DropdownItem>
+              <DropdownItem key="system">System</DropdownItem>
+              <DropdownItem key="configurations">Configurations</DropdownItem>
+              <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
+              <DropdownItem key="logout" color="danger">
+                Log Out
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        </NavbarItem>
       </NavbarContent>
 
       {/* Mobile Menu */}
       <NavbarMenu>
-        <NavbarMenuItem isActive={isActive("/agents")}>
-          <Link
-            className="w-full"
-            color={isActive("/agents") ? "primary" : "foreground"}
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/agents");
-            }}
-          >
-            Agents
+        <NavbarMenuItem>
+          <Link className="w-full" color="foreground" href="#">
+            Dashboard
           </Link>
         </NavbarMenuItem>
-        <NavbarMenuItem isActive={isActive("/settings")}>
-          <Link
-            className="w-full"
-            color={isActive("/settings") ? "primary" : "foreground"}
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/settings");
-            }}
-          >
+        <NavbarMenuItem isActive>
+          <Link aria-current="page" className="w-full" color="primary" href="#">
+            Deployments
+          </Link>
+        </NavbarMenuItem>
+        <NavbarMenuItem>
+          <Link className="w-full" color="foreground" href="#">
+            Analytics
+          </Link>
+        </NavbarMenuItem>
+        <NavbarMenuItem>
+          <Link className="w-full" color="foreground" href="#">
+            Team
+          </Link>
+        </NavbarMenuItem>
+        <NavbarMenuItem>
+          <Link className="w-full" color="foreground" href="#">
             Settings
           </Link>
         </NavbarMenuItem>

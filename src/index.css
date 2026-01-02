@@ -101,6 +101,11 @@
 }
 
 /* layout resets */
+html {
+  font-size: 13px;
+  /* Further scale down UI (13px is ~81.25% of 16px) */
+}
+
 html,
 body,
 #root {

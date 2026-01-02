@@ -35,7 +35,7 @@ interface EnrichedAgent {
   usageMax: number;
 }
 
-type ColumnsKey = "name" | "assistantId" | "model" | "status" | "billing" | "phoneNumber" | "services" | "usageLang" | "usage" | "actions";
+type ColumnsKey = "statusDot" | "name" | "assistantId" | "model" | "status" | "billing" | "phoneNumber" | "services" | "usageLang" | "usage" | "actions";
 
 // Table columns configuration
 const columns: PremiumTableColumn[] = [

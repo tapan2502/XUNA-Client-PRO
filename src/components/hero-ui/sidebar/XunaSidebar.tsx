@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import {Avatar, Button, ScrollShadow, Spacer, Tooltip, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Select, SelectItem, SelectSection, Card, CardBody, CardFooter, User} from "@heroui/react";
+import {Avatar, Button, ScrollShadow, Spacer, Tooltip, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, Select, SelectItem, SelectSection, Card, CardBody, CardFooter, User} from "@heroui/react";
 import {Icon} from "@iconify/react";
 import {useNavigate, useLocation} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "@/app/hooks";
@@ -104,19 +104,22 @@ export default function XunaSidebar() {
             defaultSelectedKeys={["xuna-ai"]}
             items={workspaces}
             renderValue={(items) => {
-              return items.map((item) => (
+              const item = items[0];
+              if (!item) return null;
+              const workspace = workspaces.find(w => w.key === item.key);
+              return (
                 <div key={item.key} className="flex items-center gap-2">
                   <Avatar
                     isBordered
                     className="w-8 h-8 text-tiny"
-                    src={workspaces.find(w => w.key === item.key)?.avatar || "https://heroui.com/avatars/avatar-1.png"}
+                    src={workspace?.avatar || "https://heroui.com/avatars/avatar-1.png"}
                   />
                   <div className="flex flex-col">
-                    <span className="text-small font-bold">{workspaces.find(w => w.key === item.key)?.name || "Xuna AI"}</span>
-                    <span className="text-tiny text-default-400 font-normal">{workspaces.find(w => w.key === item.key)?.role || "Core workspace"}</span>
+                    <span className="text-small font-bold">{workspace?.name || "Xuna AI"}</span>
+                    <span className="text-tiny text-default-400 font-normal">{workspace?.role || "Core workspace"}</span>
                   </div>
                 </div>
-              ));
+              );
             }}
             variant="bordered"
           >
@@ -199,29 +202,37 @@ export default function XunaSidebar() {
             <DropdownMenu
               aria-label="Account switcher"
               variant="flat"
-              onAction={(key) => console.log(`selected user ${key}`)}
+              onAction={(key) => {
+                if (key === "logout") {
+                  dispatch(logout());
+                } else {
+                  console.log(`selected user ${key}`);
+                }
+              }}
             >
-              {users.map((user) => (
-                <DropdownItem key={user.id} textValue={user.name}>
-                  <div className="flex items-center gap-x-3">
-                    <Avatar
-                      alt={user.name}
-                      classNames={{
-                        base: "shrink-0",
-                        img: "transition-none",
-                      }}
-                      size="sm"
-                      src={user.avatar}
-                    />
-                    <div className="flex flex-col">
-                      <p className="text-small text-default-600 font-medium">{user.name}</p>
-                      <p className="text-tiny text-default-400">{user.email}</p>
+              <DropdownSection showDivider>
+                {users.map((user) => (
+                  <DropdownItem key={user.id} textValue={user.name}>
+                    <div className="flex items-center gap-x-3">
+                      <Avatar
+                        alt={user.name}
+                        classNames={{
+                          base: "shrink-0",
+                          img: "transition-none",
+                        }}
+                        size="sm"
+                        src={user.avatar}
+                      />
+                      <div className="flex flex-col">
+                        <p className="text-small text-default-600 font-medium">{user.name}</p>
+                        <p className="text-tiny text-default-400">{user.email}</p>
+                      </div>
                     </div>
-                  </div>
-                </DropdownItem>
-              ))}
-              <DropdownItem key="logout" textValue="Log Out" onPress={() => dispatch(logout())}>
-                 Log Out
+                  </DropdownItem>
+                ))}
+              </DropdownSection>
+              <DropdownItem key="logout" textValue="Log Out" className="text-danger" color="danger">
+                  Log Out
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>

@@ -199,17 +199,33 @@ export default function PhoneNumbers() {
     <div className="flex gap-2">
       <Button
         color="primary"
-        className="font-bold px-4 shadow-lg shadow-primary/20 h-9 text-white"
-        startContent={<Icon icon="solar:add-circle-bold" width={20} />}
+        size="md"
+        radius="md"
         onPress={() => setIsTwilioModalOpen(true)}
+        endContent={
+          <div className="bg-white rounded-full w-5 h-5 flex items-center justify-center">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary"/>
+            </svg>
+          </div>
+        }
+        className="px-4 shadow-lg shadow-primary/20 font-medium h-10 text-white"
       >
         Import from Twilio
       </Button>
       <Button
         color="primary"
-        className="font-bold px-4 shadow-lg shadow-primary/20 h-9 text-white"
-        startContent={<Icon icon="solar:add-circle-bold" width={20} />}
+        size="md"
+        radius="md"
         onPress={() => setIsSIPModalOpen(true)}
+        endContent={
+          <div className="bg-white rounded-full w-5 h-5 flex items-center justify-center">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary"/>
+            </svg>
+          </div>
+        }
+        className="px-4 shadow-lg shadow-primary/20 font-medium h-10 text-white"
       >
         Import from SIP
       </Button>
@@ -226,7 +242,7 @@ export default function PhoneNumbers() {
 
   return (
     <>
-      <div className="flex flex-col gap-4 p-6 h-full overflow-hidden">
+      <div className="flex flex-col gap-10 p-6 h-full overflow-hidden">
         <DataTable<EnrichedPhoneNumber>
           columns={columns}
           data={enrichedPhoneNumbers}

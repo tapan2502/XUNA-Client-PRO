@@ -21,6 +21,7 @@ import {
   PopoverTrigger,
   PopoverContent,
   Tooltip,
+  Chip,
 } from "@heroui/react";
 import {SearchIcon} from "@heroui/shared-icons";
 import React, {useMemo, useState} from "react";
@@ -184,7 +185,7 @@ export default function PremiumTable<T extends {id: string | number}>({
           value={filterValue}
           onValueChange={onSearchChange}
           classNames={{
-            inputWrapper: "bg-content1 dark:bg-default-100 shadow-sm border border-default-100 h-9",
+            inputWrapper: "bg-white dark:bg-default-100 shadow-sm border border-default-200 h-10 rounded-xl transition-all hover:border-default-400 focus-within:!border-primary",
             input: "text-[14px]"
           }}
         />
@@ -192,7 +193,7 @@ export default function PremiumTable<T extends {id: string | number}>({
           <Popover placement="bottom">
             <PopoverTrigger>
               <Button
-                className="bg-content1 dark:bg-default-100 text-default-600 border border-default-100 shadow-sm font-medium h-9"
+                className="bg-white dark:bg-default-50 text-default-600 border border-default-200 shadow-sm font-medium h-10 px-3 rounded-xl text-[12px]"
                 size="sm"
                 startContent={
                   <Icon className="text-default-400 rotate-90" icon="solar:tuning-2-linear" width={16} />
@@ -211,7 +212,7 @@ export default function PremiumTable<T extends {id: string | number}>({
         <Dropdown>
           <DropdownTrigger>
             <Button
-              className="bg-content1 dark:bg-default-100 text-default-600 border border-default-100 shadow-sm font-medium h-9"
+              className="bg-white dark:bg-default-50 text-default-600 border border-default-200 shadow-sm font-medium h-10 px-3 rounded-xl text-[12px]"
               size="sm"
               startContent={
                 <Icon className="text-default-400" icon="solar:sort-linear" width={16} />
@@ -243,7 +244,7 @@ export default function PremiumTable<T extends {id: string | number}>({
         <Dropdown closeOnSelect={false}>
           <DropdownTrigger>
             <Button
-              className="bg-content1 dark:bg-default-100 text-default-600 border border-default-100 shadow-sm font-medium h-9"
+              className="bg-white dark:bg-default-50 text-default-600 border border-default-200 shadow-sm font-medium h-10 px-3 rounded-xl text-[12px]"
               size="sm"
               startContent={
                 <Icon
@@ -288,9 +289,9 @@ export default function PremiumTable<T extends {id: string | number}>({
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold text-foreground">{topBarTitle}</h1>
           {topBarCount !== undefined && (
-            <span className="text-default-300 text-sm font-medium ml-1">
+            <Chip className="text-default-400 bg-default-100/50 min-w-[32px] font-medium" size="sm" variant="flat">
               {topBarCount}
-            </span>
+            </Chip>
           )}
         </div>
         {topBarAction}
@@ -339,7 +340,7 @@ export default function PremiumTable<T extends {id: string | number}>({
   }, [page, pages, onPreviousPage, onNextPage]);
 
   return (
-    <div className="h-full w-full flex flex-col gap-6 overflow-visible">
+    <div className="h-full w-full flex flex-col gap-12 overflow-visible">
       <div className="px-1">{topBar}</div>
       <div className="px-1">{topContent}</div>
       
@@ -352,7 +353,7 @@ export default function PremiumTable<T extends {id: string | number}>({
             selectionMode="none"
               classNames={{
                 table: "min-w-full",
-                th: "bg-transparent text-[#71717A] font-bold text-[11px] uppercase tracking-wider px-6 border-b border-divider h-14",
+                th: "bg-default-100 text-[#71717A] font-bold text-[11px] uppercase tracking-wider px-6 border-b border-divider h-14",
                 td: "px-6 py-4 border-none text-[13px] border-b border-default-50 group-last:border-none",
                 thead: "[&>tr]:first:rounded-none",
                 tr: "group",

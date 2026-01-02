@@ -112,7 +112,7 @@ export default function CallHistory() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6 h-full overflow-hidden">
+    <div className="flex flex-col gap-10 p-6 h-full overflow-hidden">
       <DataTable
         columns={columns}
         data={callHistory}

@@ -1,7 +1,30 @@
 "use client";
 
 import React from "react";
-import {Avatar, Button, ScrollShadow, Spacer, Tooltip, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, Select, SelectItem, SelectSection, Card, CardBody, CardFooter, User} from "@heroui/react";
+import {
+  Avatar,
+  Button,
+  ScrollShadow,
+  Spacer,
+  Tooltip,
+  Input,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  DropdownSection,
+  Select,
+  SelectItem,
+  SelectSection,
+  Card,
+  CardBody,
+  CardFooter,
+  User,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Badge,
+} from "@heroui/react";
 import {Icon} from "@iconify/react";
 import {useNavigate, useLocation} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "@/app/hooks";
@@ -10,19 +33,30 @@ import {auth} from "@/lib/firebase";
 
 import Sidebar from "./Sidebar";
 import {sectionItems} from "./sidebar-items";
+import {AcmeIcon} from "./AcmeIcon"; // Ensure this exists or use fallback
 
 const workspaces = [
   {
-    key: "xuna-ai",
-    name: "Xuna AI",
-    role: "Core workspace",
-    avatar: "https://heroui.com/avatars/avatar-1.png",
-  },
-  {
-    key: "acme-inc",
-    name: "Acme Inc.",
-    role: "Design workspace",
-    avatar: "https://heroui.com/avatars/avatar-2.png",
+    value: "0",
+    label: "Xuna AI",
+    items: [
+      {
+        value: "xuna-ai",
+        label: "Core workspace",
+      },
+      {
+        value: "design",
+        label: "Design workspace",
+      },
+      {
+        value: "dev",
+        label: "Dev. workspace",
+      },
+      {
+        value: "marketing",
+        label: "Marketing workspace",
+      },
+    ],
   },
 ];
 
@@ -34,22 +68,6 @@ const users = [
     team: "Customer Support",
     avatar: "https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/avatars/e1b8ec120710c09589a12c0004f85825.jpg",
     email: "kate.moore@example.com",
-  },
-  {
-    id: 2,
-    name: "John Doe",
-    role: "Product Designer",
-    team: "Design",
-    avatar: "https://i.pravatar.cc/150?u=a04258114e29026708c",
-    email: "john.doe@example.com",
-  },
-  {
-    id: 3,
-    name: "Jane Doe",
-    role: "Product Manager",
-    team: "Product",
-    avatar: "https://i.pravatar.cc/150?u=a04258114e22026708c",
-    email: "jane.doe@example.com",
   },
 ];
 
@@ -69,7 +87,6 @@ export default function XunaSidebar() {
   }, [dispatch, userData]);
 
   const displayName = userData?.name || "Kate Moore";
-  const userEmail = userData?.email || auth.currentUser?.email || "";
   const userRole = userData?.role === "super-admin" ? "Admin" : "Customer Support";
   // Fallback avatar or user avatar
   const userAvatar = "https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/avatars/e1b8ec120710c09589a12c0004f85825.jpg";
@@ -85,54 +102,81 @@ export default function XunaSidebar() {
     if (item?.href) {
       navigate(item.href);
     }
-  }, [navigate]);
+  }, [navigate, navigate]);
 
   return (
     <div className="h-full min-h-full">
       <div className="border-r-small border-divider relative flex h-full w-full flex-1 flex-col p-6">
-        {/* Top Header removed as per instructions "dont need search notification profile from tiop" */}
         
         <div className="flex flex-col gap-y-2">
-          {/* Workspace Selector */}
+          {/* Workspace Selector as per user request */}
           <Select
+            disableSelectorIconRotation
             aria-label="Select workspace"
             className="px-1"
             classNames={{
-              trigger: "h-14 bg-default-50/50 border-divider hover:bg-default-100/50 shadow-sm transition-colors",
-              value: "text-small font-semibold",
+              trigger:
+                "min-h-14 bg-transparent border-small border-default-200 dark:border-default-100 data-[hover=true]:border-default-500 dark:data-[hover=true]:border-default-200 data-[hover=true]:bg-transparent",
             }}
             defaultSelectedKeys={["xuna-ai"]}
             items={workspaces}
-            renderValue={(items) => {
-              const item = items[0];
-              if (!item) return null;
-              const workspace = workspaces.find(w => w.key === item.key);
-              return (
-                <div key={item.key} className="flex items-center gap-2">
-                  <Avatar
-                    isBordered
-                    className="w-8 h-8 text-tiny"
-                    src={workspace?.avatar || "https://heroui.com/avatars/avatar-1.png"}
-                  />
-                  <div className="flex flex-col">
-                    <span className="text-small font-bold">{workspace?.name || "Xuna AI"}</span>
-                    <span className="text-tiny text-default-400 font-normal">{workspace?.role || "Core workspace"}</span>
-                  </div>
-                </div>
-              );
+            listboxProps={{
+              bottomContent: (
+                <Button
+                  className="bg-default-100 text-foreground text-center"
+                  size="sm"
+                  onPress={() => console.log("on create workspace")}
+                >
+                  New Workspace
+                </Button>
+              ),
             }}
-            variant="bordered"
-          >
-            {(workspace) => (
-              <SelectItem key={workspace.key} textValue={workspace.name}>
-                <div className="flex items-center gap-2">
-                  <Avatar className="w-6 h-6" src={workspace.avatar} />
-                  <div className="flex flex-col">
-                    <span className="text-small font-medium">{workspace.name}</span>
-                    <span className="text-tiny text-default-400">{workspace.role}</span>
-                  </div>
+            placeholder="Select workspace"
+            renderValue={(items) => {
+              return items.map((item) => (
+                <div key={item.key} className="ml-1 flex flex-col items-start justify-center">
+                  <span className="text-small font-bold text-foreground leading-tight">Xuna AI</span>
+                  <span className="text-[11px] text-default-400 font-medium">Core workspace</span>
                 </div>
-              </SelectItem>
+              ));
+            }}
+            selectorIcon={
+              <Icon color="hsl(var(--heroui-default-500))" icon="lucide:chevrons-up-down" width={14} />
+            }
+            startContent={
+              <div className="border border-default-200 flex h-10 w-10 flex-none items-center justify-center rounded-full bg-default-50/50 shadow-sm">
+                <Icon
+                  className="text-default-500/80"
+                  icon="solar:users-group-rounded-linear"
+                  width={22}
+                />
+              </div>
+            }
+          >
+            {(section) => (
+              <SelectSection
+                key={section.value}
+                hideSelectedIcon
+                showDivider
+                aria-label={section.label}
+                items={section.items}
+                title={section.label}
+              >
+                {(item) => (
+                  <SelectItem key={item.value} aria-label={item.label} textValue={item.label}>
+                    <div className="flex flex-row items-center justify-between gap-1">
+                      <span>{item.label}</span>
+                      <div className="border-small border-default-300 flex h-6 w-6 items-center justify-center rounded-full">
+                        <Icon
+                          className="text-default-500"
+                          icon="solar:users-group-rounded-linear"
+                          width={16}
+                        />
+                      </div>
+                    </div>
+                  </SelectItem>
+                )}
+              </SelectSection>
             )}
           </Select>
         </div>
@@ -211,25 +255,19 @@ export default function XunaSidebar() {
               }}
             >
               <DropdownSection showDivider>
-                {users.map((user) => (
-                  <DropdownItem key={user.id} textValue={user.name}>
+                  <DropdownItem key="user-info" textValue={displayName}>
                     <div className="flex items-center gap-x-3">
                       <Avatar
-                        alt={user.name}
-                        classNames={{
-                          base: "shrink-0",
-                          img: "transition-none",
-                        }}
+                        alt={displayName}
                         size="sm"
-                        src={user.avatar}
+                        src={userAvatar}
                       />
                       <div className="flex flex-col">
-                        <p className="text-small text-default-600 font-medium">{user.name}</p>
-                        <p className="text-tiny text-default-400">{user.email}</p>
+                        <p className="text-small text-default-600 font-medium">{displayName}</p>
+                        <p className="text-tiny text-default-400">{userData?.email || auth.currentUser?.email}</p>
                       </div>
                     </div>
                   </DropdownItem>
-                ))}
               </DropdownSection>
               <DropdownItem key="logout" textValue="Log Out" className="text-danger" color="danger">
                   Log Out

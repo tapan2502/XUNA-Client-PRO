@@ -56,7 +56,7 @@ import ClientsTable from "../components/ClientsTable"
   ]
 
   return (
-    <div className="flex flex-col gap-4 p-6 h-full overflow-hidden">
+    <div className="flex flex-col gap-12 p-6 h-full overflow-hidden">
       {/* Metrics Grid */}
       <KPICards items={kpiItems} limit={3} />
 

@@ -146,8 +146,8 @@ export default function ClientsTable() {
         return (
           <div className={cn(
             "w-2 h-2 rounded-full",
-            user.status === "active" ? "bg-success shadow-[0_0_8px_rgba(34,197,94,0.4)]" : 
-            user.status === "paused" ? "bg-danger shadow-[0_0_8px_rgba(243,18,96,0.4)]" : "bg-warning shadow-[0_0_8px_rgba(245,165,36,0.4)]"
+            user.status === "active" ? "bg-[#0EFF00] shadow-[0_0_8px_rgba(14,255,0,0.4)]" : 
+            "bg-[#FF0000] shadow-[0_0_8px_rgba(255,0,0,0.4)]"
           )} />
         );
       case "name":
@@ -301,7 +301,7 @@ export default function ClientsTable() {
             endContent={
               <div className="bg-white rounded-full w-5 h-5 flex items-center justify-center">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="text-primary"/>
+                  <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary"/>
                 </svg>
               </div>
             }

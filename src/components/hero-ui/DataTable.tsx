@@ -279,11 +279,11 @@ export default function DataTable<T extends { id: string | number }>({
 
   const topBar = useMemo(() => {
     return (
-      <div className="flex flex-col gap-3 mb-3">
+      <div className="flex flex-col gap-12 mb-0">
         {/* Row 1: Title and Action */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl leading-[28px] font-bold text-foreground">{topBarTitle}</h1>
+            <h1 className="text-2xl leading-[28px] font-bold text-foreground">{topBarTitle}</h1>
             {topBarCount !== undefined && (
               <Chip className="text-default-500 bg-default-100" size="sm" variant="flat">
                 {topBarCount}
@@ -305,7 +305,7 @@ export default function DataTable<T extends { id: string | number }>({
               size="sm"
               variant="flat"
               classNames={{
-                inputWrapper: "bg-white dark:bg-default-100 border border-default-200 shadow-sm transition-all hover:border-default-400 focus-within:!border-primary h-9 rounded-xl",
+                inputWrapper: "bg-white dark:bg-default-100 border border-default-200 shadow-sm transition-all hover:border-default-400 focus-within:!border-primary h-10 rounded-xl",
               }}
             />
           </div>
@@ -316,7 +316,7 @@ export default function DataTable<T extends { id: string | number }>({
                   <Button 
                     variant="flat" 
                     size="sm" 
-                    className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 min-w-0 shadow-sm text-[12px]"
+                    className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-10 px-3 min-w-0 shadow-sm text-[12px]"
                     startContent={<Filter size={16} />}
                   >
                     Filter
@@ -331,7 +331,7 @@ export default function DataTable<T extends { id: string | number }>({
               <Button 
                 variant="flat" 
                 size="sm" 
-                className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 min-w-0 shadow-sm text-[12px]"
+                className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-10 px-3 min-w-0 shadow-sm text-[12px]"
                 startContent={<Filter size={16} />}
               >
                 Filter
@@ -343,7 +343,7 @@ export default function DataTable<T extends { id: string | number }>({
                 <Button 
                   variant="flat" 
                   size="sm" 
-                  className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 min-w-0 shadow-sm text-[12px]"
+                  className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-10 px-3 min-w-0 shadow-sm text-[12px]"
                   startContent={<SortAsc size={16} />}
                   endContent={<ChevronDown size={14} />}
                 >
@@ -373,7 +373,7 @@ export default function DataTable<T extends { id: string | number }>({
                 <Button 
                   variant="flat" 
                   size="sm" 
-                  className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 min-w-0 shadow-sm text-[12px]"
+                  className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-10 px-3 min-w-0 shadow-sm text-[12px]"
                   startContent={<LayoutGrid size={16} />}
                 >
                   Columns
@@ -405,7 +405,7 @@ export default function DataTable<T extends { id: string | number }>({
                     <Button 
                       variant="flat" 
                       size="sm" 
-                      className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-9 px-3 shadow-sm text-[12px]"
+                      className="bg-white dark:bg-default-50 border border-default-200 text-default-600 font-medium h-10 px-3 shadow-sm text-[12px]"
                       endContent={<ChevronDown size={14} />}
                     >
                       Actions
@@ -497,7 +497,7 @@ export default function DataTable<T extends { id: string | number }>({
   return (
     <div className="h-full w-full flex flex-col">
       {topBar}
-      <div className="flex-1 min-h-0 flex flex-col mt-3">
+      <div className="flex-1 min-h-0 flex flex-col mt-12">
         <Table
           isHeaderSticky
           aria-label={ariaLabel}
@@ -505,8 +505,8 @@ export default function DataTable<T extends { id: string | number }>({
           bottomContentPlacement="outside"
           classNames={{
             wrapper: "shadow-none border border-divider rounded-2xl bg-white dark:bg-black/20 p-0 max-h-full",
-            th: "bg-default-50/50 text-default-500 font-semibold text-[11px] capitalize tracking-wide h-8 border-b border-divider/50 px-2 first:pl-4 last:pr-4",
-            td: "px-2 first:pl-4 last:pr-4 py-1.5 border-b border-divider/10 group-last:border-none text-[13px] text-default-600",
+            th: "bg-default-100 text-[#71717A] font-bold text-[11px] uppercase tracking-wider px-6 border-b border-divider h-14",
+            td: "px-6 py-4 border-none text-[13px] border-b border-default-50 group-last:border-none text-default-600",
             table: "border-collapse",
           }}
           selectedKeys={filterSelectedKeys}

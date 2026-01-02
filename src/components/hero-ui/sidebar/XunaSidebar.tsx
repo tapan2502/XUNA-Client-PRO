@@ -33,7 +33,7 @@ import {auth} from "@/lib/firebase";
 
 import Sidebar from "./Sidebar";
 import {sectionItems} from "./sidebar-items";
-import {AcmeIcon} from "./AcmeIcon"; // Ensure this exists or use fallback
+import {AcmeIcon} from "./acme"; // Ensure this exists or use fallback
 
 const workspaces = [
   {

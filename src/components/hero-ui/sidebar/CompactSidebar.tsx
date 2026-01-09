@@ -58,7 +58,12 @@ export default function CompactSidebar() {
       {/* Middle Group */}
       <div className="flex flex-col items-center gap-2">
          <Tooltip content="Billing" placement="right">
-            <Button isIconOnly variant="light" className="text-default-500 w-11 h-11 min-w-0 p-0 hover:bg-default-100 rounded-xl transition-colors">
+            <Button 
+                isIconOnly 
+                variant="light" 
+                className="text-default-500 w-11 h-11 min-w-0 p-0 hover:bg-default-100 rounded-xl transition-colors"
+                onPress={() => navigate("/billing")}
+            >
                 <Icon icon="solar:dollar-minimalistic-linear" width={24} />
             </Button>
         </Tooltip>

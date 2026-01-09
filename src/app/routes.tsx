@@ -21,13 +21,20 @@ import KnowledgeBaseDetails from "@/features/dashboard/pages/KnowledgeBaseDetail
 import Campaigns from "@/features/dashboard/pages/Campaigns"
 import Tools from "@/features/dashboard/pages/Tools"
 import Settings from "@/features/settings/pages/Settings"
+import Billing from "@/features/billing/pages/Billing"
 
 const Protected: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const user = useAppSelector(selectEffectiveUser)
+  const initializing = useAppSelector(selectAuthInitializing)
+
+  if (initializing) return <LoadingSpinner />
   return user ? <>{children}</> : <Navigate to="/login" replace />
 }
 const PublicOnly: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const user = useAppSelector(selectEffectiveUser)
+  const initializing = useAppSelector(selectAuthInitializing)
+
+  if (initializing) return <LoadingSpinner />
   return user ? <Navigate to="/agents" replace /> : <>{children}</>
 }
 
@@ -78,6 +85,7 @@ export default function AppRoutes() {
           <Route path="campaigns" element={<Campaigns />} />
           <Route path="tools" element={<Tools />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="billing" element={<Billing />} />
         </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

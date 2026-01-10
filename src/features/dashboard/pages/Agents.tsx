@@ -5,6 +5,7 @@ import React from "react"
 import { useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchAgents } from "@/store/agentsSlice"
+import { selectIsImpersonating, selectImpersonatedUser, setIsImpersonationLoading, selectIsImpersonationLoading } from "@/store/authSlice"
 import { CreateAgentModal } from "@/features/agents/components/CreateAgentModal"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
@@ -27,6 +28,9 @@ export default function Agents() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { agents, loading } = useAppSelector((state) => state.agents)
+  const isImpersonating = useAppSelector(selectIsImpersonating)
+  const impersonatedUser = useAppSelector(selectImpersonatedUser)
+  const isImpersonationLoading = useAppSelector(selectIsImpersonationLoading)
   const { isOpen, onOpen, onClose } = useDisclosure()
   
   const [agentToDelete, setAgentToDelete] = React.useState<any | null>(null)
@@ -37,8 +41,15 @@ export default function Agents() {
   } = useDisclosure()
 
   useEffect(() => {
-    dispatch(fetchAgents())
-  }, [dispatch])
+    const sync = async () => {
+      console.log('[Agents] Syncing data, impersonating:', isImpersonating, impersonatedUser?.uid);
+      await dispatch(fetchAgents());
+      if (isImpersonationLoading) {
+        dispatch(setIsImpersonationLoading(false));
+      }
+    };
+    sync();
+  }, [dispatch, isImpersonating, impersonatedUser])
 
   // Auto-open create modal if 'create' param is present
   useEffect(() => {

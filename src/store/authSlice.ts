@@ -10,7 +10,7 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot, setDoc, query, collection, where } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
 import { auth, db } from "@/lib/firebase";
 import { http } from "@/lib/http";
@@ -27,13 +27,36 @@ export const fetchUserDetails = createAsyncThunk<UserData, void, { rejectValue: 
   }
 );
 
+export interface WorkspaceTarget {
+  uid: string;
+  name: string;
+  email: string;
+  role: "ADMIN" | "AGENCY" | "USER";
+  agencyId?: string;
+}
+
+export const fetchWorkspaces = createAsyncThunk<{ workspaces: WorkspaceTarget[] }, void, { rejectValue: string }>(
+  "auth/fetchWorkspaces",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await http.get("/users/workspaces");
+      return data;
+    } catch (error) {
+      return rejectWithValue(describeFirebaseError(error, "Failed to fetch workspaces"));
+    }
+  }
+);
+
 type RequestStatus = "pending" | "accepted" | "rejected";
 type RequestMap = Record<string, { status: RequestStatus; email: string }>;
 
 export interface UserData {
   name: string;
   email: string;
-  role: "admin" | "user" | "super-admin";
+  role: "ADMIN" | "AGENCY" | "USER";
+  agencyId?: string;
+  workspaceId?: string;
+  isActive: boolean;
   createdByAdmin: boolean;
   createdAt: unknown;
   updatedAt: unknown;
@@ -62,9 +85,12 @@ export interface UserData {
 interface AuthState {
   user: User | null;
   userData: UserData | null;
+  managedUsers: (UserData & { uid: string })[];
+  workspaces: WorkspaceTarget[]; // NEW: Available impersonation targets
   impersonatedUser: User | null;
   impersonatedUserData: UserData | null;
   isImpersonating: boolean;
+  isImpersonationLoading: boolean; // NEW: Loading state for workspace switching
   loading: boolean;
   initializing: boolean;
   error: string | null;
@@ -73,9 +99,12 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   userData: null,
+  managedUsers: [],
+  workspaces: [],
   impersonatedUser: null,
   impersonatedUserData: null,
   isImpersonating: false,
+  isImpersonationLoading: false,
   loading: false,
   initializing: true,
   error: null,
@@ -101,10 +130,21 @@ const coerceDateString = (value: unknown): string => {
 
 const normalizeUserData = (data: Partial<UserData>): UserData => {
   const entitlements = data.entitlements ?? defaultEntitlements;
-  return {
+
+  // Safely handle role normalization
+  let role: "ADMIN" | "AGENCY" | "USER" = "USER";
+  if (data.role) {
+    const upperRole = data.role.toUpperCase();
+    if (upperRole === "ADMIN" || upperRole === "AGENCY" || upperRole === "USER") {
+      role = upperRole as "ADMIN" | "AGENCY" | "USER";
+    }
+  }
+
+  const baseData: Omit<UserData, "agencyId" | "workspaceId"> = {
     name: data.name ?? "",
     email: data.email ?? "",
-    role: data.role ?? "user",
+    role: role,
+    isActive: data.isActive ?? true,
     createdByAdmin: data.createdByAdmin ?? false,
     createdAt: data.createdAt ?? new Date(),
     updatedAt: data.updatedAt ?? new Date(),
@@ -122,6 +162,17 @@ const normalizeUserData = (data: Partial<UserData>): UserData => {
     plan_lookup_key: data.plan_lookup_key ?? entitlements.planKey ?? "Price",
     batch_calls: data.batch_calls ?? [],
   };
+
+  // Only include agencyId and workspaceId if they have actual values
+  // Firestore doesn't support undefined values
+  if (data.agencyId !== undefined) {
+    (baseData as UserData).agencyId = data.agencyId;
+  }
+  if (data.workspaceId !== undefined) {
+    (baseData as UserData).workspaceId = data.workspaceId;
+  }
+
+  return baseData as UserData;
 };
 
 const createDefaultUserData = (user: User): UserData => {
@@ -234,11 +285,16 @@ const fetchUserData = async (uid: string): Promise<UserData | null> => {
 let authListenerRegistered = false;
 let authUnsubscribe: (() => void) | null = null;
 let userDocUnsubscribe: (() => void) | null = null;
+let managedUsersUnsubscribe: (() => void) | null = null;
 
-const detachUserDocListener = () => {
+const detachListeners = () => {
   if (userDocUnsubscribe) {
     userDocUnsubscribe();
     userDocUnsubscribe = null;
+  }
+  if (managedUsersUnsubscribe) {
+    managedUsersUnsubscribe();
+    managedUsersUnsubscribe = null;
   }
 };
 
@@ -248,10 +304,11 @@ export const initAuthListener = createAsyncThunk("auth/initListener", async (_, 
   authUnsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
     dispatch(authSlice.actions.setUser(firebaseUser));
     dispatch(authSlice.actions.setError(null));
-    detachUserDocListener();
+    detachListeners();
 
     if (!firebaseUser) {
       dispatch(authSlice.actions.setUserData(null));
+      dispatch(authSlice.actions.setManagedUsers([]));
       dispatch(authSlice.actions.clearImpersonation());
       dispatch(authSlice.actions.setInitializing(false));
       return;
@@ -261,19 +318,42 @@ export const initAuthListener = createAsyncThunk("auth/initListener", async (_, 
       const data = await fetchUserData(firebaseUser.uid);
       if (data) {
         dispatch(authSlice.actions.setUserData(data));
+
+        // Restore persistent impersonation if it exists
+        const persistedImpId = localStorage.getItem("XUNA_IMPERSONATED_USER_ID");
+        if (persistedImpId) {
+          console.log('[initAuthListener] Restoring persistent impersonation for:', persistedImpId);
+          dispatch(impersonateUser(persistedImpId));
+        }
+
+        if (data.role === "AGENCY" || data.role === "ADMIN") {
+          dispatch(fetchWorkspaces());
+        } else {
+          dispatch(authSlice.actions.setWorkspaces([]));
+        }
+
         userDocUnsubscribe = onSnapshot(
           doc(db, "users", firebaseUser.uid),
           (snap) => {
             if (snap.exists()) {
-              dispatch(authSlice.actions.setUserData(normalizeUserData(snap.data() as Partial<UserData>)));
+              const updatedData = normalizeUserData(snap.data() as Partial<UserData>);
+              dispatch(authSlice.actions.setUserData(updatedData));
+
+              // Handle role change scenario (e.g. upgraded to AGENCY)
+              if ((updatedData.role === "AGENCY" || updatedData.role === "ADMIN")) {
+                dispatch(fetchWorkspaces());
+              } else {
+                dispatch(authSlice.actions.setWorkspaces([]));
+              }
             }
           },
           () => {
-            detachUserDocListener();
+            detachListeners();
           }
         );
       } else {
         dispatch(authSlice.actions.setUserData(null));
+        dispatch(authSlice.actions.setManagedUsers([]));
       }
     } catch (error) {
       dispatch(authSlice.actions.setError(describeFirebaseError(error, "Failed to fetch user data")));
@@ -300,12 +380,26 @@ export const signUp = createAsyncThunk<User, { email: string; password: string; 
   "auth/signUp",
   async ({ email, password, name }, { rejectWithValue }) => {
     try {
+      console.log('[SignUp] Starting signup process for:', email);
       const cred = await createUserWithEmailAndPassword(auth, email, password);
+      console.log('[SignUp] User created in Authentication:', cred.user.uid);
+
       const payload = createDefaultUserData(cred.user);
       payload.name = name; // Set the name provided during signup
-      await setDoc(doc(db, "users", cred.user.uid), payload);
+      console.log('[SignUp] User data payload:', payload);
+
+      try {
+        await setDoc(doc(db, "users", cred.user.uid), payload);
+        console.log('[SignUp] ✅ Firestore document created successfully');
+      } catch (firestoreError) {
+        console.error('[SignUp] ❌ Firestore write failed:', firestoreError);
+        // Even if Firestore fails, we return the user (they're authenticated)
+        // The auth listener will try to fetch the doc and handle missing data
+      }
+
       return cred.user;
     } catch (error) {
+      console.error('[SignUp] Error during signup:', error);
       if (error instanceof FirebaseError) return rejectWithValue(await resolveSignUpError(error, email));
       return rejectWithValue(describeFirebaseError(error, "An error occurred during sign up"));
     }
@@ -316,18 +410,33 @@ export const signInWithGoogle = createAsyncThunk<User, void, { rejectValue: stri
   "auth/signInWithGoogle",
   async (_, { rejectWithValue }) => {
     try {
+      console.log('[GoogleSignIn] Starting Google sign-in');
       const provider = new GoogleAuthProvider();
       provider.addScope("email");
       provider.addScope("profile");
       provider.setCustomParameters({ prompt: "select_account" });
 
       const cred = await signInWithPopup(auth, provider);
+      console.log('[GoogleSignIn] User authenticated:', cred.user.uid);
+
       const userRef = doc(db, "users", cred.user.uid);
       const snap = await getDoc(userRef);
+
       if (!snap.exists()) {
+        console.log('[GoogleSignIn] No Firestore doc found, creating new user document');
         const payload = createDefaultUserData(cred.user);
-        await setDoc(userRef, payload);
+        console.log('[GoogleSignIn] User data payload:', payload);
+
+        try {
+          await setDoc(userRef, payload);
+          console.log('[GoogleSignIn] ✅ Firestore document created successfully');
+        } catch (firestoreError) {
+          console.error('[GoogleSignIn] ❌ Firestore write failed:', firestoreError);
+        }
+      } else {
+        console.log('[GoogleSignIn] Existing user found in Firestore');
       }
+
       return cred.user;
     } catch (error) {
       if (error instanceof FirebaseError) {
@@ -417,21 +526,52 @@ type AuthThunkConfig = { state: { auth: AuthState }; rejectValue: string };
 export const impersonateUser = createAsyncThunk<ImpersonationPayload, string, AuthThunkConfig>(
   "auth/impersonateUser",
   async (userId, { getState, rejectWithValue }) => {
+    console.log('[impersonateUser] Starting impersonation for:', userId);
     const state = getState().auth;
-    if (!state.user) return rejectWithValue("Must be logged in to impersonate users");
-
-    const isSuperAdmin = state.userData?.role === "super-admin";
-    const hasAcceptedRequest = state.userData?.sentRequests?.[userId]?.status === "accepted";
-    if (!isSuperAdmin && !hasAcceptedRequest) {
-      return rejectWithValue("No permission to impersonate this user");
+    if (!state.user) {
+      console.log('[impersonateUser] ❌ No user logged in');
+      return rejectWithValue("Must be logged in to impersonate users");
     }
 
+    const currentRole = state.userData?.role;
+    const currentUid = state.user.uid;
+
+    console.log('[impersonateUser] Current user:', { uid: currentUid, role: currentRole });
+
     try {
+      // Fetch the target user's data
       const snap = await getDoc(doc(db, "users", userId));
-      if (!snap.exists()) return rejectWithValue("User not found");
-      const data = normalizeUserData(snap.data() as Partial<UserData>);
-      return { user: createMockUser(userId, data), userData: data, userId };
+      if (!snap.exists()) {
+        console.log('[impersonateUser] ❌ User not found:', userId);
+        return rejectWithValue("User not found");
+      }
+
+      const targetUserData = normalizeUserData(snap.data() as Partial<UserData>);
+      console.log('[impersonateUser] Target user data:', targetUserData);
+
+      // Permission check based on RBAC hierarchy
+      if (currentRole === "ADMIN") {
+        // ADMIN can impersonate anyone
+        console.log('[impersonateUser] ✅ ADMIN can impersonate anyone');
+      } else if (currentRole === "AGENCY") {
+        // AGENCY can only impersonate users where agencyId matches current user's UID
+        if (targetUserData.agencyId !== currentUid) {
+          console.log('[impersonateUser] ❌ AGENCY cannot impersonate user from different agency');
+          console.log('[impersonateUser] Target agencyId:', targetUserData.agencyId, 'Current UID:', currentUid);
+          return rejectWithValue("User is not in your agency");
+        }
+        console.log('[impersonateUser] ✅ AGENCY can impersonate managed user');
+      } else {
+        // Regular USER cannot impersonate
+        console.log('[impersonateUser] ❌ USER role cannot impersonate');
+        return rejectWithValue("No permission to impersonate users");
+      }
+
+      const payload = { user: createMockUser(userId, targetUserData), userData: targetUserData, userId };
+      console.log('[impersonateUser] ✅ Impersonation successful');
+      return payload;
     } catch (error) {
+      console.error('[impersonateUser] ❌ Error:', error);
       return rejectWithValue(describeFirebaseError(error, "Failed to impersonate user"));
     }
   }
@@ -453,12 +593,19 @@ const authSlice = createSlice({
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
     },
+    setManagedUsers(state, action: PayloadAction<(UserData & { uid: string })[]>) {
+      state.managedUsers = action.payload;
+    },
+    setWorkspaces(state, action: PayloadAction<WorkspaceTarget[]>) {
+      state.workspaces = action.payload;
+    },
     applyImpersonation(state, action: PayloadAction<ImpersonationPayload>) {
       state.impersonatedUser = action.payload.user;
       state.impersonatedUserData = action.payload.userData;
       state.isImpersonating = true;
       if (typeof window !== "undefined") {
         (window as any).__IMPERSONATE_USER_ID__ = action.payload.userId;
+        localStorage.setItem("XUNA_IMPERSONATED_USER_ID", action.payload.userId);
       }
     },
     clearImpersonation(state) {
@@ -467,7 +614,11 @@ const authSlice = createSlice({
       state.isImpersonating = false;
       if (typeof window !== "undefined") {
         (window as any).__IMPERSONATE_USER_ID__ = undefined;
+        localStorage.removeItem("XUNA_IMPERSONATED_USER_ID");
       }
+    },
+    setIsImpersonationLoading(state, action: PayloadAction<boolean>) {
+      state.isImpersonationLoading = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -542,16 +693,18 @@ const authSlice = createSlice({
         state.error = (action.payload as string) ?? action.error.message ?? "Failed to log out";
       })
       .addCase(impersonateUser.pending, (state) => {
-        state.loading = true;
+        state.isImpersonationLoading = true;
         state.error = null;
       })
       .addCase(impersonateUser.fulfilled, (state, action) => {
-        state.loading = false;
+        // We DON'T set isImpersonationLoading to false here 
+        // because we want to wait for API syncing (agents, etc) 
+        // to complete in the components.
         authSlice.caseReducers.applyImpersonation(state, action);
         state.error = null;
       })
       .addCase(impersonateUser.rejected, (state, action) => {
-        state.loading = false;
+        state.isImpersonationLoading = false;
         state.error = (action.payload as string) ?? action.error.message ?? "Failed to impersonate user";
       })
       .addCase(fetchUserDetails.pending, (state) => {
@@ -566,11 +719,21 @@ const authSlice = createSlice({
       .addCase(fetchUserDetails.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as string) ?? action.error.message ?? "Failed to fetch user details";
+      })
+      .addCase(fetchWorkspaces.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(fetchWorkspaces.fulfilled, (state, action) => {
+        state.workspaces = action.payload.workspaces;
+        state.error = null;
+      })
+      .addCase(fetchWorkspaces.rejected, (state, action) => {
+        state.error = (action.payload as string) ?? action.error.message ?? "Failed to fetch workspaces";
       });
   },
 });
 
-export const { clearImpersonation: stopImpersonation } = authSlice.actions;
+export const { clearImpersonation: stopImpersonation, setIsImpersonationLoading } = authSlice.actions;
 export const authReducer = authSlice.reducer;
 export default authSlice.reducer;
 
@@ -578,13 +741,17 @@ export const selectAuth = (state: { auth: AuthState }) => state.auth;
 export const selectAuthError = (state: { auth: AuthState }) => state.auth.error;
 export const selectAuthLoading = (state: { auth: AuthState }) => state.auth.loading;
 export const selectAuthInitializing = (state: { auth: AuthState }) => state.auth.initializing;
+export const selectManagedUsers = (state: { auth: AuthState }) => state.auth.managedUsers;
 export const selectCurrentUser = (state: { auth: AuthState }) => state.auth.user;
 export const selectCurrentUserData = (state: { auth: AuthState }) => state.auth.userData;
+export const selectIsImpersonating = (state: { auth: AuthState }) => state.auth.isImpersonating;
+export const selectWorkspaces = (state: { auth: AuthState }) => state.auth.workspaces;
+export const selectIsImpersonationLoading = (state: { auth: AuthState }) => state.auth.isImpersonationLoading;
 export const selectImpersonatedUser = (state: { auth: AuthState }) => state.auth.impersonatedUser;
 export const selectImpersonatedUserData = (state: { auth: AuthState }) => state.auth.impersonatedUserData;
 export const selectEffectiveUser = (state: { auth: AuthState }) =>
   state.auth.impersonatedUser ?? state.auth.user;
 export const selectEffectiveUserData = (state: { auth: AuthState }) =>
   state.auth.impersonatedUserData ?? state.auth.userData;
-export const selectIsAdmin = (state: { auth: AuthState }) => state.auth.userData?.role === "admin";
-export const selectIsImpersonating = (state: { auth: AuthState }) => state.auth.isImpersonating;
+export const selectIsAdmin = (state: { auth: AuthState }) => state.auth.userData?.role === "ADMIN";
+export const selectIsAgency = (state: { auth: AuthState }) => state.auth.userData?.role === "AGENCY";

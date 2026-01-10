@@ -9,8 +9,15 @@ import Signup from "@/features/auth/pages/Signup"
 import DashboardShell from "@/features/layout/components/Dashboard"
 import DashboardHome from "@/features/dashboard/pages/DashboardHome"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
+import { LoadingOverlay } from "@/components/ui/LoadingOverlay"
 import { useAppDispatch, useAppSelector } from "./hooks"
-import { initAuthListener, selectAuthInitializing, selectEffectiveUser } from "@/store/authSlice"
+import { 
+  initAuthListener, 
+  selectAuthInitializing, 
+  selectEffectiveUser,
+  selectIsImpersonationLoading,
+  setIsImpersonationLoading
+} from "@/store/authSlice"
 import Profile from "@/features/profile/pages/Profile"
 import AgentDetails from "@/features/agents/pages/AgentDetails"
 import CallHistory from "@/features/call-history/pages/CallHistory"
@@ -41,14 +48,32 @@ const PublicOnly: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 export default function AppRoutes() {
   const dispatch = useAppDispatch()
   const initializing = useAppSelector(selectAuthInitializing)
+  const isImpersonationLoading = useAppSelector(selectIsImpersonationLoading)
 
   useEffect(() => {
     dispatch(initAuthListener())
   }, [dispatch])
 
+  // Fail-safe for indefinite loading state
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (isImpersonationLoading) {
+      console.log('[AppRoutes] Loading fail-safe timer started (4s)');
+      timeout = setTimeout(() => {
+        console.warn('[AppRoutes] Loading fail-safe triggered. Force clearing loading state.');
+        dispatch(setIsImpersonationLoading(false));
+      }, 4000);
+    }
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [isImpersonationLoading, dispatch]);
+
   return (
-    <BrowserRouter>
-      <Routes>
+    <>
+      {isImpersonationLoading && <LoadingOverlay />}
+      <BrowserRouter>
+        <Routes>
         <Route
           path="/login"
           element={
@@ -90,5 +115,6 @@ export default function AppRoutes() {
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
+  </>
   )
 }

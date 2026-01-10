@@ -2,19 +2,32 @@ import { useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchAgents } from "@/store/agentsSlice"
 import { fetchConversations } from "@/store/callHistorySlice"
+import { selectIsImpersonating, selectImpersonatedUser, setIsImpersonationLoading, selectIsImpersonationLoading } from "@/store/authSlice"
 import KPICards from "@/components/hero-ui/statsKPI/KPICards"
 import ClientsTable from "../components/ClientsTable"
 
-
-  export default function DashboardHome() {
+export default function DashboardHome() {
   const dispatch = useAppDispatch()
+  const isImpersonating = useAppSelector(selectIsImpersonating)
+  const impersonatedUser = useAppSelector(selectImpersonatedUser)
+  const isImpersonationLoading = useAppSelector(selectIsImpersonationLoading)
   const { agents } = useAppSelector((state) => state.agents)
   const { conversations } = useAppSelector((state) => state.callHistory)
 
   useEffect(() => {
-    dispatch(fetchAgents())
-    dispatch(fetchConversations())
-  }, [dispatch])
+    const sync = async () => {
+      console.log('[DashboardHome] Syncing data, impersonating:', isImpersonating, impersonatedUser?.uid);
+      await Promise.all([
+        dispatch(fetchAgents()),
+        dispatch(fetchConversations())
+      ]);
+      
+      if (isImpersonationLoading) {
+        dispatch(setIsImpersonationLoading(false));
+      }
+    };
+    sync();
+  }, [dispatch, isImpersonating, impersonatedUser])
 
   // Mock data for charts
   const agentsData = [40, 45, 42, 48, 50, 52, 55, 53, 58, 60]

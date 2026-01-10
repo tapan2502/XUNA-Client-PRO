@@ -317,53 +317,44 @@ export default function XunaSidebar() {
                 </DropdownItem>
               </DropdownSection>
               
-              {/* Hierarchical User Switching (Bottom) */}
               {(userData?.role === "AGENCY" || userData?.role === "ADMIN") && (
                 <DropdownSection title="Agency Users">
-                  {workspacesList
-                    .filter(w => {
-                      if (w.role !== 'USER') return false;
-                      // If we are in an Agency context (Top), show only that agency's users
-                      if (effectiveUserData?.role === 'AGENCY') {
-                        return w.agencyId === effectiveUser?.uid;
-                      }
-                      // If we are viewing a USER, show other users of the same agency
-                      if (effectiveUserData?.role === 'USER') {
-                        return w.agencyId === effectiveUserData.agencyId;
-                      }
-                      // Otherwise show all users for Admin
-                      return userData?.role === 'ADMIN';
-                    })
-                    .map((w) => (
+                  {[
+                    ...workspacesList
+                      .filter(w => {
+                        if (w.role !== 'USER') return false;
+                        if (effectiveUserData?.role === 'AGENCY') return w.agencyId === effectiveUser?.uid;
+                        if (effectiveUserData?.role === 'USER') return w.agencyId === effectiveUserData.agencyId;
+                        return userData?.role === 'ADMIN';
+                      })
+                      .map((w) => (
+                        <DropdownItem
+                          key={w.uid}
+                          textValue={w.name}
+                          startContent={
+                            <Avatar
+                              size="sm"
+                              name={w.name.charAt(0)}
+                              className="bg-primary/10 text-primary"
+                            />
+                          }
+                        >
+                          <div className="flex flex-col">
+                            <p className="text-small font-medium">{w.name}</p>
+                            <p className="text-tiny text-default-400">{w.email}</p>
+                          </div>
+                        </DropdownItem>
+                      )),
+                    ...(effectiveUserData?.role === 'USER' ? [(
                       <DropdownItem
-                        key={w.uid}
-                        textValue={w.name}
-                        startContent={
-                          <Avatar
-                            size="sm"
-                            name={w.name.charAt(0)}
-                            className="bg-primary/10 text-primary"
-                          />
-                        }
+                        key="back-to-agency"
+                        className="text-primary font-bold"
+                        startContent={<Icon icon="solar:arrow-left-up-linear" width={20} />}
                       >
-                        <div className="flex flex-col">
-                          <p className="text-small font-medium">{w.name}</p>
-                          <p className="text-tiny text-default-400">{w.email}</p>
-                        </div>
+                         View Agency Workspace
                       </DropdownItem>
-                    ))
-                  }
-                  
-                  {/* Option to go back to Agency-wide data if currently viewing as a User */}
-                  {effectiveUserData?.role === 'USER' && (
-                    <DropdownItem
-                      key="back-to-agency"
-                      className="text-primary font-bold"
-                      startContent={<Icon icon="solar:arrow-left-up-linear" width={20} />}
-                    >
-                       View Agency Workspace
-                    </DropdownItem>
-                  )}
+                    )] : [])
+                  ]}
                 </DropdownSection>
               )}
             </DropdownMenu>

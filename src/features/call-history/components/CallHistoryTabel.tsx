@@ -111,34 +111,34 @@ export default function CallHistoryTable({ conversations, onSelectConversation }
 
       {/* Desktop View */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-accent border-b border-border">
+        <table className="w-full text-left">
+          <thead className="border-b border-divider text-default-500 text-[11px] uppercase tracking-wider font-medium">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="px-6 py-4">
                 Date
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="px-6 py-4">
                 Agent
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="px-6 py-4">
                 Duration
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="px-6 py-4">
                 Messages
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="px-6 py-4">
                 Sentiment Analysis
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-y divide-divider">
             {conversations.map((conversation) => (
               <motion.tr
                 key={conversation.conversation_id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 onClick={() => onSelectConversation(conversation.conversation_id)}
-                className="hover:bg-accent transition-colors cursor-pointer"
+                className="hover:bg-default-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
               >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                   {formatDate(conversation.start_time_unix_secs)}

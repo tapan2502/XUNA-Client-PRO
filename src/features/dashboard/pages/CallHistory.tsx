@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useAppSelector, useAppDispatch } from "@/app/hooks"
 import { selectCurrentUserData, fetchUserDetails } from "@/store/authSlice"
 import { Phone, Clock, CheckCircle2, XCircle, AlertCircle, MoreVertical, Eye, Trash2 } from "lucide-react"
-import DataTable from "@/components/hero-ui/DataTable"
+import XunaTable from "@/components/hero-ui/XunaTable"
 import { Chip, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react"
 import { Icon } from "@iconify/react"
 
@@ -113,7 +113,7 @@ export default function CallHistory() {
 
   return (
     <div className="flex flex-col gap-10 p-6 h-full overflow-hidden">
-      <DataTable
+      <XunaTable
         columns={columns}
         data={callHistory}
         renderCell={renderCell}

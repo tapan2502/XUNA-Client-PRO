@@ -13,6 +13,7 @@ import {
 } from "@heroui/react";
 import {Area, AreaChart, ResponsiveContainer, YAxis} from "recharts";
 import {Icon} from "@iconify/react";
+import { useAppSelector } from "@/app/hooks";
 
 const data = [
   {
@@ -151,57 +152,71 @@ interface KPICardsProps {
 
 export default function KPICards({ items, limit = 3 }: KPICardsProps) {
   const displayData = (items || data).slice(0, limit);
+  const mode = useAppSelector((s) => s.settings.theme);
+      const resolvedTheme = React.useMemo<"light" | "dark">(() => {
+          if (mode !== "system") return mode;
+          if (typeof window === "undefined") return "light";
+          return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }, [mode]);
   return (
-    <dl className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
+    <dl className="grid w-full grid-cols-1 gap-6 px-6 sm:grid-cols-2 md:grid-cols-3">
       {displayData.map(({title, subtitle, value, change, color, chartData}, index) => (
-        <Card key={index} className="dark:border-default-100 border border-transparent overflow-hidden h-[170px]">
-          <section className="flex flex-col h-full">
-            <div className="flex flex-col gap-y-1 px-4 pt-4 pb-2">
-              <dt className="text-default-500 text-sm font-medium">{title}</dt>
-              <div className="flex items-center justify-between">
-                <dd className="text-default-800 text-3xl font-bold">{value}</dd>
-                <Chip
-                  classNames={{
-                    content: "font-semibold text-tiny",
-                    base: "h-6 px-1"
-                  }}
-                  color={
-                    color === "success"
-                      ? "success"
-                      : color === "primary"
-                        ? "primary"
-                        : color === "secondary"
-                          ? "secondary"
-                          : color === "warning"
-                            ? "warning"
-                            : color === "danger"
-                              ? "danger"
-                              : "default"
-                  }
-                  radius="sm"
-                  size="sm"
-                  startContent={
-                    color === "success" ? (
-                      <Icon height={12} icon={"solar:arrow-right-up-linear"} width={12} />
-                    ) : color === "danger" ? (
-                      <Icon height={12} icon={"solar:arrow-right-down-linear"} width={12} />
-                    ) : (
-                      <Icon height={12} icon={"solar:arrow-right-linear"} width={12} />
-                    )
-                  }
-                  variant="flat"
-                >
-                  <span>{change}</span>
-                </Chip>
+        <Card key={index} className="dark:border-default-100 border border-transparent dark:bg-[#0B0B0B]/80"
+          style={{
+            backdropFilter: 'blur(16px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(16px) saturate(180%)'
+          }}>
+          <section className="flex flex-col flex-nowrap">
+            <div className="flex flex-col justify-between gap-y-2 px-6 pt-6">
+              <div className="flex flex-col gap-y-2">
+                <div className="flex flex-col gap-y-0">
+                  <dt className="text-default-600 text-lg font-medium">{title}</dt>
+                  <dt className="text-sm text-default-400 font-normal">{subtitle}</dt>
+                </div>
+                <div className="flex items-baseline gap-x-2">
+                  <dd className="text-default-700 text-xl font-semibold">{value}</dd>
+                  <Chip
+                    classNames={{
+                      content: "font-medium",
+                    }}
+                    color={
+                      color === "success"
+                        ? "success"
+                        : color === "primary"
+                          ? "primary"
+                          : color === "secondary"
+                            ? "secondary"
+                            : color === "warning"
+                              ? "warning"
+                              : color === "danger"
+                                ? "danger"
+                                : "default"
+                    }
+                    radius="sm"
+                    size="sm"
+                    startContent={
+                      color === "success" ? (
+                        <Icon height={16} icon={"solar:arrow-right-up-linear"} width={16} />
+                      ) : color === "danger" ? (
+                        <Icon height={16} icon={"solar:arrow-right-down-linear"} width={16} />
+                      ) : (
+                        <Icon height={16} icon={"solar:arrow-right-linear"} width={16} />
+                      )
+                    }
+                    variant="flat"
+                  >
+                    <span>{change}</span>
+                  </Chip>
+                </div>
               </div>
             </div>
-            <div className="h-16 w-full mt-auto">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+            <div className="min-h-24 w-full">
+              <ResponsiveContainer className="[&_.recharts-surface]:outline-hidden">
+                <AreaChart accessibilityLayer className="translate-y-1 scale-105" data={chartData}>
                   <defs>
                     <linearGradient id={"colorUv" + index} x1="0" x2="0" y1="0" y2="1">
                       <stop
-                        offset="5%"
+                        offset="10%"
                         stopColor={cn({
                           "hsl(var(--heroui-success))": color === "success",
                           "hsl(var(--heroui-primary))": color === "primary",
@@ -210,10 +225,10 @@ export default function KPICards({ items, limit = 3 }: KPICardsProps) {
                           "hsl(var(--heroui-danger))": color === "danger",
                           "hsl(var(--heroui-foreground))": color === "default",
                         })}
-                        stopOpacity={0.4}
+                        stopOpacity={0.3}
                       />
                       <stop
-                        offset="95%"
+                        offset="100%"
                         stopColor={cn({
                           "hsl(var(--heroui-success))": color === "success",
                           "hsl(var(--heroui-primary))": color === "primary",
@@ -222,19 +237,17 @@ export default function KPICards({ items, limit = 3 }: KPICardsProps) {
                           "hsl(var(--heroui-danger))": color === "danger",
                           "hsl(var(--heroui-foreground))": color === "default",
                         })}
-                        stopOpacity={0}
+                        stopOpacity={0.1}
                       />
                     </linearGradient>
                   </defs>
                   <YAxis
-                    domain={[Math.min(...chartData.map((d) => d.value)) * 0.9, "auto"]}
+                    domain={[Math.min(...chartData.map((d) => d.value)), "auto"]}
                     hide={true}
                   />
                   <Area
-                    type="monotone"
                     dataKey="value"
                     fill={`url(#colorUv${index})`}
-                    strokeWidth={2}
                     stroke={cn({
                       "hsl(var(--heroui-success))": color === "success",
                       "hsl(var(--heroui-primary))": color === "primary",
@@ -247,6 +260,33 @@ export default function KPICards({ items, limit = 3 }: KPICardsProps) {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+            <Dropdown
+              classNames={{
+                content: "min-w-[120px]",
+              }}
+              placement="bottom-end"
+            >
+              <DropdownTrigger>
+                <Button
+                  isIconOnly
+                  className="absolute top-6 right-6 w-auto rounded-full"
+                  size="sm"
+                  variant="light"
+                >
+                  <Icon height={16} icon="solar:menu-dots-bold" width={16} />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                itemClasses={{
+                  title: "text-tiny",
+                }}
+                variant="flat"
+              >
+                <DropdownItem key="view-details">View Details</DropdownItem>
+                <DropdownItem key="export-data">Export Data</DropdownItem>
+                <DropdownItem key="set-alert">Set Alert</DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
           </section>
         </Card>
       ))}

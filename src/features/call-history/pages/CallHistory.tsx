@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchConversations, fetchConversationDetails, clearSelectedConversation } from "@/store/callHistorySlice"
 import { Phone, Clock, MessageSquare, Copy, Check, MoreVertical, Eye } from "lucide-react"
 import { Chip, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react"
-import DataTable from "@/components/hero-ui/DataTable"
+import XunaTable from "@/components/hero-ui/XunaTable"
 import CallHistoryDetails from "../components/CallHistoryDetails"
 import CallHistoryFilters from "../components/CallHistoryFilters"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
@@ -90,7 +90,7 @@ export default function CallHistory() {
     })
   }
 
-  // Map conversations to include id for DataTable
+  // Map conversations to include id for XunaTable
   const tableData = useMemo(() => {
     let data = filteredConversations.map((conv) => ({
       ...conv,
@@ -205,7 +205,7 @@ export default function CallHistory() {
 
   return (
     <div className="flex flex-col gap-4 p-6 h-full overflow-hidden">
-      <DataTable
+      <XunaTable
         columns={columns}
         data={tableData}
         renderCell={renderCell}

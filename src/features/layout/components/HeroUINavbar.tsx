@@ -25,21 +25,24 @@ import {Icon} from "@iconify/react";
 
 import NotificationsCard from "@/components/hero-ui/navbar/notifications-card";
 import logoImage from "@/assets/logo.png";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { setTheme } from "@/store/settingsSlice";
+import { applyTheme } from "@/app/theme";
 
 export default function HeroUINavbar() {
-  const [theme, setTheme] = React.useState<"light" | "dark" | null>(null);
-
-  React.useEffect(() => {
-    setTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
-  }, []);
+  const dispatch = useAppDispatch();
+  const mode = useAppSelector((s) => s.settings.theme);
+  const resolvedTheme = React.useMemo<"light" | "dark">(() => {
+    if (mode !== "system") return mode;
+    if (typeof window === "undefined") return "light";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }, [mode]);
 
   const toggleTheme = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    import("@/app/theme").then(({ applyTheme }) => {
-      applyTheme(next);
-      localStorage.setItem("theme", next);
-      setTheme(next);
-    });
+    const next = resolvedTheme === "dark" ? "light" : "dark";
+    dispatch(setTheme(next));
+    applyTheme(next);
+    localStorage.setItem("theme", next);
   };
 
   return (
@@ -101,8 +104,8 @@ export default function HeroUINavbar() {
         <NavbarItem className="hidden sm:flex">
           <Button isIconOnly radius="full" variant="light" onPress={toggleTheme}>
             <Icon 
-              className={theme === "dark" ? "text-warning" : "text-default-500"} 
-              icon={theme === "dark" ? "solar:sun-linear" : "solar:moon-linear"} 
+              className={resolvedTheme === "dark" ? "text-warning" : "text-default-500"} 
+              icon={resolvedTheme === "dark" ? "solar:sun-linear" : "solar:moon-linear"} 
               width={24} 
             />
           </Button>

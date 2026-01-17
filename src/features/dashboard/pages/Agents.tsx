@@ -11,10 +11,10 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import { Headset, Eye, Trash2 } from "lucide-react"
 import { Icon } from "@iconify/react"
 import { Button, User, useDisclosure, Snippet, Switch, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/react"
-import DataTable, { type DataTableColumn } from "@/components/hero-ui/DataTable"
+import XunaTable, { type XunaTableColumn } from "@/components/hero-ui/XunaTable"
 import { updateAgentStatus, deleteAgent } from "@/store/agentsSlice"
 
-const columns: DataTableColumn[] = [
+const columns: XunaTableColumn[] = [
   { uid: "name", name: "Agent Name", sortable: true },
   { uid: "agent_id", name: "Agent ID" },
   { uid: "status", name: "Status" },
@@ -187,7 +187,7 @@ export default function Agents() {
     )
   }
 
-  // DataTable requires an 'id' property
+  // XunaTable requires an 'id' property
   const tableData = agents.map((agent) => ({
     ...agent,
     id: agent.agent_id,
@@ -195,7 +195,7 @@ export default function Agents() {
 
   return (
     <div className="flex flex-col gap-12 p-10 h-full overflow-hidden">
-      <DataTable
+      <XunaTable
         columns={columns}
         data={tableData}
         renderCell={renderCell}
@@ -206,6 +206,7 @@ export default function Agents() {
         topBarCount={agents.length}
         topBarAction={topBarAction}
         emptyContent="No agents found. Create one to get started."
+        justifyEndColumns={false}
       />
 
       <CreateAgentModal

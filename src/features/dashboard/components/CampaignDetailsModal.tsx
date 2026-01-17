@@ -89,7 +89,7 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaignId }: Ca
                 <h3 className="text-[14px] font-bold text-foreground">Recipients ({selectedCampaign.recipients.length})</h3>
                 <div className="border border-divider rounded-xl overflow-hidden shadow-sm">
                   <table className="w-full text-sm text-left">
-                    <thead className="bg-default-50/50 text-default-500 border-b border-divider font-bold text-[11px] uppercase tracking-wider">
+                    <thead className="border-b border-divider text-default-500 text-[11px] uppercase tracking-wider font-medium">
                       <tr>
                         <th className="px-4 py-3">Phone Number</th>
                         <th className="px-4 py-3">Status</th>
@@ -98,7 +98,7 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaignId }: Ca
                     </thead>
                     <tbody className="divide-y divide-divider">
                       {selectedCampaign.recipients.map((recipient, index) => (
-                        <tr key={index} className="hover:bg-default-50 transition-colors">
+                        <tr key={index} className="hover:bg-default-100 dark:hover:bg-white/5 transition-colors">
                           <td className="px-4 py-3 font-mono text-foreground text-[13px]">{recipient.phone_number}</td>
                           <td className="px-4 py-3">
                             <span className={`px-2 py-0.5 rounded text-[11px] font-bold capitalize ${

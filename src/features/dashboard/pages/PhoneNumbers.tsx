@@ -18,7 +18,7 @@ import ImportSIPModal from "../components/ImportSIPModal"
 import AssignAgentModal from "../components/AssignAgentModal"
 import ConfirmationModal from "@/components/ConfirmationModal"
 import { useSnackbar } from "@/components/ui/SnackbarProvider"
-import DataTable, { DataTableColumn, useMemoizedCallback } from "@/components/hero-ui/DataTable"
+import XunaTable, { XunaTableColumn, useMemoizedCallback } from "@/components/hero-ui/XunaTable"
 import { Button, Chip, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, User, RadioGroup, Radio } from "@heroui/react"
 import { Icon } from "@iconify/react"
 import React from "react"
@@ -38,7 +38,16 @@ interface EnrichedPhoneNumber {
   status: "assigned" | "unassigned"
 }
 
-const columns: DataTableColumn[] = [
+const columns: XunaTableColumn[] = [
+  { 
+    uid: "statusDot", 
+    name: (
+      <div className="flex items-center justify-center w-full ml-1">
+         <div className="w-2 h-2 rounded-full bg-success" />
+      </div>
+    ) as any,
+    sortDirection: "ascending"
+  },
   { uid: "name", name: "Name", sortable: true },
   { uid: "phone_number", name: "Phone Number", sortable: true },
   { uid: "provider", name: "Provider", sortable: true },
@@ -46,7 +55,7 @@ const columns: DataTableColumn[] = [
   { uid: "actions", name: "Actions" },
 ]
 
-const INITIAL_VISIBLE_COLUMNS = ["name", "phone_number", "provider", "assigned_agent", "actions"]
+const INITIAL_VISIBLE_COLUMNS = ["statusDot", "name", "phone_number", "provider", "assigned_agent", "actions"]
 
 export default function PhoneNumbers() {
   const dispatch = useAppDispatch()
@@ -65,7 +74,7 @@ export default function PhoneNumbers() {
     dispatch(fetchPhoneNumbers())
   }, [dispatch])
 
-  // Transform data for DataTable
+  // Transform data for XunaTable
   const enrichedPhoneNumbers: EnrichedPhoneNumber[] = useMemo(() => {
     return phoneNumbers.map((pn) => ({
       id: pn.phone_number_id,
@@ -196,36 +205,20 @@ export default function PhoneNumbers() {
 
   // Top Bar Actions
   const topBarAction = (
-    <div className="flex gap-2">
+    <div className="flex gap-4">
       <Button
+        className="text-white"
         color="primary"
-        size="md"
-        radius="md"
         onPress={() => setIsTwilioModalOpen(true)}
-        endContent={
-          <div className="bg-white rounded-full w-5 h-5 flex items-center justify-center">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary"/>
-            </svg>
-          </div>
-        }
-        className="px-4 shadow-lg shadow-primary/20 font-medium h-10 text-white"
+        endContent={<Icon icon="solar:add-circle-bold" width={20} />}
       >
         Import from Twilio
       </Button>
       <Button
+        className="text-white"
         color="primary"
-        size="md"
-        radius="md"
         onPress={() => setIsSIPModalOpen(true)}
-        endContent={
-          <div className="bg-white rounded-full w-5 h-5 flex items-center justify-center">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary"/>
-            </svg>
-          </div>
-        }
-        className="px-4 shadow-lg shadow-primary/20 font-medium h-10 text-white"
+        endContent={<Icon icon="solar:add-circle-bold" width={20} />}
       >
         Import from SIP
       </Button>
@@ -243,12 +236,12 @@ export default function PhoneNumbers() {
   return (
     <>
       <div className="flex flex-col gap-10 p-6 h-full overflow-hidden">
-        <DataTable<EnrichedPhoneNumber>
+        <XunaTable<EnrichedPhoneNumber>
           columns={columns}
           data={enrichedPhoneNumbers}
           renderCell={renderCell}
           initialVisibleColumns={INITIAL_VISIBLE_COLUMNS}
-          searchPlaceholder="Search phone numbers..."
+          searchPlaceholder="Search"
           searchKeys={["label", "phone_number"]}
           topBarTitle="Phone Numbers"
           topBarCount={enrichedPhoneNumbers.length}

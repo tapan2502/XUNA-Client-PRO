@@ -5,7 +5,7 @@ import { useAppSelector, useAppDispatch } from "@/app/hooks"
 import { selectCurrentUserData, fetchUserDetails } from "@/store/authSlice"
 import { Users, Eye, CheckCircle2, Clock, MoreVertical } from "lucide-react"
 import { Icon } from "@iconify/react"
-import DataTable from "@/components/hero-ui/DataTable"
+import XunaTable from "@/components/hero-ui/XunaTable"
 import { Button, Chip, Select, SelectItem, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react"
 import CreateCampaignModal from "../components/CreateCampaignModal"
 import CampaignDetailsModal from "../components/CampaignDetailsModal"
@@ -30,7 +30,7 @@ export default function Campaigns() {
     dispatch(fetchUserDetails())
   }, [dispatch])
 
-  // Map data to include id for DataTable
+  // Map data to include id for XunaTable
   const tableData = batchCalls.map((campaign) => ({
     ...campaign,
     id: campaign.batch_call_id,
@@ -143,7 +143,7 @@ export default function Campaigns() {
 
   return (
     <div className="flex flex-col gap-10 p-6 h-full overflow-hidden">
-      <DataTable
+      <XunaTable
         columns={columns}
         data={filteredData}
         renderCell={renderCell}

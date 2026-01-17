@@ -1,10 +1,12 @@
 import { Outlet, Navigate } from "react-router-dom"
-import HeroUINavbar from "./HeroUINavbar"
 import { Suspense } from "react"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import { useAppSelector } from "@/app/hooks"
 import { selectAuthInitializing, selectEffectiveUser } from "@/store/authSlice"
 import { Component, ErrorInfo, ReactNode } from "react"
+import CompactSidebar from "@/components/hero-ui/sidebar/CompactSidebar"
+import XunaSidebar from "@/components/hero-ui/sidebar/XunaSidebar"
+import XunaNavbar from "@/components/hero-ui/navbar"
 
 class SimpleErrorBoundary extends Component<{children: ReactNode}, {hasError: boolean, error: any}> {
   constructor(props: any) {
@@ -36,20 +38,17 @@ class SimpleErrorBoundary extends Component<{children: ReactNode}, {hasError: bo
   }
 }
 
-import CompactSidebar from "@/components/hero-ui/sidebar/CompactSidebar"
-import XunaSidebar from "@/components/hero-ui/sidebar/XunaSidebar"
-
 export default function Dashboard() {
   const initializing = useAppSelector(selectAuthInitializing);
   const user = useAppSelector(selectEffectiveUser);
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden relative">
-      <HeroUINavbar />
+    <div className="h-screen flex flex-col bg-transparent overflow-hidden relative">
+      <XunaNavbar />
       <div className="flex-1 flex overflow-hidden relative">
         <CompactSidebar />
         <XunaSidebar />
-        <main className="flex-1 overflow-y-auto bg-default-50/50 dark:bg-background relative p-0">
+        <main className="flex-1 overflow-y-auto bg-transparent relative p-0">
           {initializing ? (
             <div className="flex items-center justify-center h-full">
               <LoadingSpinner />

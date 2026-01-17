@@ -6,6 +6,7 @@ import agentsReducer from "./agentsSlice";
 import callHistoryReducer from "./callHistorySlice";
 import campaignsReducer from "./campaignsSlice";
 import settingsReducer from "./settingsSlice";
+import billingReducer from "./billingSlice";
 
 export const store = configureStore({
   reducer: {
@@ -16,8 +17,10 @@ export const store = configureStore({
     callHistory: callHistoryReducer,
     campaigns: campaignsReducer,
     settings: settingsReducer,
+    billing: billingReducer,
   },
 });
+
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

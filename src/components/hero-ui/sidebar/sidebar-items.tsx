@@ -1,17 +1,140 @@
 "use client";
+import {type SidebarItem, SidebarItemType} from "./Sidebar";
 
-import React from "react";
 import {Chip} from "@heroui/react";
+
 import {Icon} from "@iconify/react";
 
-import {type SidebarItem, SidebarItemType} from "./Sidebar";
 import TeamAvatar from "./team-avatar";
 
 /**
  * Please check the https://heroui.com/docs/guide/routing to have a seamless router integration
  */
 
-export const items: SidebarItem[] = [
+export const sectionItems: SidebarItem[] = [  {
+    key: "overview",
+    title: "Overview",
+    items: [
+      {
+        key: "dashboard",
+        href: "#",
+        icon: "solar:home-2-linear",
+        title: "Dashboard",
+      },
+      {
+        key: "voice",
+        href: "#",
+        icon: "solar:microphone-large-linear",
+        title: "Voice",
+        endContent: (
+          <Icon className="text-default-400" icon="solar:microphone-large-linear" width={24} />
+        ),
+      },
+      {
+        key: "imessage",
+        href: "#",
+        icon: "solar:chat-dots-linear",
+        title: "iMessage",
+        endContent: (
+          <Icon className="text-default-400" icon="solar:chat-dots-linear" width={24} />
+        ),
+      },
+      {
+        key: "chat",
+        href: "#",
+        icon: "solar:dialog-2-linear",
+        title: "Chat",
+      },
+      {
+        key: "leads",
+        href: "#",
+        icon: "solar:user-id-linear",
+        title: "Leads",
+        endContent: (
+          <Chip size="sm" variant="flat">
+            New          </Chip>
+        ),
+      },
+      {
+        key: "reviews",
+        href: "#",
+        icon: "solar:like-linear",
+        title: "Reviews",
+      },
+    ],
+  },
+  {
+    key: "organization",
+    title: "Organization",
+    items: [
+      {
+        key: "workflows",
+        href: "#",
+        icon: "solar:branching-paths-down-linear",
+        title: "Workflows",
+      },
+      {
+        key: "integrations",
+        href: "#",
+        icon: "solar:link-square-linear",
+        title: "Integrations",
+      },
+    ],
+  },
+  {
+    key: "finance",
+    title: "Finance",
+    items: [
+      {
+        key: "billing",
+        href: "/billing",
+        icon: "solar:dollar-minimalistic-linear",
+        title: "Billing",
+      },
+      {
+        key: "analytics",
+        href: "#",
+        icon: "solar:chart-linear",
+        title: "Analytics",
+      },
+      {
+        key: "settings",
+        href: "/settings",
+        icon: "solar:settings-outline",
+        title: "Settings",
+      },
+    ],
+  },
+];
+
+export const sectionItemsWithTeams: SidebarItem[] = [  ...sectionItems,
+  {
+    key: "your-teams",
+    title: "Your Teams",
+    items: [
+      {
+        key: "xuna-university",
+        href: "#",
+        title: "XUNA University",
+        startContent: <TeamAvatar name="XUNA University" />,
+      },
+      {
+        key: "xuna-news",
+        href: "#",
+        title: "XUNA News",
+        startContent: <TeamAvatar name="XUNA News" />,
+      },
+      {
+        key: "xuna-partners",
+        href: "#",
+        title: "XUNA Partners",
+        startContent: <TeamAvatar name="XUNA Partners" />,
+      },
+    ],
+  },
+];
+
+export const xunaItems: SidebarItem[] = [
   {
     key: "agents",
     href: "/agents",
@@ -50,11 +173,11 @@ export const items: SidebarItem[] = [
   },
 ];
 
-export const sectionItems: SidebarItem[] = [
+export const xunaSectionItems: SidebarItem[] = [
   {
     key: "overview",
     title: "Overview",
-    items: items,
+    items: xunaItems,
   },
   {
     key: "configuration",
@@ -68,16 +191,20 @@ export const sectionItems: SidebarItem[] = [
       },
     ],
   },
+  {
+    key: "finance",
+    title: "Finance",
+    items: [
+      {
+        key: "billing",
+        href: "/billing",
+        icon: "solar:dollar-minimalistic-linear",
+        title: "Billing",
+      },
+    ],
+  },
 ];
 
-export const sectionItemsWithTeams: SidebarItem[] = [
+export const compactSidebarItems: SidebarItem[] = [
   ...sectionItems,
 ];
-
-export const brandItems: SidebarItem[] = items;
-
-export const sectionLongList: SidebarItem[] = [
-  ...sectionItems,
-];
-
-export const sectionNestedItems: SidebarItem[] = items;

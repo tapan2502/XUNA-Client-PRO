@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { fetchAgents } from "@/store/agentsSlice"
 import { fetchConversations } from "@/store/callHistorySlice"
 import KPICards from "@/components/hero-ui/statsKPI/KPICards"
-import ClientsTable from "../components/ClientsTable"
+import AgentsTable from "@/components/hero-ui/xuna-table-agents/AgentsTable"
 
 
   export default function DashboardHome() {
@@ -27,8 +27,8 @@ import ClientsTable from "../components/ClientsTable"
 
   const kpiItems = [
     {
-      title: "Agents",
-      subtitle: "Active Agents",
+      title: "Voice Agents",
+      subtitle: "Active",
       value: totalAgents.toString(),
       change: "3.3%",
       color: "success" as const,
@@ -37,7 +37,7 @@ import ClientsTable from "../components/ClientsTable"
     },
     {
       title: "Total Calls",
-      subtitle: "Lifetime Calls",
+      subtitle: "Lifetime",
       value: totalCalls.toLocaleString(),
       change: "0.0%",
       color: "warning" as const,
@@ -45,8 +45,8 @@ import ClientsTable from "../components/ClientsTable"
       xaxis: "month"
     },
     {
-      title: "Total SMS",
-      subtitle: "Lifetime SMS",
+      title: "Total Messages",
+      subtitle: "Lifetime",
       value: totalSMS.toLocaleString(),
       change: "3.3%",
       color: "danger" as const,
@@ -60,10 +60,7 @@ import ClientsTable from "../components/ClientsTable"
       {/* Metrics Grid */}
       <KPICards items={kpiItems} limit={3} />
 
-      {/* Clients Table */}
-      <div className="flex-1 min-h-0">
-        <ClientsTable />
-      </div>
+      <AgentsTable />
     </div>
   )
 }

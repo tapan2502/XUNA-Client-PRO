@@ -4,7 +4,7 @@ import { fetchKnowledgeBase, deleteKnowledgeBaseDocument } from "@/store/agentsS
 import { useNavigate } from "react-router-dom"
 import { FileText, ExternalLink, Trash2, Eye, Plus, MoreVertical } from "lucide-react"
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
-import DataTable from "@/components/hero-ui/DataTable"
+import XunaTable from "@/components/hero-ui/XunaTable"
 import { Button, Chip, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, RadioGroup, Radio } from "@heroui/react"
 import AddDocumentModal from "../components/AddDocumentModal"
 import ConfirmationModal from "@/components/ConfirmationModal"
@@ -157,10 +157,10 @@ export default function KnowledgeBase() {
     </Button>
   )
 
-  // Map data to ensure id property exists for DataTable
+  // Map data to ensure id property exists for XunaTable
   const tableData = knowledgeBase.map(doc => ({
     ...doc,
-    id: doc.id // DataTable requires id property
+    id: doc.id // XunaTable requires id property
   }))
 
   return (
@@ -172,7 +172,7 @@ export default function KnowledgeBase() {
       )}
 
       <div className="flex flex-col gap-10 p-6 h-full overflow-hidden">
-        <DataTable
+        <XunaTable
           columns={columns}
           data={tableData}
           renderCell={renderCell}

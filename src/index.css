@@ -1,27 +1,156 @@
-/* 
- * Tailwind CSS v4 Import
- * Official Hero UI configuration for Tailwind v4
- * Reference: https://www.heroui.com/docs/guide/tailwind-v4
- */
 @import "tailwindcss";
-
-/* 
- * Load Tailwind Configuration
- * This loads tailwind.config.js which includes the heroui() plugin
- * The @config directive is Tailwind v4's way to explicitly load config files
- */
 @config "../tailwind.config.js";
 
-/* 
- * Dark Mode Variant
- * Tailwind v4 syntax for dark mode support
- * Applies to elements with .dark class or descendants of .dark elements
- */
-@variant dark (&:where(.dark, .dark *));
+/* *,
+*::before,
+*::after {
+	cursor: none
+} */
 
-/* …your variables and other CSS (what you pasted) … */
+/* ::-webkit-scrollbar {
+	display: none;
+} */
+/* html {
+	color-scheme: dark;
+	scrollbar-color: #888 #222; 
+	scrollbar-width: thin; 
+} */
 
-/* your tokens and base styles */
+@font-face {
+	font-family: 'Inter';
+	src: url('/assets/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
+	font-weight: 100 900;
+	font-display: swap;
+	font-style: normal;
+}
+
+html, body {
+	font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+	overscroll-behavior-y: none;
+	min-height: 100%;
+	background: #ffffff;
+}
+
+html.dark,
+html.dark body {
+	background:
+		radial-gradient(1200px 700px at 15% 20%, rgba(34, 52, 128, 0.55) 0%, rgba(10, 12, 30, 0.2) 60%, rgba(6, 6, 16, 0) 100%),
+		radial-gradient(900px 600px at 70% 35%, rgba(84, 58, 140, 0.55) 0%, rgba(20, 15, 38, 0.4) 55%, rgba(6, 6, 16, 0) 100%),
+		linear-gradient(180deg, #0b1024 0%, #090914 45%, #05050c 100%);
+	background-attachment: fixed;
+}
+
+::-webkit-scrollbar {
+	width: 8px; /* Width of the scrollbar */
+}
+
+/* ::-webkit-scrollbar-thumb {
+	background-color: #888; 
+	border-radius: 4px; 
+}
+
+::-webkit-scrollbar-track {
+	background-color: #222; 
+} */
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* * {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+} */
+
+@keyframes fromTopToBottom {
+	from {
+		transform: translateY(-100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+[data-loader] {
+	margin: 8px;
+  }
+
+  [data-loader='logo-circle'] {
+	width: 155px;
+	height: 155px;
+	-webkit-animation: circle infinite .75s linear;
+	-moz-animation: circle infinite .75s linear;
+	-o-animation: circle infinite .75s linear;
+	animation: circle infinite .75s linear;
+	border: 4px solid #e52d27;
+	border-top-color: transparent;
+	border-radius: 100%;
+	display: block;
+	margin: auto;
+  }
+
+  @-webkit-keyframes circle {
+	0% {
+	  -webkit-transform: rotate(0);
+	  -ms-transform: rotate(0);
+	  -o-transform: rotate(0);
+	  transform: rotate(0);
+	}
+	100% {
+	  -webkit-transform: rotate(360deg);
+	  -ms-transform: rotate(360deg);
+	  -o-transform: rotate(360deg);
+	  transform: rotate(360deg);
+	}
+  }
+
+  @-moz-keyframes circle {
+	0% {
+	  -webkit-transform: rotate(0);
+	  -ms-transform: rotate(0);
+	  -o-transform: rotate(0);
+	  transform: rotate(0);
+	}
+	100% {
+	  -webkit-transform: rotate(360deg);
+	  -ms-transform: rotate(360deg);
+	  -o-transform: rotate(360deg);
+	  transform: rotate(360deg);
+	}
+  }
+
+  @-o-keyframes circle {
+	0% {
+	  -webkit-transform: rotate(0);
+	  -ms-transform: rotate(0);
+	  -o-transform: rotate(0);
+	  transform: rotate(0);
+	}
+	100% {
+	  -webkit-transform: rotate(360deg);
+	  -ms-transform: rotate(360deg);
+	  -o-transform: rotate(360deg);
+	  transform: rotate(360deg);
+	}
+  }
+
+  @keyframes circle {
+	0% {
+	  -webkit-transform: rotate(0);
+	  -ms-transform: rotate(0);
+	  -o-transform: rotate(0);
+	  transform: rotate(0);
+	}
+	100% {
+	  -webkit-transform: rotate(360deg);
+	  -ms-transform: rotate(360deg);
+	  -o-transform: rotate(360deg);
+	  transform: rotate(360deg);
+	}
+  }
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -100,93 +229,138 @@
   }
 }
 
-/* layout resets */
-html {
-  font-size: 13px;
-  /* Further scale down UI (13px is ~81.25% of 16px) */
-}
-
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-/* custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--muted));
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(var(--muted-foreground) / 0.5);
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--muted));
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(var(--muted-foreground) / 0.3);
-}
-
 @layer components {
-  .surface-panel {
-    border-radius: calc(var(--radius) * 1.5);
-    border: 1px solid hsl(var(--border));
-    background: hsl(var(--card));
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+	.custom-input [data-slot="input-wrapper"] {
+	  @apply border border-gray-200 text-[rgb(79,79,79)] transition-colors duration-200 ease-in-out rounded-none bg-transparent;
+	}
+
+	.custom-input [data-slot="input-wrapper"]:hover {
+	  @apply border-black bg-transparent;
+	}
+
+	.custom-input:focus-within [data-slot="input-wrapper"] {
+	  @apply border-[#2849F7] ring-0 outline-none bg-transparent;
+	}
+
+	.scrollbar-hide {
+	  -ms-overflow-style: none;
+	  scrollbar-width: none;
+	}
+
+	.scrollbar-hide::-webkit-scrollbar {
+	  display: none;
+	}
+
+	/* Ensure blog cards don't get cut off in carousel */
+	.carousel-card {
+	  box-sizing: border-box;
+	  overflow: hidden;
+	}
+
+	.carousel-card * {
+	  box-sizing: border-box;
+	}
+
+	/* Custom blue bullet points for prose content */
+	.prose-blue-bullets ul {
+	  list-style-type: none !important;
+	  padding-left: 0;
+	  margin-left: 0;
+	}
+
+	.prose-blue-bullets ul li {
+	  position: relative;
+	  display: list-item !important;
+	  padding-left: 2rem;
+	}
+
+	.prose-blue-bullets ul li::before {
+	  content: '';
+	  position: absolute;
+	  left: 0;
+	  width: 18px;
+	  height: 18px;
+	  background-image: url('/assets/icons/xuna-bullet.svg');
+	  background-size: contain;
+	  background-repeat: no-repeat;
+	  background-position: center;
+	  top: 0.1em;
+	}
+	.prose-blue-bullets ul li::marker {
+	  display: none;
+	}
   }
 
-  .dark .surface-panel {
-    background: linear-gradient(135deg,
-        hsl(var(--card)) 0%,
-        hsl(var(--accent) / 0.3) 45%,
-        hsl(var(--primary) / 0.08) 100%);
-    box-shadow: 0 4px 12px hsl(var(--primary) / 0.08);
-    border-color: hsl(var(--border) / 0.5);
-  }
+.wrapper-menu {
+  width: 17px;
+  height: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: transform 330ms ease-out;
+}
 
-  .surface-subtle {
-    border-radius: calc(var(--radius) * 1.1);
-    border: 1px solid hsl(var(--border));
-    background: linear-gradient(135deg,
-        hsl(var(--accent)) 0%,
-        hsl(var(--card)) 100%);
-  }
+.wrapper-menu.open {
+  transform: rotate(-45deg);  
+}
 
-  .dark .surface-subtle {
-    background: linear-gradient(135deg,
-        hsl(var(--accent)) 0%,
-        hsl(var(--card)) 100%);
-  }
+.line-menu {
+  border-radius: 5px;
+  width: 100%;
+  height: 2px;
+}
 
-  .surface-badge {
-    background-color: hsl(var(--primary) / 0.12);
-    color: hsl(var(--primary));
-  }
+.line-menu.half {
+  width: 50%;
+}
 
-  .dark .surface-badge {
-    background-color: hsl(var(--primary) / 0.24);
-    color: hsl(var(--primary));
-  }
+.line-menu.start {
+  transition: transform 330ms cubic-bezier(0.54, -0.81, 0.57, 0.57);
+  transform-origin: right;
+}
 
-  .bg-brand-gradient {
-    background: linear-gradient(135deg, #ff6b6b 0%, #feca57 50%, #48dbfb 100%);
-  }
+.open .line-menu.start {
+  transform: rotate(-90deg) translateX(3px);
+}
 
-  .bg-brand-gradient:hover {
-    filter: brightness(1.1);
-  }
+.line-menu.end {
+  align-self: flex-end;
+  transition: transform 330ms cubic-bezier(0.54, -0.81, 0.57, 0.57);
+  transform-origin: left;
+}
+
+.open .line-menu.end {
+  transform: rotate(-90deg) translateX(-3px);
+}
+
+.glass-nav {
+  border-radius: 20px;
+  isolation: isolate;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0px 6px 24px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 20px;
+  box-shadow: inset 0 0 20px -5px rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.glass-nav::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 28px;
+  backdrop-filter: blur(8px);
+  filter: url(#glass-distortion);
+  isolation: isolate;
 }

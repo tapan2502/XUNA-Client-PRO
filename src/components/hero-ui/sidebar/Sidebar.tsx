@@ -11,6 +11,7 @@ import React from "react";
 import {Listbox, Tooltip, ListboxItem, ListboxSection} from "@heroui/react";
 import {Icon} from "@iconify/react";
 import {cn} from "@heroui/react";
+import {Link} from "react-router-dom";
 
 export enum SidebarItemType {
   Nest = "nest",
@@ -28,7 +29,7 @@ export type SidebarItem = {
   className?: string;
 };
 
-export type SidebarProps = Omit<ListboxProps<SidebarItem>, "children" | "onSelect"> & {
+export type SidebarProps = Omit<ListboxProps<SidebarItem>, "children"> & {
   items: SidebarItem[];
   isCompact?: boolean;
   hideEndContent?: boolean;
@@ -36,7 +37,7 @@ export type SidebarProps = Omit<ListboxProps<SidebarItem>, "children" | "onSelec
   sectionClasses?: ListboxSectionProps["classNames"];
   classNames?: ListboxProps["classNames"];
   defaultSelectedKey: string;
-  onSelect?: (key: string) => void;
+  onItemSelect?: (key: string) => void;
 };
 
 const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
@@ -45,24 +46,19 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
       items,
       isCompact,
       defaultSelectedKey,
-      onSelect,
+      onItemSelect,
       hideEndContent,
       sectionClasses: sectionClassesProp = {},
       itemClasses: itemClassesProp = {},
       iconClassName,
       classNames,
       className,
+      onAction: onActionProp,
       ...props
     },
     ref,
   ) => {
     const [selected, setSelected] = React.useState<React.Key>(defaultSelectedKey);
-
-    React.useEffect(() => {
-      if (defaultSelectedKey) {
-        setSelected(defaultSelectedKey);
-      }
-    }, [defaultSelectedKey]);
 
     const sectionClasses = {
       ...sectionClassesProp,
@@ -89,15 +85,13 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
         const isNestType =
           item.items && item.items?.length > 0 && item?.type === SidebarItemType.Nest;
 
-        if (isNestType) {
-          // Is a nest type item , so we need to remove the href
-          delete item.href;
-        }
+        const {href, ...itemProps} = item;
 
         return (
           <ListboxItem
-            {...item}
+            {...itemProps}
             key={item.key}
+            {...(href ? {as: Link, to: href} : null)}
             classNames={{
               base: cn(
                 {
@@ -208,12 +202,13 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
           return renderNestItem(item);
         }
 
-        const { href, ...itemWithoutHref } = item;
+        const {href, ...itemProps} = item;
 
         return (
           <ListboxItem
-            {...itemWithoutHref}
+            {...itemProps}
             key={item.key}
+            {...(href ? {as: Link, to: href} : null)}
             endContent={isCompact || hideEndContent ? null : (item.endContent ?? null)}
             startContent={
               isCompact ? null : item.icon ? (
@@ -284,11 +279,14 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
         selectedKeys={[selected] as unknown as Selection}
         selectionMode="single"
         variant="flat"
+        onAction={(key) => {
+          onActionProp?.(key);
+          onItemSelect?.(String(key));
+        }}
         onSelectionChange={(keys) => {
           const key = Array.from(keys)[0];
 
           setSelected(key as React.Key);
-          onSelect?.(key as string);
         }}
         {...props}
       >

@@ -5,8 +5,6 @@ import {
   Avatar,
   Button,
   ScrollShadow,
-  Spacer,
-  Tooltip,
   Input,
   Dropdown,
   DropdownTrigger,
@@ -16,14 +14,7 @@ import {
   Select,
   SelectItem,
   SelectSection,
-  Card,
-  CardBody,
-  CardFooter,
   User,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  Badge,
 } from "@heroui/react";
 import {Icon} from "@iconify/react";
 import {useNavigate, useLocation} from "react-router-dom";
@@ -32,8 +23,7 @@ import {selectCurrentUserData, fetchUserDetails, logout} from "@/store/authSlice
 import {auth} from "@/lib/firebase";
 
 import Sidebar from "./Sidebar";
-import {sectionItems} from "./sidebar-items";
-import {AcmeIcon} from "./acme"; // Ensure this exists or use fallback
+import {sectionItems, xunaSectionItems} from "./sidebar-items";
 
 const workspaces = [
   {
@@ -75,7 +65,13 @@ export default function XunaSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
-  
+
+  const mode = useAppSelector((s) => s.settings.theme);
+  const resolvedTheme = React.useMemo<"light" | "dark">(() => {
+    if (mode !== "system") return mode;
+    if (typeof window === "undefined") return "light";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }, [mode]);
   const userData = useAppSelector(selectCurrentUserData);
 
   const [phoneNumber, setPhoneNumber] = React.useState("");
@@ -97,16 +93,24 @@ export default function XunaSidebar() {
   }, [location.pathname]);
 
   const handleSelect = React.useCallback((key: string) => {
-    const allItems = sectionItems.flatMap(section => section.items || []);
+    const allItems = xunaSectionItems.flatMap(section => section.items || []);
     const item = allItems.find(i => i.key === key);
     if (item?.href) {
       navigate(item.href);
     }
-  }, [navigate, navigate]);
+  }, [navigate]);
 
   return (
-    <div className="h-full min-h-full">
-      <div className="border-r-small border-divider relative flex h-full w-full flex-1 flex-col p-6">
+    <div
+    className={`h-full min-h-full border-b border-opacity-10 z-40 ${
+					"text-white border-white dark:bg-[#0B0B0B]/80"
+				}`}
+				style={{
+					backdropFilter: 'blur(16px) saturate(180%)',
+					WebkitBackdropFilter: 'blur(16px) saturate(180%)'
+				}}>
+      <div className="border-r-small border-divider relative flex h-full w-72 flex-1 flex-col p-6"
+      style={{borderRight: resolvedTheme === "dark" ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(228,228,231,1)'}}>
         
         <div className="flex flex-col gap-y-2">
           {/* Workspace Selector as per user request */}
@@ -116,7 +120,7 @@ export default function XunaSidebar() {
             className="px-1"
             classNames={{
               trigger:
-                "min-h-14 bg-transparent border-small border-default-200 dark:border-default-100 data-[hover=true]:border-default-500 dark:data-[hover=true]:border-default-200 data-[hover=true]:bg-transparent",
+                "min-h-14 bg-transparent border-small border-default-200 dark:border-default-100 data-[hover=true]:border-default-500 dark:data-[hover=true]:border-default-200 data-[hover=true]:bg-transparent mt-2 mb-4",
             }}
             defaultSelectedKeys={["xuna-ai"]}
             items={workspaces}
@@ -135,8 +139,8 @@ export default function XunaSidebar() {
             renderValue={(items) => {
               return items.map((item) => (
                 <div key={item.key} className="ml-1 flex flex-col items-start justify-center">
-                  <span className="text-small font-bold text-foreground leading-tight">Xuna AI</span>
-                  <span className="text-[11px] text-default-400 font-medium">Core workspace</span>
+                  <span className="text-sm leading-4">Xuna AI</span>
+                  <span className="text-sm text-default-400">Core workspace</span>
                 </div>
               ));
             }}
@@ -185,13 +189,12 @@ export default function XunaSidebar() {
         <ScrollShadow className="flex-1 -mx-2 px-2 scrollbar-hide py-2">
           <Sidebar
             defaultSelectedKey={currentPath}
-            onSelect={handleSelect}
-            iconClassName="group-data-[selected=true]:text-foreground"
+            iconClassName="group-data-[selected=true]:text-primary-foreground"
             itemClasses={{
               base: "data-[selected=true]:bg-default-100 data-[hover=true]:bg-default-300/10 dark:data-[hover=true]:bg-default-200/20",
-              title: "group-data-[selected=true]:text-foreground group-data-[selected=true]:font-bold",
+              title: "group-data-[selected=true]:text-foreground",
             }}
-            items={sectionItems}
+            items={xunaSectionItems}
           />
         </ScrollShadow>
 
@@ -229,7 +232,7 @@ export default function XunaSidebar() {
           {/* User Profile at Bottom */}
           <Dropdown placement="top">
             <DropdownTrigger>
-              <Button className="h-16 items-center justify-between" variant="light">
+              <Button className="h-16 mb-2 items-center justify-between" variant="light">
                 <User
                   avatarProps={{
                     size: "sm",

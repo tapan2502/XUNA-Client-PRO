@@ -38,12 +38,15 @@ export const CopyText = memo(
     const content = useMemo(() => (copied ? "Copied" : copyText), [copied, copyText]);
 
     return (
-      <div ref={forwardedRef} className={cn("text-default-500 flex items-center gap-3", className)}>
-        <span className={textClassName}>{children}</span>
+      <div
+        ref={forwardedRef}
+        className={cn("text-default-500 flex items-center max-w-40 min-w-0", className)}
+      >
+        <span className={cn("truncate", textClassName)}>{children}</span>
         <Tooltip className="text-foreground" content={content}>
           <Button
             isIconOnly
-            className="text-default-400 h-7 w-7 min-w-7"
+            className="text-default-600 h-7 w-7 min-w-7 shrink-0"
             size="sm"
             variant="light"
             onPress={handleClick}

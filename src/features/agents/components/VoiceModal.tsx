@@ -336,9 +336,9 @@ export const VoiceModal = ({
               </div>
 
               {/* Table */}
-              <div className="border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+              <div className="border border-divider rounded-xl overflow-hidden">
                 <table className="w-full text-sm text-left">
-                  <thead className="bg-gray-50 dark:bg-gray-800/50 text-muted-foreground border-b border-gray-200 dark:border-gray-800">
+                  <thead className="border-b border-divider text-default-500 text-[11px] uppercase tracking-wider font-medium">
                     <tr>
                       <th className="py-3 px-4 w-12"></th>
                       <th className="py-3 px-4">Voice</th>
@@ -346,7 +346,7 @@ export const VoiceModal = ({
                       {activeTab === "custom-voices" && <th className="py-3 px-4 w-20 text-center">Add</th>}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                  <tbody className="divide-y divide-divider">
                     {loadingSharedVoices && activeTab === "custom-voices" ? (
                       <tr>
                         <td colSpan={5} className="py-8 text-center">
@@ -368,7 +368,8 @@ export const VoiceModal = ({
                               onClick={activeTab === "my-voices" ? () => onVoiceChange(voice.voice_id) : undefined}
                               className={cn(
                                 "transition-colors",
-                                activeTab === "my-voices" && "cursor-pointer hover:bg-muted/50",
+                                "hover:bg-default-100 dark:hover:bg-white/5",
+                                activeTab === "my-voices" && "cursor-pointer",
                                 isSelected && "bg-primary/5",
                               )}
                             >

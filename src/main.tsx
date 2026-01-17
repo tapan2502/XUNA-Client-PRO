@@ -9,9 +9,7 @@ import AppRoutes from "@/app/routes";
 import { SnackbarProvider } from "@/components/ui/SnackbarProvider";
 import { applyTheme } from "@/app/theme";
 
-const savedTheme =
-  (localStorage.getItem("theme") as "light" | "dark" | "system") ?? "system";
-applyTheme(savedTheme);
+applyTheme(store.getState().settings.theme);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

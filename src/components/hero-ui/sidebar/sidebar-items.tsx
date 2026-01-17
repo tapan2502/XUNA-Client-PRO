@@ -191,18 +191,6 @@ export const xunaSectionItems: SidebarItem[] = [
       },
     ],
   },
-  {
-    key: "finance",
-    title: "Finance",
-    items: [
-      {
-        key: "billing",
-        href: "/billing",
-        icon: "solar:dollar-minimalistic-linear",
-        title: "Billing",
-      },
-    ],
-  },
 ];
 
 export const compactSidebarItems: SidebarItem[] = [

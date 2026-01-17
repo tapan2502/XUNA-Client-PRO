@@ -15,16 +15,10 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Environment files
-.env
-.env.development
-.env.production
-.env.local
-.env.test
 
 # Editor directories and files
 .DS_Store
 .idea/
-.vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
 
@@ -34,3 +28,4 @@ pnpm-debug.log*
 # Misc
 dist-ssr/
 *.local
+config.bat
